@@ -1,0 +1,58 @@
+<html lang="en">
+<head>
+  <title>inkmap demo page</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="app.js"></script>
+</head>
+<style>
+
+</style>
+<body>
+<div class="container" style="width: 960px">
+  <h1 class="mt-5"><strong>inkmap</strong><br>
+  <span class="mt-2" style="font-size: 20px">a library for generating high-quality, printable maps.</span></h1>
+
+  <div class="mt-5">
+    <p>
+      Give <strong>inkmap</strong> a JSON spec and it will use it to generate a PNG image in the background.
+    </p>
+    <div class="row align-items-center">
+      <label class="col-8">
+        <textarea class="form-control text-monospace" rows="20" style="font-size: 12px">{
+  "layers": [
+    {
+      "type": "XYZ",
+      "url": "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    },
+    {
+      "type": "WMS",
+      "url": "http://ows.mundialis.de/services/service",
+      "layer": "TOPO-OSM-WMS",
+      "opacity": 0.9
+    }
+  ],
+  "size": [4000, 3000],
+  "center": [-50, 42],
+  "dpi": 200,
+  "scale": 40000000,
+  "projection": "EPSG:3857"
+}</textarea>
+        <small class="text-secondary">Please provide a valid JSON object.</small>
+      </label>
+      <div class="col-3" style="display: initial">
+        <button role="button" class="btn btn-primary btn-block">Generate!</button>
+      </div>
+      <div class="col-3" style="display: none">
+        <button role="button" disabled class="btn btn-secondary btn-block">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Working...
+        </button>
+        <div class="progress mt-1" style="height: 5px">
+          <div class="progress-bar w-75" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
