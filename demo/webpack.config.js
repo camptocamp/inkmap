@@ -3,8 +3,8 @@ const path = require('path')
 module.exports = {
     mode: 'development',
     entry: {
-        app: path.resolve(__dirname, 'src', 'index.js'),
-        worker: path.resolve(__dirname, 'lib', 'worker', 'index.js'),
+        app: path.resolve(__dirname, 'index.js'),
+        ['inkmap-worker']: path.resolve(__dirname, '..', 'src', 'worker', 'index.js'),
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

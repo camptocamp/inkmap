@@ -4,7 +4,7 @@
   "description": "A library for generating printable, high quality maps in the browser.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "demo": "webpack-dev-server --config demo/webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,18 @@
   "bugs": {
     "url": "https://github.com/camptocamp/inkmap/issues"
   },
-  "homepage": "https://github.com/camptocamp/inkmap#readme"
+  "homepage": "https://github.com/camptocamp/inkmap#readme",
+  "dependencies": {
+    "ol": "^6.4.3",
+    "rxjs": "^6.6.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.5",
+    "webpack-dev-server": "^3.7.2",
+    "worker-loader": "^3.0.2"
+  }
 }
