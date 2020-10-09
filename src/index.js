@@ -1,10 +1,12 @@
 import {hasOffscreenCanvasSupport} from './utils'
-import {timer} from 'rxjs'
-import {map, take} from 'rxjs/operators'
+import {createJob} from './print/job'
+
+export {downloadBlob} from './utils'
 
 if (hasOffscreenCanvasSupport()) {
   navigator.serviceWorker.register('inkmap-worker.js').then(
-    () => {},
+    () => {
+    },
     error => {
       console.log('Service worker registration failed:', error)
     }
@@ -32,9 +34,10 @@ if (hasOffscreenCanvasSupport()) {
 /**
  * @typedef {Object} PrintStatus
  * @property {number} id Job id.
+ * @property {PrintSpec} spec Job initial spec.
  * @property {number} progress Job progress, from 0 to 1.
- * @property {string} status Either `'pending'`, `'ongoing'` or `'finished'`.
- * @property {string} resultImageUrl An URL used to access the print result (PNG image). This will only be available once the job status is `'finished'`
+ * @property {'pending' | 'ongoing' | 'finished'} status Job status.
+ * @property {Blob} [imageBlob] Finished image blob.
  */
 
 /**
@@ -43,10 +46,21 @@ if (hasOffscreenCanvasSupport()) {
  * @return {Observable<PrintStatus>} Observable emitting print statuses, completes when the print job is over.
  */
 export function print(printSpec) {
-  return timer(100, 200).pipe(
-    take(11),
-    map(index => ({
-      progress: index / 10
-    }))
-  )
+  return createJob(printSpec)
+}
+
+export function queuePrint() {
+  console.warn('Not implemented yet')
+}
+
+export function getJobsStatus() {
+  console.warn('Not implemented yet')
+}
+
+export function getJobStatus() {
+  console.warn('Not implemented yet')
+}
+
+export function cancelJob() {
+  console.warn('Not implemented yet')
 }
