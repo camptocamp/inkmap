@@ -1,17 +1,9 @@
-import {hasOffscreenCanvasSupport} from './utils'
 import {createJob} from './print/job'
+import {Observable} from 'rxjs'
+import {messageWorker, workerReady} from './utils.worker'
 
 export {downloadBlob} from './utils'
 
-if (hasOffscreenCanvasSupport()) {
-  navigator.serviceWorker.register('inkmap-worker.js').then(
-    () => {
-    },
-    error => {
-      console.log('Service worker registration failed:', error)
-    }
-  )
-}
 
 /**
  * @typedef {Object} Layer
@@ -46,7 +38,13 @@ if (hasOffscreenCanvasSupport()) {
  * @return {Observable<PrintStatus>} Observable emitting print statuses, completes when the print job is over.
  */
 export function print(printSpec) {
-  return createJob(printSpec)
+  return workerReady.then(useWorker => {
+    if (!useWorker) return createJob(printSpec).toPromise()
+    else {
+      messageWorker('requestJob', {spec: printSpec})
+      return Promise.resolve(true)
+    }
+  })
 }
 
 export function queuePrint() {

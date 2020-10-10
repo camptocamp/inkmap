@@ -14,9 +14,9 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('message', function(event) {
   const msg = event.data
-  console.log(`Message received by worker (v${version})`, msg)
+  console.log(`Message received by worker`, msg)
   switch (msg.type) {
-    case 'request':
+    case 'requestJob':
       createJob(msg.spec)
       break
     default:
