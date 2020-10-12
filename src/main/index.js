@@ -1,16 +1,31 @@
-import {createJob} from './print/job'
-import {Observable} from 'rxjs'
-import {messageWorker, workerReady} from './utils.worker'
+import {getJobStatusObservable, newJob$} from './jobs'
+import {switchMap, take, takeWhile, tap, map} from 'rxjs/operators'
+import {MESSAGE_JOB_REQUEST} from '../shared/constants'
+import {messageToPrinter} from './exchange'
+
+import '../printer'
 
 export {downloadBlob} from './utils'
 
 
+
 /**
- * @typedef {Object} Layer
- * @property {string} type Either `XYZ`, `WMTS` or `WMS`.
- * @property {string} url URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`.
- * @property {string} name Layer name (for WMS and WMTS layers).
+ * @typedef {Object} WmsLayer
+ * @property {'WMS'} type
+ * @property {string} url
+ * @property {string} name Layer name.
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ */
+
+/**
+ * @typedef {Object} XyzLayer
+ * @property {'XYZ'} type
+ * @property {string} url URL or URL template for the layer; can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`.
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ */
+
+/**
+ * @typedef {WmsLayer|XyzLayer} Layer
  */
 
 /**
@@ -35,16 +50,16 @@ export {downloadBlob} from './utils'
 /**
  * Starts generating a map image from a print spec.
  * @param {PrintSpec} printSpec
- * @return {Observable<PrintStatus>} Observable emitting print statuses, completes when the print job is over.
+ * @return {Promise<Blob>} Promise resolving to the final image blob.
  */
 export function print(printSpec) {
-  return workerReady.then(useWorker => {
-    if (!useWorker) return createJob(printSpec).toPromise()
-    else {
-      messageWorker('requestJob', {spec: printSpec})
-      return Promise.resolve(true)
-    }
-  })
+  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
+  return newJob$.pipe(
+    take(1),
+    switchMap(job => getJobStatusObservable(job.id)),
+    takeWhile(job => job.progress < 1, true),
+    map(job => job.imageBlob)
+  ).toPromise()
 }
 
 export function queuePrint() {

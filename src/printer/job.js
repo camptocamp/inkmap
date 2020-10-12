@@ -5,26 +5,15 @@ import {createLayer} from './layers'
 import {createCanvasContext2D} from 'ol/dom'
 import {combineLatest, of} from 'rxjs'
 import {map, switchMap, takeWhile} from 'rxjs/operators'
-import {fromPromise} from 'rxjs/internal-compatibility'
-import {isWorker} from '../worker/utils'
-import {canvasToBlob} from '../utils'
+import {canvasToBlob} from './utils'
+import {messageToMain} from './exchange'
+import {MESSAGE_JOB_STATUS} from '../shared/constants'
 
-/**
- * @typedef {Object} PrintJob
- * @extends PrintStatus
- */
-
-/**
- * @type {PrintJob[]}
- */
-const jobs = []
-
-var counter = 0
+let counter = 0
 
 /**
  * Add a new job in the queue
  * @param {PrintSpec} spec
- * @return {Observable<PrintStatus>}
  */
 export function createJob(spec) {
   const frameState = getFrameState(spec)
@@ -39,9 +28,7 @@ export function createJob(spec) {
     progress: 0
   }
 
-  jobs.push(job)
-
-  return combineLatest(spec.layers.map(layer => {
+  combineLatest(spec.layers.map(layer => {
     return createLayer(layer, frameState)
   })).pipe(
     switchMap(layerStates => {
@@ -70,7 +57,7 @@ export function createJob(spec) {
       }
     }),
     takeWhile(jobStatus => jobStatus.progress < 1, true)
-  )
+  ).subscribe(status => messageToMain(MESSAGE_JOB_STATUS, { status }))
 }
 
 function getFrameState(spec) {

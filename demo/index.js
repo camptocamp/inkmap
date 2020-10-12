@@ -1,4 +1,4 @@
-import {print, downloadBlob} from '../src'
+import {print, downloadBlob} from '../src/main'
 
 document.querySelectorAll('.print-unit').forEach(unit => {
   const specElt = unit.querySelector('.spec')
@@ -13,13 +13,13 @@ document.querySelectorAll('.print-unit').forEach(unit => {
     progressBar.style.display = null
     progressBarInner.style.width = '0'
 
-    print(JSON.parse(specElt.value)).then(job => {
+    print(JSON.parse(specElt.value)).then(imageBlob => {
       // progressBarInner.style.width = Math.round(job.progress * 100) + '%'
 
       // console.log(job)
 
       // if (job.status === 'finished' && !!job.imageBlob) {
-        downloadBlob(job.imageBlob, `inkmap-${new Date().toISOString().substr(0, 10)}.png`)
+        downloadBlob(imageBlob, `inkmap-${new Date().toISOString().substr(0, 10)}.png`)
     //   }
     // }, null, () => {
     //   console.log('finished')
