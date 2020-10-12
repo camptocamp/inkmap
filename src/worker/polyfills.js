@@ -1,24 +1,44 @@
 class Image extends OffscreenCanvas {
   constructor() {
     super(1, 1)
-    this.setSize(1, 1)
+    this.src_ = null
+    this.hintImageSize(1, 1)
     this.loadPromiseResolver = null
     this.loadPromise = new Promise(resolve => this.loadPromiseResolver = resolve)
   }
-  setSize(width, height) {
+
+  // this is a new API, required because we cannot guess an image size
+  // simply from the blob received by `fetch`
+  hintImageSize(width, height) {
     this.width = width
     this.height = height
     this.naturalWidth = width
     this.naturalHeight = height
   }
+
+  // setting `src` will trigger a loading of the image and a trigger of a `load` event eventually
+  set src(url) {
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const ctx = this.getContext('2d')
+        createImageBitmap(blob).then(imageData => {
+          ctx.drawImage(imageData, 0, 0)
+          this.loadPromiseResolver()
+        })
+      })
+  }
+  get src() {
+    return this.src_
+  }
+
+  // this is to sort of comply with the HTMLImage API
   addEventListener(eventName, callback) {
     if (eventName === 'load') {
       this.loadPromise.then(callback)
     }
   }
   removeEventListener() {}
-  loaded() {
-    this.loadPromiseResolver()
-  }
 }
+
 self.Image = Image

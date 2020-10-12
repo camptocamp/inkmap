@@ -38,24 +38,16 @@ function createLayerXYZ(layerSpec, rootFrameState) {
   layer.getSource().setTileLoadFunction(
     function (tile, src) {
       const image = tile.getImage()
-      if (!isWorker()) {
-        image.src = src
-        return
+
+      if (isWorker()) {
+        const tileSize = layer.getSource().getTilePixelSize(0,
+          rootFrameState.pixelRatio,
+          rootFrameState.viewState.projection
+        )
+        image.hintImageSize(tileSize[0], tileSize[1])
       }
-      fetch(src)
-        .then(response => response.blob())
-        .then(blob => {
-          const tileSize = layer.getSource().getTilePixelSize(0,
-            rootFrameState.pixelRatio,
-            rootFrameState.viewState.projection
-          )
-          image.setSize(tileSize[0], tileSize[1])
-          const ctx = image.getContext('2d')
-          createImageBitmap(blob).then(imageData => {
-            ctx.drawImage(imageData, 0, 0)
-            image.loaded()
-          })
-        })
+
+      image.src = src
     })
 
   frameState = {
@@ -121,25 +113,12 @@ function createLayerWMS(layerSpec, rootFrameState) {
     })
   })
   layer.getSource().setImageLoadFunction(
-    function (image, src) {
-      if (!isWorker()) {
-        image.getImage().src = src
-        return
+    function (layerImage, src) {
+      const image = layerImage.getImage()
+      if (isWorker()) {
+        image.hintImageSize(width, height)
       }
-      const layerImage = image
-      fetch(src)
-        .then(response => response.blob())
-        .then(blob => {
-          const image = layerImage.getImage()
-          if (image.setSize) {
-            image.setSize(width, height)
-          }
-          const ctx = image.getContext('2d')
-          createImageBitmap(blob).then(imageData => {
-            ctx.drawImage(imageData, 0, 0)
-            image.loaded()
-          })
-        })
+      image.src = src
     })
 
   frameState = {
