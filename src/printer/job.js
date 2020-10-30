@@ -32,6 +32,8 @@ export function createJob(spec) {
     progress: 0,
   };
 
+  const context = createCanvasContext2D(spec.size[0], spec.size[1]);
+
   combineLatest(
     spec.layers.map((layer) => {
       return createLayer(layer, frameState);
@@ -39,8 +41,7 @@ export function createJob(spec) {
   )
     .pipe(
       switchMap((layerStates) => {
-        const context = createCanvasContext2D(spec.size[0], spec.size[1]);
-        const allReady = layerStates.every(([, canvas]) => !!canvas);
+        const allReady = layerStates.every(([progress]) => progress === 1);
 
         if (allReady) {
           for (let i = 0; i < layerStates.length; i++) {
@@ -48,9 +49,11 @@ export function createJob(spec) {
           }
           return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
         } else {
-          const progress =
+          const rawProgress =
             layerStates.reduce((prev, [progress]) => progress + prev, 0) /
             layerStates.length;
+          const progress = parseFloat(rawProgress.toFixed(4)); // only keep 4 digits precision
+
           return of([progress, null]);
         }
       }),

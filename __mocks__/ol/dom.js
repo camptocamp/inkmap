@@ -3,5 +3,6 @@ export function createCanvasContext2D() {
     canvas: {
       style: {},
     },
+    drawImage() {},
   };
 }
