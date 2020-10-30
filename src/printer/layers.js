@@ -9,6 +9,20 @@ import { isWorker } from '../worker/utils';
 
 const update$ = interval(100);
 
+/**
+ * @typedef {Array} LayerPrintStatus
+ * @property {number} 0 Progress, from 0 to 1.
+ * @property {HTMLCanvasElement|OffscreenCanvas|null} 1 Canvas on which the layer is printed, or null if progress < 1.
+ */
+
+/**
+ * Returns an observable emitting the printing status for this layer
+ * The observable will emit a final value with the finished canvas
+ * and complete.
+ * @param {Layer} layerSpec
+ * @param {FrameState} rootFrameState
+ * @return {Observable<LayerPrintStatus>}
+ */
 export function createLayer(layerSpec, rootFrameState) {
   switch (layerSpec.type) {
     case 'XYZ':
@@ -18,6 +32,11 @@ export function createLayer(layerSpec, rootFrameState) {
   }
 }
 
+/**
+ * @param {XyzLayer} layerSpec
+ * @param {FrameState} rootFrameState
+ * @return {Observable<LayerPrintStatus>}
+ */
 function createLayerXYZ(layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
@@ -100,6 +119,11 @@ function createLayerXYZ(layerSpec, rootFrameState) {
   );
 }
 
+/**
+ * @param {WmsLayer} layerSpec
+ * @param {FrameState} rootFrameState
+ * @return {Observable<LayerPrintStatus>}
+ */
 function createLayerWMS(layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];

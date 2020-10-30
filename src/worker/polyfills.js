@@ -1,3 +1,11 @@
+/**
+ * This defines an Image class on the worker thread, to allow libraries such as
+ * OpenLayers to work more or less seamlessly.
+ * Image elements are useful for loading images over HTTP and decoding them,
+ * but unfortunately this is not available in workers. As such, this replaces
+ * the Image class with a extended OffscreenCanvas class so as to sort of
+ * reproduce the Image class behaviour.
+ */
 class Image extends OffscreenCanvas {
   constructor() {
     super(1, 1);

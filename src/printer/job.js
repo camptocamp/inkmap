@@ -15,6 +15,8 @@ let counter = 0;
 
 /**
  * Add a new job in the queue
+ * Note: this will broadcast the job status updates to the main thread
+ * until the job is over.
  * @param {PrintSpec} spec
  */
 export function createJob(spec) {
@@ -65,6 +67,11 @@ export function createJob(spec) {
     .subscribe((status) => messageToMain(MESSAGE_JOB_STATUS, { status }));
 }
 
+/**
+ * Returns an OpenLayers frame state for a given job spec
+ * @param {PrintSpec} spec
+ * @return {FrameState}
+ */
 function getFrameState(spec) {
   const projection = getProj(spec.projection);
   const inchPerMeter = 39.3701;

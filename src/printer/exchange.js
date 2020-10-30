@@ -2,6 +2,11 @@ import { fromEvent } from 'rxjs';
 import { pluck, tap } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 
+/**
+ * Sends a message to the main thread
+ * @param {string} type Message type, described by a MESSAGE_JOB_* constant.
+ * @param {any} message Message object.
+ */
 export function messageToMain(type, message) {
   if (isWorker()) {
     self.clients
