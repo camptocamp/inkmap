@@ -1,13 +1,11 @@
-import {getJobStatusObservable, newJob$} from './jobs'
-import {switchMap, take, takeWhile, tap, map} from 'rxjs/operators'
-import {MESSAGE_JOB_REQUEST} from '../shared/constants'
-import {messageToPrinter} from './exchange'
+import { getJobStatusObservable, newJob$ } from './jobs';
+import { map, switchMap, take, takeWhile } from 'rxjs/operators';
+import { MESSAGE_JOB_REQUEST } from '../shared/constants';
+import { messageToPrinter } from './exchange';
 
-import '../printer'
+import '../printer';
 
-export {downloadBlob} from './utils'
-
-
+export { downloadBlob } from './utils';
 
 /**
  * @typedef {Object} WmsLayer
@@ -54,26 +52,28 @@ export {downloadBlob} from './utils'
  */
 export function print(printSpec) {
   messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
-  return newJob$.pipe(
-    take(1),
-    switchMap(job => getJobStatusObservable(job.id)),
-    takeWhile(job => job.progress < 1, true),
-    map(job => job.imageBlob)
-  ).toPromise()
+  return newJob$
+    .pipe(
+      take(1),
+      switchMap((job) => getJobStatusObservable(job.id)),
+      takeWhile((job) => job.progress < 1, true),
+      map((job) => job.imageBlob)
+    )
+    .toPromise();
 }
 
 export function queuePrint() {
-  console.warn('Not implemented yet')
+  console.warn('Not implemented yet');
 }
 
 export function getJobsStatus() {
-  console.warn('Not implemented yet')
+  console.warn('Not implemented yet');
 }
 
 export function getJobStatus() {
-  console.warn('Not implemented yet')
+  console.warn('Not implemented yet');
 }
 
 export function cancelJob() {
-  console.warn('Not implemented yet')
+  console.warn('Not implemented yet');
 }

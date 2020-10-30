@@ -1,29 +1,52 @@
 <html lang="en">
-<head>
-  <title>inkmap demo page</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<style>
-body {
-  font-family: 'PT Sans', sans-serif;
-}
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Montserrat', sans-serif;
-}
-</style>
-<body>
-<div class="container" style="width: 960px">
-  <h1 class="mt-5"><strong>inkmap</strong><br>
-  <span class="mt-2" style="font-size: 20px">a library for generating high-quality, printable maps.</span></h1>
+  <head>
+    <title>inkmap demo page</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=PT+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <style>
+    body {
+      font-family: 'PT Sans', sans-serif;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+  <body>
+    <div class="container" style="width: 960px">
+      <h1 class="mt-5">
+        <strong>inkmap</strong><br />
+        <span class="mt-2" style="font-size: 20px"
+          >a library for generating high-quality, printable maps.</span
+        >
+      </h1>
 
-  <div class="mt-5">
-    <p>
-      Give <strong>inkmap</strong> a JSON spec and it will use it to generate a PNG image in the background.
-    </p>
-    <div class="row align-items-center print-unit">
-      <label class="col-8">
-        <textarea class="spec form-control text-monospace" rows="20" style="font-size: 12px">{
+      <div class="mt-5">
+        <p>
+          Give <strong>inkmap</strong> a JSON spec and it will use it to
+          generate a PNG image in the background.
+        </p>
+        <div class="row align-items-center print-unit">
+          <label class="col-8">
+            <textarea
+              class="spec form-control text-monospace"
+              rows="20"
+              style="font-size: 12px"
+            >
+{
   "layers": [
     {
       "type": "XYZ",
@@ -41,23 +64,43 @@ h1, h2, h3, h4, h5, h6 {
   "dpi": 200,
   "scale": 40000000,
   "projection": "EPSG:3857"
-}</textarea>
-        <small class="text-secondary">Please provide a valid JSON object.</small>
-      </label>
-      <div class="col-3" style="display: initial">
-        <button role="button" class="start-btn btn btn-primary btn-block">Generate!</button>
-        <button role="button" disabled class="wait-btn btn btn-secondary btn-block" style="display: none">
-          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          Working...
-        </button>
-        <div class="progress mt-1" style="height: 5px; display: none">
-          <div class="progress-bar" style="width: 0" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+}</textarea
+            >
+            <small class="text-secondary"
+              >Please provide a valid JSON object.</small
+            >
+          </label>
+          <div class="col-3" style="display: initial">
+            <button role="button" class="start-btn btn btn-primary btn-block">
+              Generate!
+            </button>
+            <button
+              role="button"
+              disabled
+              class="wait-btn btn btn-secondary btn-block"
+              style="display: none"
+            >
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Working...
+            </button>
+            <div class="progress mt-1" style="height: 5px; display: none">
+              <div
+                class="progress-bar"
+                style="width: 0"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>

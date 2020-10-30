@@ -1,5 +1,5 @@
 export function hasOffscreenCanvasSupport() {
-  return !!HTMLCanvasElement.prototype.transferControlToOffscreen
+  return !!HTMLCanvasElement.prototype.transferControlToOffscreen;
 }
 
 /**
@@ -8,11 +8,11 @@ export function hasOffscreenCanvasSupport() {
  * @param {string} filename
  */
 export function downloadBlob(imageBlob, filename) {
-  const anchor = document.createElement('a')
-  const objectUrl = URL.createObjectURL(imageBlob)
-  anchor.setAttribute('download', filename)
-  anchor.setAttribute('href', objectUrl)
-  anchor.click()
+  const anchor = document.createElement('a');
+  const objectUrl = URL.createObjectURL(imageBlob);
+  anchor.setAttribute('download', filename);
+  anchor.setAttribute('href', objectUrl);
+  anchor.click();
 }
 
 /**
@@ -20,18 +20,17 @@ export function downloadBlob(imageBlob, filename) {
  * True means a worker is used for print jobs
  * @type {Promise<boolean>}
  */
-export const printerReady = new Promise(resolve => {
+export const printerReady = new Promise((resolve) => {
   if (hasOffscreenCanvasSupport()) {
     navigator.serviceWorker.register('inkmap-worker.js').then(
       () => {
-        resolve(true)
+        resolve(true);
       },
-      error => {
-        console.log('Service worker registration failed:', error)
+      (error) => {
+        console.log('Service worker registration failed:', error);
       }
-    )
+    );
   } else {
-    resolve(false)
+    resolve(false);
   }
-})
-
+});

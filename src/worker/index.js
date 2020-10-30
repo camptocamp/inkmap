@@ -1,13 +1,13 @@
-import './polyfills'
-import '../printer'
+import './polyfills';
+import '../printer';
 
-self.addEventListener('install', function(event) {
-  console.log(`[inkmap] Installing worker...`)
+self.addEventListener('install', function () {
+  console.log(`[inkmap] Installing worker...`);
 
-  self.skipWaiting()
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', function(event) {
-  console.log(`[inkmap] Activated worker, claiming clients.`)
-  self.clients.claim()
+self.addEventListener('activate', function () {
+  console.log(`[inkmap] Activated worker, claiming clients.`);
+  self.clients.claim();
 });
