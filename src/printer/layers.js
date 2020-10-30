@@ -4,7 +4,7 @@ import ImageWMS from 'ol/source/ImageWMS';
 import ImageLayer from 'ol/layer/Image';
 import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval } from 'rxjs';
-import { map, takeWhile, throttleTime } from 'rxjs/operators';
+import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 
 const update$ = interval(100);
@@ -103,6 +103,7 @@ function createLayerXYZ(layerSpec, rootFrameState) {
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
 
   return update$.pipe(
+    startWith(true),
     takeWhile(() => {
       renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
       frameState.tileQueue.reprioritize();
