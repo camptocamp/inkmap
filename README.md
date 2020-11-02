@@ -93,3 +93,7 @@ A `PrintStatus` object describes the status of a print job.
 
 Under the hood, `inkmap` will attempt to install a service worker on the page it is called. The service worker will then be in charge
 of loading all the map images and data, composing them together and giving them back to the application code.
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md).
