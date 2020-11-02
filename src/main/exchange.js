@@ -6,7 +6,7 @@ import { printerReady } from './utils';
 /**
  * Sends a message to the printer thread
  * @param {string} type Message type, described by a MESSAGE_JOB_* constant.
- * @param {any} message Message object.
+ * @param {Object} [message] Message object.
  */
 export function messageToPrinter(type, message) {
   printerReady.then((useWorker) => {
