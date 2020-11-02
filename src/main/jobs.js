@@ -3,6 +3,7 @@ import {
   map,
   pairwise,
   scan,
+  shareReplay,
   startWith,
   switchMap,
 } from 'rxjs/operators';
@@ -17,8 +18,8 @@ export const jobs$ = messageToMain$.pipe(
     (jobs, status) => [...jobs.filter((job) => job.id !== status.id), status],
     []
   ),
-  startWith([])
-  // tap(jobs => console.log('jobs$ = ', jobs))
+  startWith([]),
+  shareReplay()
 );
 
 export const newJob$ = jobs$.pipe(
@@ -28,13 +29,11 @@ export const newJob$ = jobs$.pipe(
       jobs.filter((job) => !prevJobs.some((prevJob) => prevJob.id === job.id))
     );
   })
-  // tap(job => console.log('newJob$ emitted ', job))
 );
 
 export function getJobStatusObservable(jobId) {
   return jobs$.pipe(
     map((jobs) => jobs.find((job) => job.id === jobId)),
     filter((job) => !!job)
-    // tap(job => console.log(`job(id=${jobId})$ emitted `, job))
   );
 }
