@@ -1,0 +1,14 @@
+{
+  "layers": [
+    {
+      "type": "WMS",
+      "url": "https://ows.terrestris.de/osm/service",
+      "layer": "TOPO-OSM-WMS"
+    }
+  ],
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 50,
+  "scale": 40000000,
+  "projection": "EPSG:3857"
+}
