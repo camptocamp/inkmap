@@ -61,7 +61,7 @@ let failed = false;
 
 async function startBrowser() {
   browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
   });
   page = await browser.newPage();
   page.on('error', (err) => {
