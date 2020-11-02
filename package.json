@@ -37,6 +37,7 @@
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^6.15.0",
     "jest": "^26.6.1",
+    "pixelmatch": "^5.2.1",
     "prettier": "^2.1.2",
     "puppeteer": "^5.4.1",
     "webpack": "^4.42.1",

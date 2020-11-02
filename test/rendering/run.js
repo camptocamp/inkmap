@@ -1,12 +1,15 @@
 #!/usr/bin/env node
+const fs = require('fs');
+const process = require('process');
 const path = require('path');
+const { promisify } = require('util');
 const puppeteer = require('puppeteer');
 const webpack = require('webpack');
 const config = require('./webpack.config');
 const webpackDevServer = require('webpack-dev-server');
 const yargs = require('yargs');
-const fs = require('fs');
-const { promisify } = require('util');
+const pixelmatch = require('pixelmatch');
+const png = require('pngjs');
 
 const options = yargs.option('fix', {
   describe: 'Write generated images to disk',
@@ -16,9 +19,45 @@ const options = yargs.option('fix', {
 
 const serverPort = 8888;
 
+// UTILS
+
+async function getCases() {
+  const root = path.resolve(__dirname, 'cases');
+  return await promisify(fs.readdir)(root).then((cases) =>
+    cases.filter((name) => fs.statSync(path.resolve(root, name)).isDirectory())
+  );
+}
+
+function getCaseReceivedImagePath(name) {
+  return path.resolve(__dirname, 'cases', name, 'received.png');
+}
+
+function getCaseExpectedImagePath(name) {
+  return path.resolve(__dirname, 'cases', name, 'expected.png');
+}
+
+function parsePNG(filepath) {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filepath);
+    stream.on('error', (err) => {
+      if (err.code === 'ENOENT') {
+        return reject(new Error(`File not found: ${filepath}`));
+      }
+      reject(err);
+    });
+
+    const image = stream.pipe(new png.PNG());
+    image.on('parsed', () => resolve(image));
+    image.on('error', reject);
+  });
+}
+
+// TEST RUN
+
 let browser;
 let page;
 let resolver, rejecter;
+let failed = false;
 
 async function startBrowser() {
   browser = await puppeteer.launch({
@@ -39,7 +78,6 @@ async function startBrowser() {
   await page.setViewport({ width: 256, height: 256 });
 
   await page.exposeFunction('validate', () => {
-    console.log('received image');
     resolver();
   });
   await page.exposeFunction('fail', (error) => {
@@ -52,20 +90,8 @@ async function closeBrowser() {
   await browser.close();
 }
 
-async function getCases() {
-  return await promisify(fs.readdir)(path.resolve(__dirname, 'cases'));
-}
-
-function getCaseReceivedImagePath(name) {
-  return path.resolve(__dirname, 'cases', name, 'received.png');
-}
-
-function getCaseExpectedImagePath(name) {
-  return path.resolve(__dirname, 'cases', name, 'expected.png');
-}
-
 async function runTest(name) {
-  console.log('Running case:', name);
+  console.log(`Running case ${name}...`);
 
   const testFinished = new Promise((resolve, reject) => {
     resolver = resolve;
@@ -92,8 +118,41 @@ async function runTest(name) {
   }
 }
 
+// returns true if validation failed
 async function validateResult(name) {
-  return true; // to do: image check
+  const receivedPath = getCaseReceivedImagePath(name);
+  const expectedPath = getCaseExpectedImagePath(name);
+  const receivedImage = await parsePNG(receivedPath);
+  const expectedImage = await parsePNG(expectedPath);
+  const width = expectedImage.width;
+  const height = expectedImage.height;
+  if (receivedImage.width != width) {
+    throw new Error(
+      `Unexpected width for ${receivedPath}: expected ${width}, got ${receivedImage.width}`
+    );
+  }
+  if (receivedImage.height != height) {
+    throw new Error(
+      `Unexpected height for ${receivedPath}: expected ${height}, got ${receivedImage.height}`
+    );
+  }
+  const count = pixelmatch(
+    receivedImage.data,
+    expectedImage.data,
+    null,
+    width,
+    height
+  );
+  const errorPercentage = count / (width * height);
+
+  if (errorPercentage > 0.01) {
+    console.log(
+      `Image comparison failed for case ${name} with an error of ${(
+        errorPercentage * 100
+      ).toFixed(2)}%.`
+    );
+    return true;
+  }
 }
 
 async function runTests() {
@@ -103,7 +162,8 @@ async function runTests() {
 
   for (let name of cases) {
     await runTest(name);
-    await validateResult(name);
+    const mismatch = await validateResult(name);
+    failed = failed || mismatch;
   }
 
   await closeBrowser();
@@ -125,8 +185,15 @@ server.listen(serverPort, 'localhost', function (err) {
     console.log('Dev server started on http://localhost:' + serverPort);
 
     runTests().then(() => {
-      console.log('rendering tests over');
       server.close();
+      if (failed) {
+        console.log(
+          'One or several rendering tests failed - check the logs above.'
+        );
+        process.exit(1);
+      } else {
+        console.log('Rendering tests completed successfully.');
+      }
     });
   }
 });
