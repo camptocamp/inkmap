@@ -1,9 +1,9 @@
 import { BehaviorSubject, of } from 'rxjs';
-import { createJob } from '../../src/printer/job';
-import * as LayersMock from '../../src/printer/layers';
-import { messageToMain } from '../../src/printer/exchange';
-import * as UtilsMock from '../../src/printer/utils';
-import { MESSAGE_JOB_STATUS } from '../../src/shared/constants';
+import { createJob } from '../../../src/printer/job';
+import * as LayersMock from '../../../src/printer/layers';
+import { messageToMain } from '../../../src/printer/exchange';
+import * as UtilsMock from '../../../src/printer/utils';
+import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants';
 
 jest.mock('../../src/printer/layers');
 jest.mock('../../src/printer/exchange');

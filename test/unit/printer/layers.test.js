@@ -1,5 +1,5 @@
-import { createLayer } from '../../src/printer/layers';
-import { triggerLoadEnd } from '../../__mocks__/ol/source/ImageWMS';
+import { createLayer } from '../../../src/printer/layers';
+import { triggerLoadEnd } from '../../../__mocks__/ol/source/ImageWMS';
 
 /** @type {FrameState} */
 const frameState = {
