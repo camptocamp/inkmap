@@ -2,7 +2,7 @@
   "layers": [
     {
       "type": "XYZ",
-      "url": "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      "url": "/osm-tiles/{z}/{x}/{y}.png"
     }
   ],
   "size": [256, 256],

@@ -2,7 +2,7 @@
   "layers": [
     {
       "type": "WMS",
-      "url": "https://ows.terrestris.de/osm/service",
+      "url": "/wms1.png",
       "layer": "TOPO-OSM-WMS",
       "opacity": 0.4
     }

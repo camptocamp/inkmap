@@ -172,7 +172,10 @@ async function runTests() {
 const server = new webpackDevServer(webpack(config), {
   port: serverPort,
   quiet: true,
-  contentBase: path.resolve(__dirname, 'testbench'),
+  contentBase: [
+    path.resolve(__dirname, 'testbench'),
+    path.resolve(__dirname, 'data'),
+  ],
   publicPath: '/',
   liveReload: false,
 });
