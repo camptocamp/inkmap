@@ -8,7 +8,7 @@ import { BehaviorSubject, interval } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 
-const update$ = interval(100);
+const update$ = interval(500);
 
 /**
  * @typedef {Array} LayerPrintStatus
@@ -105,7 +105,7 @@ function createTiledLayer(source, rootFrameState, opacity) {
     takeWhile(() => {
       renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
       frameState.tileQueue.reprioritize();
-      frameState.tileQueue.loadMoreTiles(8, 2);
+      frameState.tileQueue.loadMoreTiles(12, 4);
       return frameState.tileQueue.getTilesLoading();
     }, true),
     map(() => {
@@ -119,7 +119,15 @@ function createTiledLayer(source, rootFrameState, opacity) {
         progress -= 0.001;
       }
 
-      return progress < 1 ? [progress, null] : [1, context.canvas];
+      if (progress === 1) {
+        renderer.renderFrame(
+          { ...frameState, time: Date.now() },
+          context.canvas
+        );
+        return [1, context.canvas];
+      } else {
+        return [progress, null];
+      }
     }),
     throttleTime(500, undefined, { leading: true, trailing: true })
   );
