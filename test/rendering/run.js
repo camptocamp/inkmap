@@ -11,11 +11,17 @@ const yargs = require('yargs');
 const pixelmatch = require('pixelmatch');
 const png = require('pngjs');
 
-const options = yargs.option('fix', {
-  describe: 'Write generated images to disk',
-  type: 'boolean',
-  default: false,
-});
+const options = yargs
+  .option('fix', {
+    describe: 'Write generated images to disk',
+    type: 'boolean',
+    default: false,
+  })
+  .option('interactive', {
+    describe: 'Disable headless mode and leave the browser running for a while',
+    type: 'boolean',
+    default: false,
+  });
 
 const serverPort = 8888;
 
@@ -61,7 +67,7 @@ let failed = false;
 
 async function startBrowser() {
   browser = await puppeteer.launch({
-    headless: true,
+    headless: !options.argv.interactive,
   });
   page = await browser.newPage();
   page.on('error', (err) => {
@@ -164,6 +170,11 @@ async function runTests() {
     await runTest(name);
     const mismatch = await validateResult(name);
     failed = failed || mismatch;
+  }
+
+  // await 30 minutes
+  if (options.argv.interactive) {
+    await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 30));
   }
 
   await closeBrowser();

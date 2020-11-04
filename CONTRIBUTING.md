@@ -56,3 +56,9 @@ $ npm run test:rendering -- --fix
 
 This will in essence copy the `received.png` file to the `expected.png` one for each rendering test.
 This command will logically always succeed.
+
+Also running the following command will start the tests in interactive mode, i.e. without headless mode and with
+the browser left running for 30mn:
+```bash
+$ npm run test:rendering -- --interactive
+```
