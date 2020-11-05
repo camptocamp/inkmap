@@ -1,13 +1,14 @@
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
+import TileWMS from 'ol/source/TileWMS';
 import ImageLayer from 'ol/layer/Image';
 import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 
-const update$ = interval(100);
+const update$ = interval(500);
 
 /**
  * @typedef {Array} LayerPrintStatus
@@ -33,11 +34,12 @@ export function createLayer(layerSpec, rootFrameState) {
 }
 
 /**
- * @param {XyzLayer} layerSpec
+ * @param {TileSource} source
  * @param {FrameState} rootFrameState
+ * @param {number} [opacity=1]
  * @return {Observable<LayerPrintStatus>}
  */
-function createLayerXYZ(layerSpec, rootFrameState) {
+function createTiledLayer(source, rootFrameState, opacity) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
@@ -48,11 +50,7 @@ function createLayerXYZ(layerSpec, rootFrameState) {
 
   layer = new TileLayer({
     transition: 0,
-    source: new XYZ({
-      crossOrigin: 'anonymous',
-      url: layerSpec.url,
-      transition: 0,
-    }),
+    source,
   });
   layer.getSource().setTileLoadFunction(function (tile, src) {
     const image = tile.getImage();
@@ -81,7 +79,7 @@ function createLayerXYZ(layerSpec, rootFrameState) {
         maxZoom: null,
         minResolution: 0,
         minZoom: null,
-        opacity: layerSpec.opacity !== undefined ? layerSpec.opacity : 1,
+        opacity: opacity !== undefined ? opacity : 1,
         sourceState: 'ready',
         visible: true,
         zIndex: 0,
@@ -105,18 +103,49 @@ function createLayerXYZ(layerSpec, rootFrameState) {
   return update$.pipe(
     startWith(true),
     takeWhile(() => {
-      renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
       frameState.tileQueue.reprioritize();
-      frameState.tileQueue.loadMoreTiles(8, 2);
+      frameState.tileQueue.loadMoreTiles(12, 4);
       return frameState.tileQueue.getTilesLoading();
     }, true),
     map(() => {
-      const progress =
-        1 -
-        Object.keys(frameState.tileQueue.queuedElements_).length / tileCount;
-      return progress < 1 ? [progress, null] : [1, context.canvas];
+      let loadedTilesCount = Object.keys(frameState.tileQueue.queuedElements_)
+        .length;
+
+      let progress = 1 - loadedTilesCount / tileCount;
+
+      // this is to make sure all tiles have finished loading before completing layer
+      if (progress === 1 && frameState.tileQueue.getTilesLoading() > 0) {
+        progress -= 0.001;
+      }
+
+      if (progress === 1) {
+        renderer.renderFrame(
+          { ...frameState, time: Date.now() },
+          context.canvas
+        );
+        return [1, context.canvas];
+      } else {
+        return [progress, null];
+      }
     }),
     throttleTime(500, undefined, { leading: true, trailing: true })
+  );
+}
+
+/**
+ * @param {XyzLayer} layerSpec
+ * @param {FrameState} rootFrameState
+ * @return {Observable<LayerPrintStatus>}
+ */
+function createLayerXYZ(layerSpec, rootFrameState) {
+  return createTiledLayer(
+    new XYZ({
+      crossOrigin: 'anonymous',
+      url: layerSpec.url,
+      transition: 0,
+    }),
+    rootFrameState,
+    layerSpec.opacity
   );
 }
 
@@ -126,6 +155,19 @@ function createLayerXYZ(layerSpec, rootFrameState) {
  * @return {Observable<LayerPrintStatus>}
  */
 function createLayerWMS(layerSpec, rootFrameState) {
+  if (layerSpec.tiled) {
+    return createTiledLayer(
+      new TileWMS({
+        crossOrigin: 'anonymous',
+        url: layerSpec.url,
+        params: { LAYERS: layerSpec.layer, TILED: true },
+        transition: 0,
+      }),
+      rootFrameState,
+      layerSpec.opacity
+    );
+  }
+
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);

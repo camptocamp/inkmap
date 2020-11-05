@@ -11,8 +11,9 @@ export { downloadBlob } from './utils';
  * @typedef {Object} WmsLayer
  * @property {'WMS'} type
  * @property {string} url
- * @property {string} name Layer name.
+ * @property {string} layer Layer name.
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
  */
 
 /**

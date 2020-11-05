@@ -35,17 +35,22 @@ const frameState = {
 class TileQueueMock {
   constructor(tileCount) {
     this.remaining = tileCount;
+    this.queuedCount = tileCount;
   }
   reprioritize() {}
   loadMoreTiles() {}
   getTilesLoading() {
-    return this.remaining > 0;
+    return this.remaining;
   }
   get queuedElements_() {
     // this will generate an object with one key per tile
-    return new Array(this.remaining)
+    return new Array(this.queuedCount)
       .fill(0)
       .reduce((prev, curr, index) => ({ ...prev, [index]: true }), {});
+  }
+  _setQueuedCount(count, remainingTilesCount) {
+    this.queuedCount = count;
+    this._setRemainingTiles(remainingTilesCount);
   }
   _setRemainingTiles(count) {
     this.remaining = count;
@@ -82,15 +87,20 @@ describe('layer creation', () => {
     });
 
     it('status updates are sent regularly', () => {
-      tileQueue._setRemainingTiles(12);
+      tileQueue._setQueuedCount(12, 12);
       expect(received).toEqual([0.4, null]);
 
-      tileQueue._setRemainingTiles(2);
+      tileQueue._setQueuedCount(2, 2);
       expect(received).toEqual([0.9, null]);
     });
 
+    it('when no queued elements left but tiles are remaining, do not complete', () => {
+      tileQueue._setQueuedCount(0, 2);
+      expect(received).toEqual([0.999, null]);
+    });
+
     it('when observable completes, canvas is received', () => {
-      tileQueue._setRemainingTiles(0);
+      tileQueue._setQueuedCount(0, 0);
       expect(received).toEqual([1, expect.objectContaining({})]);
       expect(completed).toBeTruthy();
     });
@@ -126,6 +136,55 @@ describe('layer creation', () => {
       triggerLoadEnd();
       jest.runOnlyPendingTimers();
 
+      expect(received).toEqual([1, expect.objectContaining({})]);
+      expect(completed).toBeTruthy();
+    });
+  });
+
+  describe('tiled WMS layer creation', () => {
+    /** @type {Layer} */
+    const spec = {
+      type: 'WMS',
+      url: 'https://my.url/wms',
+      layer: 'SOME_LAYER',
+      opacity: 0.4,
+      tiled: true,
+    };
+    let layer$;
+    let received;
+    let tileQueue;
+    let completed;
+
+    beforeEach(() => {
+      tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
+      completed = false;
+      layer$ = createLayer(spec, { ...frameState, tileQueue });
+      layer$.subscribe(
+        (status) => (received = status),
+        null,
+        () => (completed = true)
+      );
+    });
+
+    it('initially emit a status with progress 0', () => {
+      expect(received).toEqual([0, null]);
+    });
+
+    it('status updates are sent regularly', () => {
+      tileQueue._setQueuedCount(12, 12);
+      expect(received).toEqual([0.4, null]);
+
+      tileQueue._setQueuedCount(2, 2);
+      expect(received).toEqual([0.9, null]);
+    });
+
+    it('when no queued elements left but tiles are remaining, do not complete', () => {
+      tileQueue._setQueuedCount(0, 2);
+      expect(received).toEqual([0.999, null]);
+    });
+
+    it('when observable completes, canvas is received', () => {
+      tileQueue._setQueuedCount(0, 0);
       expect(received).toEqual([1, expect.objectContaining({})]);
       expect(completed).toBeTruthy();
     });
