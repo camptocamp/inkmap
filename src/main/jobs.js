@@ -19,7 +19,7 @@ export const jobs$ = messageToMain$.pipe(
     []
   ),
   startWith([]),
-  shareReplay(1)
+  shareReplay({ bufferSize: 1, refCount: true })
 );
 
 export const newJob$ = jobs$.pipe(
