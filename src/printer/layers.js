@@ -103,7 +103,6 @@ function createTiledLayer(source, rootFrameState, opacity) {
   return update$.pipe(
     startWith(true),
     takeWhile(() => {
-      renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
       frameState.tileQueue.reprioritize();
       frameState.tileQueue.loadMoreTiles(12, 4);
       return frameState.tileQueue.getTilesLoading();
