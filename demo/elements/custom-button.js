@@ -80,6 +80,7 @@ class CustomButton extends HTMLElement {
   refreshDOM() {
     if (typeof this.progress_ !== 'number') {
       this.progressBar.style.visibility = 'hidden';
+      this.progressBarInner.style.width = '0';
     } else {
       this.progressBar.style.visibility = 'visible';
       this.progressBarInner.style.width =
