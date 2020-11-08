@@ -1,34 +1,21 @@
+import './elements/custom-button';
 import { print, downloadBlob } from '../src/main';
 
 document.querySelectorAll('.print-unit').forEach((unit) => {
+  /** @type {CustomButton} */
+  const btn = unit.querySelector('custom-button');
   const specElt = unit.querySelector('.spec');
-  const startBtn = unit.querySelector('.start-btn');
-  const waitBtn = unit.querySelector('.wait-btn');
-  const progressBar = unit.querySelector('.progress');
-  const progressBarInner = progressBar.children.item(0);
 
-  startBtn.addEventListener('click', () => {
-    startBtn.style.display = 'none';
-    waitBtn.style.display = null;
-    progressBar.style.display = null;
-    progressBarInner.style.width = '0';
+  btn.addEventListener('click', () => {
+    btn.working = true;
+    btn.progress = 0.5;
 
     print(JSON.parse(specElt.value)).then((imageBlob) => {
-      // progressBarInner.style.width = Math.round(job.progress * 100) + '%'
-
-      // console.log(job)
-
-      // if (job.status === 'finished' && !!job.imageBlob) {
+      btn.working = false;
       downloadBlob(
         imageBlob,
         `inkmap-${new Date().toISOString().substr(0, 10)}.png`
       );
-      //   }
-      // }, null, () => {
-      //   console.log('finished')
-      startBtn.style.display = null;
-      waitBtn.style.display = 'none';
-      progressBar.style.display = 'none';
     });
   });
 });
