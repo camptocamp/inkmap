@@ -9,11 +9,12 @@ const btn = root.querySelector('custom-button');
 /** @type {PrintSpec} */
 const specElt = root.querySelector('print-spec');
 
-btn.addEventListener('click', () => {
+btn.addEventListener('click', async () => {
   btn.working = true;
 
-  print(specElt.value).then((imageBlob) => {
-    btn.working = false;
-    downloadBlob(imageBlob, getFileName());
-  });
+  const blob = await print(specElt.value);
+
+  btn.working = false;
+
+  downloadBlob(blob, getFileName());
 });
