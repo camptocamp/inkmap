@@ -1,21 +1,6 @@
 import './elements/custom-button';
-import { print, downloadBlob } from '../src/main';
-
-document.querySelectorAll('.print-unit').forEach((unit) => {
-  /** @type {CustomButton} */
-  const btn = unit.querySelector('custom-button');
-  const specElt = unit.querySelector('.spec');
-
-  btn.addEventListener('click', () => {
-    btn.working = true;
-    btn.progress = 0.5;
-
-    print(JSON.parse(specElt.value)).then((imageBlob) => {
-      btn.working = false;
-      downloadBlob(
-        imageBlob,
-        `inkmap-${new Date().toISOString().substr(0, 10)}.png`
-      );
-    });
-  });
-});
+import './examples/01-simple';
+import './examples/02-progress';
+import './examples/03-cancel';
+import './examples/04-jobs';
+import './examples/05-pdf';
