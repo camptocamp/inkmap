@@ -10,7 +10,11 @@ import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { canvasToBlob } from './utils';
 import { messageToMain } from './exchange';
 import { MESSAGE_JOB_STATUS } from '../shared/constants';
+<<<<<<< HEAD
 import { printNorthArrow } from './north-arrow';
+=======
+import { writeScaletoCanvas } from './scalebar';
+>>>>>>> writes dummy scalebar to canvas
 
 let counter = 0;
 
@@ -50,6 +54,8 @@ export function createJob(spec) {
           }
           if (spec.northArrow) {
             printNorthArrow(context, spec.northArrow);
+          if (spec.scaleBar) {
+            writeScaletoCanvas(context)
           }
           return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
         } else {
