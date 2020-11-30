@@ -48,9 +48,9 @@ export function createJob(spec) {
           for (let i = 0; i < layerStates.length; i++) {
             context.drawImage(layerStates[i][1], 0, 0);
           }
-
-          printNorthArrow(context);
-
+          if (spec.northArrow) {
+            printNorthArrow(context, spec.northArrow);
+          }
           return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
         } else {
           const rawProgress =
