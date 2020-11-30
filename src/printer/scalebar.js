@@ -111,9 +111,7 @@ function getScaleBarParams(frameState, spec) {
 }
 
 function createScaleBar(ctx, frameState, scaleParams, spec) {
-  const mapScale =
-    '1 / ' +
-    Math.round(getScaleForResolution(frameState, spec)).toLocaleString();
+  const mapScale = '1 / ' + spec.scale;
 
   const scaleWidth = scaleParams.width;
   const scaleNumber = scaleParams.scalenumber;
@@ -208,17 +206,4 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
   ctx.stroke();
 
   ctx.restore();
-}
-
-function getScaleForResolution(frameState, spec) {
-  // use DPI from spec if present
-  const dpi = spec.dpi ? spec.dpi : 25.4 / 0.28;
-  const mpu = frameState.viewState.projection.getMetersPerUnit();
-  const inchesPerMeter = 39.37;
-  return (
-    parseFloat(frameState.viewState.resolution.toString()) *
-    mpu *
-    inchesPerMeter *
-    dpi
-  );
 }
