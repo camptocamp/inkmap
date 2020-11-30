@@ -10,6 +10,7 @@ import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { canvasToBlob } from './utils';
 import { messageToMain } from './exchange';
 import { MESSAGE_JOB_STATUS } from '../shared/constants';
+import { printNorthArrow } from './north-arrow';
 
 let counter = 0;
 
@@ -47,6 +48,9 @@ export function createJob(spec) {
           for (let i = 0; i < layerStates.length; i++) {
             context.drawImage(layerStates[i][1], 0, 0);
           }
+
+          printNorthArrow(context);
+
           return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
         } else {
           const rawProgress =
