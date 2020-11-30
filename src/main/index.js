@@ -33,6 +33,7 @@ export { downloadBlob } from './utils';
  * @property {[number, number]|[number, number, string]} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
  * @property {[number, number]} center Longitude and latitude of the map center.
  * @property {number} dpi Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print.
+ * @property {boolean | Object} scaleBar Indicates whether scalebar should be printed.
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
  * @property {boolean | string} northArrow North arrow position.
