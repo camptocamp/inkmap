@@ -115,30 +115,37 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
     '1 / ' +
     Math.round(getScaleForResolution(frameState, spec)).toLocaleString();
 
-  let scalewidth = scaleParams.width;
-  let scalenumber = scaleParams.scalenumber;
-  let scaleunit = scaleParams.suffix;
+  const scaleWidth = scaleParams.width;
+  const scaleNumber = scaleParams.scalenumber;
+  const scaleUnit = scaleParams.suffix;
 
-  let line1 = 6;
+  const scaleText = scaleNumber + ' ' + scaleUnit;
+  const scaleTextWidth = ctx.measureText(scaleText).width;
+
+  const scaleTitle = 'Echelle : ' + ' ' + mapScale;
+  const scaleTitleWidth = ctx.measureText(scaleTitle).width;
+
+  const line1 = 6;
   // use position from spec if provided, default "bottom-left"
-  let xOffset =
+  const scaleMaxWidth = Math.max(scaleWidth + scaleTextWidth, scaleTitleWidth)
+  const xOffset =
     spec.scaleBar.position === 'bottom-right'
-      ? frameState.size[0] - scalewidth - 60
+      ? frameState.size[0] - scaleMaxWidth - 20
       : 10;
-  let yOffset = 10;
-  let fontsize1 = 12;
-  let font1 = fontsize1 + 'px Arial';
+  const yOffset = 10;
+  const fontsize1 = 12;
+  const font1 = fontsize1 + 'px Arial';
 
   ctx.save();
   ctx.globalAlpha = 0.8;
 
   // Scale Dimensions
-  let xzero = scalewidth + xOffset;
-  let yzero = ctx.canvas.height - yOffset;
-  let xfirst = xOffset + (scalewidth * 1) / 4;
-  let xsecond = xfirst + (scalewidth * 1) / 4;
-  let xthird = xsecond + (scalewidth * 1) / 4;
-  let xfourth = xthird + (scalewidth * 1) / 4;
+  const xzero = scaleWidth + xOffset;
+  const yzero = ctx.canvas.height - yOffset;
+  const xfirst = xOffset + (scaleWidth * 1) / 4;
+  const xsecond = xfirst + (scaleWidth * 1) / 4;
+  const xthird = xsecond + (scaleWidth * 1) / 4;
+  const xfourth = xthird + (scaleWidth * 1) / 4;
 
   // Scale Text
   ctx.beginPath();
@@ -148,16 +155,16 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
   ctx.lineWidth = 5;
   ctx.font = font1;
   // Title
-  ctx.strokeText(['Echelle : ' + ' ' + mapScale], xOffset, yzero - fontsize1);
-  ctx.fillText(['Echelle : ' + ' ' + mapScale], xOffset, yzero - fontsize1);
+  ctx.strokeText([scaleTitle], xOffset, yzero - fontsize1);
+  ctx.fillText([scaleTitle], xOffset, yzero - fontsize1);
   // Number with units
   ctx.strokeText(
-    [scalenumber + ' ' + scaleunit],
+    [scaleText],
     xzero + 5,
     yzero + fontsize1 / 2
   );
   ctx.fillText(
-    [scalenumber + ' ' + scaleunit],
+    [scaleText],
     xzero + 5,
     yzero + fontsize1 / 2
   );
