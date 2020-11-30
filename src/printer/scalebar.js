@@ -125,7 +125,7 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
 
   const line1 = 6;
   // use position from spec if provided, default "bottom-left"
-  const scaleMaxWidth = Math.max(scaleWidth + scaleTextWidth, scaleTitleWidth)
+  const scaleMaxWidth = Math.max(scaleWidth + scaleTextWidth, scaleTitleWidth);
   const xOffset =
     spec.scaleBar.position === 'bottom-right'
       ? frameState.size[0] - scaleMaxWidth - 20
@@ -156,16 +156,8 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
   ctx.strokeText([scaleTitle], xOffset, yzero - fontsize1);
   ctx.fillText([scaleTitle], xOffset, yzero - fontsize1);
   // Number with units
-  ctx.strokeText(
-    [scaleText],
-    xzero + 5,
-    yzero + fontsize1 / 2
-  );
-  ctx.fillText(
-    [scaleText],
-    xzero + 5,
-    yzero + fontsize1 / 2
-  );
+  ctx.strokeText([scaleText], xzero + 5, yzero + fontsize1 / 2);
+  ctx.fillText([scaleText], xzero + 5, yzero + fontsize1 / 2);
 
   // Stroke
   ctx.beginPath();
