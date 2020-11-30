@@ -91,7 +91,7 @@ function getScaleBarParams(frameState, spec) {
 
   let i = 3 * Math.floor(Math.log(minWidth * pointResolution) / Math.log(10));
   let count, width, decimalCount;
-  while (i) {
+  while (true) {
     decimalCount = Math.floor(i / 3);
     const decimal = Math.pow(10, decimalCount);
     count = LEADING_DIGITS[((i % 3) + 3) % 3] * decimal;

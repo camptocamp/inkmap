@@ -7,7 +7,9 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  rules: {},
+  rules: {
+    "no-constant-condition": ["error", { "checkLoops": false }]
+  },
   extends: ['eslint:recommended', 'prettier'],
   globals: { WorkerGlobalScope: true },
 };
