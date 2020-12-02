@@ -35,6 +35,7 @@ export { downloadBlob } from './utils';
  * @property {number} dpi Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print.
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
+ * @property {boolean | string} northArrow North arrow position.
  */
 
 /**

@@ -66,6 +66,7 @@ A `PrintSpec` object describes the content and aspect of the map to be printed.
 | `dpi` | `number` | Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print. |
 | `scale` | `number` | Scale denominator. |
 | `projection` | `string` | EPSG projection code. |
+| `northArrow` | `boolean | string` | North arrow position; either `'top-left'`, `'bottom-left'`, `'bottom-right'` or `'top-right'`; `true` defaults to `'top-right'`; absent or `false` means not to print the north arrow.
 
 #### `Layer` type
 
