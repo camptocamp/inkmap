@@ -1,4 +1,5 @@
 import TileLayer from 'ol/layer/Tile';
+import TileState from 'ol/TileState';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
@@ -55,18 +56,34 @@ function createTiledLayer(source, rootFrameState, opacity) {
   layer.getSource().setTileLoadFunction(function (tile, src) {
     const image = tile.getImage();
 
+    const tileSize = layer
+      .getSource()
+      .getTilePixelSize(
+        0,
+        rootFrameState.pixelRatio,
+        rootFrameState.viewState.projection
+      );
     if (isWorker()) {
-      const tileSize = layer
-        .getSource()
-        .getTilePixelSize(
-          0,
-          rootFrameState.pixelRatio,
-          rootFrameState.viewState.projection
-        );
       image.hintImageSize(tileSize[0], tileSize[1]);
     }
 
-    image.src = src;
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+    xhr.addEventListener('loadend', function () {
+      var data = this.response;
+      if (this.status === 404 || this.status === 403) {
+        createErrorTile(image, tile, tileSize, this.status);
+      } else {
+        if (data !== undefined) {
+          tile.getImage().src = URL.createObjectURL(data);
+        }
+      }
+    });
+    xhr.addEventListener('error', function () {
+      tile.setState(TileState.ERROR);
+    });
+    xhr.open('GET', src);
+    xhr.send();
   });
 
   frameState = {
@@ -130,6 +147,51 @@ function createTiledLayer(source, rootFrameState, opacity) {
     }),
     throttleTime(500, undefined, { leading: true, trailing: true })
   );
+}
+
+function createErrorTile(image, tile, tileSize, errorCode) {
+  let errorText = '';
+  switch (errorCode) {
+    case 404:
+      errorText = 'Not found';
+      break;
+    case 403:
+      errorText = 'Forbidden';
+      break;
+  }
+
+  const ctx = createCanvasContext2D(tileSize[0], tileSize[1]);
+  const fontsize1 = 12;
+  const font1 = fontsize1 + 'px Arial';
+  const errorTextWidth = ctx.measureText(errorText).width;
+  const xOffset = ctx.canvas.width / 2 - errorTextWidth / 2;
+  const yOffset = ctx.canvas.height / 2 - fontsize1 / 2;
+
+  ctx.save();
+  ctx.globalAlpha = 0.8;
+
+  // Tile shape
+  ctx.strokeStyle = '#000000';
+  ctx.fillStyle = '#f29a94';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.restore();
+
+  // Text
+  ctx.beginPath();
+  ctx.textAlign = 'left';
+  ctx.strokeStyle = '#ffffff';
+  ctx.fillStyle = '#000000';
+  ctx.lineWidth = 5;
+  ctx.font = font1;
+  ctx.strokeText([errorText], xOffset, yOffset);
+  ctx.fillText([errorText], xOffset, yOffset);
+  ctx.restore();
+
+  image.src = ctx.canvas.toDataURL();
+
+  tile.setState(TileState.ERROR);
 }
 
 /**
