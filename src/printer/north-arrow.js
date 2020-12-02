@@ -19,6 +19,11 @@ const N_PATH =
 const NORTH_ARROW_WIDTH = 51;
 const NORTH_ARROW_HEIGHT = 72;
 
+/**
+ * Print a north arrow on top of the canvas
+ * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
+ * @param {boolean|string} position Position of the arrow; `true` defaults to `'top-right'`
+ */
 export function printNorthArrow(ctx, position) {
   if (position === true) {
     position = 'top-right';
