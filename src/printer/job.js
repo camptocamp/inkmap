@@ -11,6 +11,7 @@ import { canvasToBlob } from './utils';
 import { messageToMain } from './exchange';
 import { MESSAGE_JOB_STATUS } from '../shared/constants';
 import { printNorthArrow } from './north-arrow';
+import { printScaleBar } from './scalebar';
 
 let counter = 0;
 
@@ -50,6 +51,8 @@ export function createJob(spec) {
           }
           if (spec.northArrow) {
             printNorthArrow(context, spec.northArrow);
+          if (spec.scaleBar) {
+            printScaleBar(context, frameState, spec);
           }
           return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
         } else {
