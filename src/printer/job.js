@@ -9,7 +9,7 @@ import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { canvasToBlob } from './utils';
 import { messageToMain } from './exchange';
-import { MESSAGE_JOB_STATUS } from '../shared/constants';
+import { MESSAGE_JOB_STATUS, METRIC_DENOMINATOR } from '../shared/constants';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
 
@@ -22,8 +22,8 @@ let counter = 0;
  * @param {PrintSpec} spec
  */
 export function createJob(spec) {
-  const pixelSize = calculatePixelSize(spec);
-  const frameState = getFrameState(spec, pixelSize);
+  const sizeInPixel = calculateSizeInPixel(spec);
+  const frameState = getFrameState(spec, sizeInPixel);
 
   /**
    * @type {PrintStatus}
@@ -35,7 +35,7 @@ export function createJob(spec) {
     progress: 0,
   };
 
-  const context = createCanvasContext2D(pixelSize[0], pixelSize[1]);
+  const context = createCanvasContext2D(sizeInPixel[0], sizeInPixel[1]);
 
   combineLatest(
     spec.layers.map((layer) => {
@@ -139,37 +139,38 @@ function getFrameState(spec, pixelSize) {
 /**
  * Returns the map canvas size in pixels based on size units and dpi given in spec
  * @param {PrintSpec} spec
- * @return {Array}
+ * @return {Array<Number>}
  */
-function calculatePixelSize(spec) {
-  if (!spec.size[2] || spec.size[2] === 'px') {
-    return spec.size;
+function calculateSizeInPixel(spec) {
+  const { size, dpi } = spec;
+  if (!size[2] || size[2] === 'px') {
+    return size;
   }
   let pixelX;
   let pixelY;
-  const unit = spec.size[2];
+  const unit = size[2];
 
   switch (unit) {
     case 'in':
-      pixelX = spec.dpi * spec.size[0];
-      pixelY = spec.dpi * spec.size[1];
+      pixelX = dpi * size[0];
+      pixelY = dpi * size[1];
       break;
     case 'cm':
-      pixelX = (spec.dpi * spec.size[0]) / 2.54;
-      pixelY = (spec.dpi * spec.size[1]) / 2.54;
+      pixelX = (dpi * size[0]) / METRIC_DENOMINATOR;
+      pixelY = (dpi * size[1]) / METRIC_DENOMINATOR;
       break;
     case 'mm':
-      pixelX = (spec.dpi * spec.size[0]) / (2.54 * 10);
-      pixelY = (spec.dpi * spec.size[1]) / (2.54 * 10);
+      pixelX = (dpi * size[0]) / (METRIC_DENOMINATOR * 10);
+      pixelY = (dpi * size[1]) / (METRIC_DENOMINATOR * 10);
       break;
     case 'm':
-      pixelX = (spec.dpi * spec.size[0] * 100) / 2.54;
-      pixelY = (spec.dpi * spec.size[1] * 100) / 2.54;
+      pixelX = (dpi * size[0] * 100) / METRIC_DENOMINATOR;
+      pixelY = (dpi * size[1] * 100) / METRIC_DENOMINATOR;
       break;
     default:
-      pixelX = spec.size[0];
-      pixelY = spec.size[1];
+      pixelX = size[0];
+      pixelY = size[1];
   }
 
-  return [pixelX, pixelY];
+  return [Math.round(pixelX), Math.round(pixelY)];
 }
