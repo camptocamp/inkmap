@@ -52,6 +52,7 @@ export function createJob(spec) {
           }
           if (spec.northArrow) {
             printNorthArrow(context, spec.northArrow);
+          }
           if (spec.scaleBar) {
             printScaleBar(context, frameState, spec);
           }
