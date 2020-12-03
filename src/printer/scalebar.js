@@ -1,23 +1,28 @@
 import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
-import { assert } from 'ol/asserts.js';
+import { Units } from 'ol/control/ScaleLine';
 
+/**
+ * Determines scalebar size and annotation and prints it to map.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {FrameState} frameState
+ * @param {PrintSpec} spec
+ */
 export function printScaleBar(ctx, frameState, spec) {
-  let scaleParams = getScaleBarParams(frameState, spec);
-  createScaleBar(ctx, frameState, scaleParams, spec);
+  const scaleBarParams = getScaleBarParams(frameState, spec);
+  renderScaleBar(ctx, frameState, scaleBarParams, spec);
 }
 
+/**
+ * Gets width and annotation for graphical scalebar.
+ * @param {FrameState} frameState
+ * @param {PrintSpec} spec
+ * @return {ScaleBarParams}
+ */
 function getScaleBarParams(frameState, spec) {
   // default values like ol.control.ScaleLine
   const minWidth = 64;
   const LEADING_DIGITS = [1, 2, 5];
-  const Units = {
-    DEGREES: 'degrees',
-    IMPERIAL: 'imperial',
-    NAUTICAL: 'nautical',
-    METRIC: 'metric',
-    US: 'us',
-  };
 
   const center = frameState.viewState.center;
   const projection = frameState.viewState.projection;
@@ -86,7 +91,7 @@ function getScaleBarParams(frameState, spec) {
       pointResolution /= 1609.3472;
     }
   } else {
-    assert(false, 33); // Invalid units
+    console.error('Invalid units: Please verifiy your scaleBar object');
   }
 
   let i = 3 * Math.floor(Math.log(minWidth * pointResolution) / Math.log(10));
@@ -110,17 +115,24 @@ function getScaleBarParams(frameState, spec) {
   };
 }
 
-function createScaleBar(ctx, frameState, scaleParams, spec) {
-  const mapScale = '1 / ' + spec.scale;
+/**
+ * Renders scalebar on canvas.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {FrameState} frameState
+ * @param {ScaleBarParams} scaleBarParams
+ * @param {PrintSpec} spec
+ */
+function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
+  const mapScale = `1 / ${spec.scale}`;
 
-  const scaleWidth = scaleParams.width;
-  const scaleNumber = scaleParams.scalenumber;
-  const scaleUnit = scaleParams.suffix;
+  const scaleWidth = scaleBarParams.width;
+  const scaleNumber = scaleBarParams.scalenumber;
+  const scaleUnit = scaleBarParams.suffix;
 
-  const scaleText = scaleNumber + ' ' + scaleUnit;
+  const scaleText = `${scaleNumber} ${scaleUnit}`;
   const scaleTextWidth = ctx.measureText(scaleText).width;
 
-  const scaleTitle = 'Echelle : ' + ' ' + mapScale;
+  const scaleTitle = `Echelle : ${mapScale}`;
   const scaleTitleWidth = ctx.measureText(scaleTitle).width;
 
   const line1 = 6;
@@ -132,7 +144,9 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
       : 10;
   const yOffset = 10;
   const fontsize1 = 12;
-  const font1 = fontsize1 + 'px Arial';
+  const font1 = `${fontsize1}px Arial`;
+  const oddColor = '#000000';
+  const evenColor = '#FFFFFF';
 
   ctx.save();
   ctx.globalAlpha = 0.8;
@@ -163,7 +177,6 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
   ctx.beginPath();
   ctx.lineWidth = line1 + 2;
   ctx.strokeStyle = '#000000';
-  ctx.fillStyle = '#ffffff';
   ctx.moveTo(xOffset, yzero);
   ctx.lineTo(xzero + 1, yzero);
   ctx.stroke();
@@ -171,28 +184,28 @@ function createScaleBar(ctx, frameState, scaleParams, spec) {
   // sections black/white
   ctx.beginPath();
   ctx.lineWidth = line1;
-  ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = oddColor;
   ctx.moveTo(xOffset, yzero);
   ctx.lineTo(xfirst, yzero);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.lineWidth = line1;
-  ctx.strokeStyle = '#FFFFFF';
+  ctx.strokeStyle = evenColor;
   ctx.moveTo(xfirst, yzero);
   ctx.lineTo(xsecond, yzero);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.lineWidth = line1;
-  ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = oddColor;
   ctx.moveTo(xsecond, yzero);
   ctx.lineTo(xthird, yzero);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.lineWidth = line1;
-  ctx.strokeStyle = '#FFFFFF';
+  ctx.strokeStyle = evenColor;
   ctx.moveTo(xthird, yzero);
   ctx.lineTo(xfourth, yzero);
   ctx.stroke();

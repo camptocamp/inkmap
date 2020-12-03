@@ -33,10 +33,23 @@ export { downloadBlob } from './utils';
  * @property {[number, number]|[number, number, string]} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
  * @property {[number, number]} center Longitude and latitude of the map center.
  * @property {number} dpi Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print.
- * @property {boolean | Object} scaleBar Indicates whether scalebar should be printed.
+ * @property {boolean | ScaleBarSpec} scaleBar Indicates whether scalebar should be printed (and optionally its options).
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
  * @property {boolean | string} northArrow North arrow position.
+ */
+
+/**
+ * @typedef {Object} ScaleBarSpec
+ * @property {string} position Position on the map. Possible values: "bottom-left" (default), "bottom-right".
+ * @property {string} units Units for the graphical scalebar. Possible values: "metric" (default), "degrees", "imperial", "nautical", "us".
+ */
+
+/**
+ * @typedef {Object} ScaleBarParams
+ * @property {number} width Width of rendered graphical scalebar in px.
+ * @property {number} scalenumber Distance value for rendered graphical scalebar.
+ * @property {string} suffix Unit suffix for rendered graphical scalebar.
  */
 
 /**
