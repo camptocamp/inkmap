@@ -154,6 +154,7 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
   );
 }
 
+function createErrorTile(image, tileSize, errorCode) {
   let errorText = HTTP_CODES[errorCode];
 
   const ctx = createCanvasContext2D(tileSize[0], tileSize[1]);
@@ -187,7 +188,6 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
 
   image.src = ctx.canvas.toDataURL();
 
-  tile.setState(TileState.ERROR);
 }
 
 /**
@@ -250,7 +250,24 @@ function createLayerWMS(layerSpec, rootFrameState) {
     if (isWorker()) {
       image.hintImageSize(width, height);
     }
-    image.src = src;
+
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+    xhr.addEventListener('loadend', function () {
+      var data = this.response;
+      if (this.status === 0 || this.status >= 400 ) {
+        if (layerSpec.debug) {
+          // create one error tile for entire WMS response
+          createErrorTile(image, [width, height], this.status);
+        }
+      } else {
+        if (data !== undefined) {
+          image.src = URL.createObjectURL(data);
+        }
+      }
+    });
+    xhr.open('GET', src);
+    xhr.send();
   });
 
   frameState = {
