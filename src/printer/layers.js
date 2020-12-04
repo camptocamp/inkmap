@@ -8,6 +8,7 @@ import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
+import { HTTP_CODES } from '../shared/constants';
 
 const update$ = interval(500);
 
@@ -71,8 +72,8 @@ function createTiledLayer(source, rootFrameState, opacity) {
     xhr.responseType = 'blob';
     xhr.addEventListener('loadend', function () {
       var data = this.response;
-      if (this.status === 404 || this.status === 403) {
-        createErrorTile(image, tile, tileSize, this.status);
+      
+      if (this.status === 0 || this.status >= 400 ) {
       } else {
         if (data !== undefined) {
           tile.getImage().src = URL.createObjectURL(data);
@@ -149,16 +150,7 @@ function createTiledLayer(source, rootFrameState, opacity) {
   );
 }
 
-function createErrorTile(image, tile, tileSize, errorCode) {
-  let errorText = '';
-  switch (errorCode) {
-    case 404:
-      errorText = 'Not found';
-      break;
-    case 403:
-      errorText = 'Forbidden';
-      break;
-  }
+  let errorText = HTTP_CODES[errorCode];
 
   const ctx = createCanvasContext2D(tileSize[0], tileSize[1]);
   const fontsize1 = 12;
