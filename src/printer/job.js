@@ -9,7 +9,7 @@ import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { canvasToBlob } from './utils';
 import { messageToMain } from './exchange';
-import { MESSAGE_JOB_STATUS, METRIC_DENOMINATOR } from '../shared/constants';
+import { MESSAGE_JOB_STATUS, CM_PER_INCH } from '../shared/constants';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
 
@@ -157,16 +157,16 @@ function calculateSizeInPixel(spec) {
       pixelY = dpi * size[1];
       break;
     case 'cm':
-      pixelX = (dpi * size[0]) / METRIC_DENOMINATOR;
-      pixelY = (dpi * size[1]) / METRIC_DENOMINATOR;
+      pixelX = (dpi * size[0]) / CM_PER_INCH;
+      pixelY = (dpi * size[1]) / CM_PER_INCH;
       break;
     case 'mm':
-      pixelX = (dpi * size[0]) / (METRIC_DENOMINATOR * 10);
-      pixelY = (dpi * size[1]) / (METRIC_DENOMINATOR * 10);
+      pixelX = (dpi * size[0]) / (CM_PER_INCH * 10);
+      pixelY = (dpi * size[1]) / (CM_PER_INCH * 10);
       break;
     case 'm':
-      pixelX = (dpi * size[0] * 100) / METRIC_DENOMINATOR;
-      pixelY = (dpi * size[1] * 100) / METRIC_DENOMINATOR;
+      pixelX = (dpi * size[0] * 100) / CM_PER_INCH;
+      pixelY = (dpi * size[1] * 100) / CM_PER_INCH;
       break;
     default:
       pixelX = size[0];

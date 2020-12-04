@@ -3,7 +3,7 @@ import { createJob } from '../../../src/printer/job';
 import * as LayersMock from '../../../src/printer/layers';
 import { messageToMain } from '../../../src/printer/exchange';
 import * as UtilsMock from '../../../src/printer/utils';
-import { MESSAGE_JOB_STATUS, METRIC_DENOMINATOR } from '../../../src/shared/constants';
+import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants';
 import * as olDomMock from 'ol/dom';
 
 jest.mock('../../../src/printer/layers');
@@ -62,9 +62,7 @@ describe('job creation', () => {
     expect(LayersMock.createLayer).toHaveBeenCalledTimes(3);
   });
   it('creates the correct canvas size from cm', () => {
-    let xPixelExpected = Math.round(spec.dpi * spec.size[0] / METRIC_DENOMINATOR);
-    let yPixelExpected = Math.round(spec.dpi * spec.size[1] / METRIC_DENOMINATOR); 
-    expect(olDomMock.createCanvasContext2D).toHaveBeenLastCalledWith(xPixelExpected, yPixelExpected);
+    expect(olDomMock.createCanvasContext2D).toHaveBeenLastCalledWith(630, 315);
   });
   it('broadcasts initial status to the main thread', () => {
     expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
