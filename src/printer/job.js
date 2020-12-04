@@ -82,10 +82,10 @@ export function createJob(spec) {
 /**
  * Returns an OpenLayers frame state for a given job spec
  * @param {PrintSpec} spec
- * @param {Array} pixelSize
+ * @param {Array} sizeInPixel
  * @return {FrameState}
  */
-function getFrameState(spec, pixelSize) {
+function getFrameState(spec, sizeInPixel) {
   const projection = getProj(spec.projection);
   const inchPerMeter = 39.3701;
   const resolution =
@@ -106,7 +106,7 @@ function getFrameState(spec, pixelSize) {
       viewState.center,
       viewState.resolution,
       viewState.rotation,
-      pixelSize
+      sizeInPixel
     ),
     index: 0,
     layerIndex: 0,
@@ -114,7 +114,7 @@ function getFrameState(spec, pixelSize) {
     pixelRatio: 1,
     pixelToCoordinateTransform: [1, 0, 0, 1, 0, 0],
     postRenderFunctions: [],
-    size: pixelSize,
+    size: sizeInPixel,
     time: Date.now(),
     usedTiles: {},
     viewState: viewState,
