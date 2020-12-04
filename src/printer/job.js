@@ -9,7 +9,7 @@ import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { canvasToBlob } from './utils';
 import { messageToMain } from './exchange';
-import { MESSAGE_JOB_STATUS } from '../shared/constants';
+import { MESSAGE_JOB_STATUS, CM_PER_INCH } from '../shared/constants';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
 
@@ -22,7 +22,8 @@ let counter = 0;
  * @param {PrintSpec} spec
  */
 export function createJob(spec) {
-  const frameState = getFrameState(spec);
+  const sizeInPixel = calculateSizeInPixel(spec);
+  const frameState = getFrameState(spec, sizeInPixel);
 
   /**
    * @type {PrintStatus}
@@ -34,7 +35,7 @@ export function createJob(spec) {
     progress: 0,
   };
 
-  const context = createCanvasContext2D(spec.size[0], spec.size[1]);
+  const context = createCanvasContext2D(sizeInPixel[0], sizeInPixel[1]);
 
   combineLatest(
     spec.layers.map((layer) => {
@@ -51,6 +52,7 @@ export function createJob(spec) {
           }
           if (spec.northArrow) {
             printNorthArrow(context, spec.northArrow);
+          }
           if (spec.scaleBar) {
             printScaleBar(context, frameState, spec);
           }
@@ -80,9 +82,10 @@ export function createJob(spec) {
 /**
  * Returns an OpenLayers frame state for a given job spec
  * @param {PrintSpec} spec
+ * @param {Array} sizeInPixel
  * @return {FrameState}
  */
-function getFrameState(spec) {
+function getFrameState(spec, sizeInPixel) {
   const projection = getProj(spec.projection);
   const inchPerMeter = 39.3701;
   const resolution =
@@ -103,7 +106,7 @@ function getFrameState(spec) {
       viewState.center,
       viewState.resolution,
       viewState.rotation,
-      spec.size
+      sizeInPixel
     ),
     index: 0,
     layerIndex: 0,
@@ -111,7 +114,7 @@ function getFrameState(spec) {
     pixelRatio: 1,
     pixelToCoordinateTransform: [1, 0, 0, 1, 0, 0],
     postRenderFunctions: [],
-    size: spec.size,
+    size: sizeInPixel,
     time: Date.now(),
     usedTiles: {},
     viewState: viewState,
@@ -132,4 +135,43 @@ function getFrameState(spec) {
   );
 
   return frameState;
+}
+
+/**
+ * Returns the map canvas size in pixels based on size units and dpi given in spec
+ * @param {PrintSpec} spec
+ * @return {Array<Number>}
+ */
+function calculateSizeInPixel(spec) {
+  const { size, dpi } = spec;
+  if (!size[2] || size[2] === 'px') {
+    return size;
+  }
+  let pixelX;
+  let pixelY;
+  const unit = size[2];
+
+  switch (unit) {
+    case 'in':
+      pixelX = dpi * size[0];
+      pixelY = dpi * size[1];
+      break;
+    case 'cm':
+      pixelX = (dpi * size[0]) / CM_PER_INCH;
+      pixelY = (dpi * size[1]) / CM_PER_INCH;
+      break;
+    case 'mm':
+      pixelX = (dpi * size[0]) / (CM_PER_INCH * 10);
+      pixelY = (dpi * size[1]) / (CM_PER_INCH * 10);
+      break;
+    case 'm':
+      pixelX = (dpi * size[0] * 100) / CM_PER_INCH;
+      pixelY = (dpi * size[1] * 100) / CM_PER_INCH;
+      break;
+    default:
+      pixelX = size[0];
+      pixelY = size[1];
+  }
+
+  return [Math.round(pixelX), Math.round(pixelY)];
 }

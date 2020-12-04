@@ -4,10 +4,12 @@ import * as LayersMock from '../../../src/printer/layers';
 import { messageToMain } from '../../../src/printer/exchange';
 import * as UtilsMock from '../../../src/printer/utils';
 import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants';
+import * as olDomMock from 'ol/dom';
 
 jest.mock('../../../src/printer/layers');
 jest.mock('../../../src/printer/exchange');
 jest.mock('../../../src/printer/utils');
+jest.mock('ol/dom');
 
 const spec = {
   layers: [
@@ -26,7 +28,7 @@ const spec = {
       opacity: 0.4,
     },
   ],
-  size: [800, 400],
+  size: [8, 4, "cm"],
   center: [12, 48],
   dpi: 200,
   scale: 40000000,
@@ -43,6 +45,12 @@ LayersMock.createLayer = jest.fn(() => {
 
 UtilsMock.canvasToBlob = jest.fn(() => of({ blob: true }));
 
+olDomMock.createCanvasContext2D = jest.fn(() => {
+  return {
+    drawImage: jest.fn()
+  };
+})
+
 describe('job creation', () => {
   beforeEach(() => {
     layerSubjects = [];
@@ -52,6 +60,9 @@ describe('job creation', () => {
 
   it('creates the correct amount of layers', () => {
     expect(LayersMock.createLayer).toHaveBeenCalledTimes(3);
+  });
+  it('creates the correct canvas size from cm', () => {
+    expect(olDomMock.createCanvasContext2D).toHaveBeenLastCalledWith(630, 315);
   });
   it('broadcasts initial status to the main thread', () => {
     expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
