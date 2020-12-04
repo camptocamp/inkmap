@@ -72,8 +72,8 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
     xhr.responseType = 'blob';
     xhr.addEventListener('loadend', function () {
       var data = this.response;
-      
-      if (this.status === 0 || this.status >= 400 ) {
+
+      if (this.status === 0 || this.status >= 400) {
         if (debug) {
           createErrorTile(image, tileSize, this.status);
         }
@@ -187,7 +187,6 @@ function createErrorTile(image, tileSize, errorCode) {
   ctx.restore();
 
   image.src = ctx.canvas.toDataURL();
-
 }
 
 /**
@@ -255,7 +254,7 @@ function createLayerWMS(layerSpec, rootFrameState) {
     xhr.responseType = 'blob';
     xhr.addEventListener('loadend', function () {
       var data = this.response;
-      if (this.status === 0 || this.status >= 400 ) {
+      if (this.status === 0 || this.status >= 400) {
         if (layerSpec.debug) {
           // create one error tile for entire WMS response
           createErrorTile(image, [width, height], this.status);
