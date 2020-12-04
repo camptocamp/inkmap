@@ -41,7 +41,7 @@ export function createLayer(layerSpec, rootFrameState) {
  * @param {number} [opacity=1]
  * @return {Observable<LayerPrintStatus>}
  */
-function createTiledLayer(source, rootFrameState, opacity) {
+function createTiledLayer(source, rootFrameState, opacity, debug) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
@@ -74,6 +74,10 @@ function createTiledLayer(source, rootFrameState, opacity) {
       var data = this.response;
       
       if (this.status === 0 || this.status >= 400 ) {
+        if (debug) {
+          createErrorTile(image, tileSize, this.status);
+        }
+        tile.setState(TileState.ERROR);
       } else {
         if (data !== undefined) {
           tile.getImage().src = URL.createObjectURL(data);
@@ -199,7 +203,8 @@ function createLayerXYZ(layerSpec, rootFrameState) {
       transition: 0,
     }),
     rootFrameState,
-    layerSpec.opacity
+    layerSpec.opacity,
+    layerSpec.debug
   );
 }
 
@@ -218,7 +223,8 @@ function createLayerWMS(layerSpec, rootFrameState) {
         transition: 0,
       }),
       rootFrameState,
-      layerSpec.opacity
+      layerSpec.opacity,
+      layerSpec.debug
     );
   }
 

@@ -25,6 +25,7 @@ export { downloadBlob } from './utils';
 
 /**
  * @typedef {WmsLayer|XyzLayer} Layer
+ * @property {boolean} debug Print pink tiles with error code message for unavailable tiles, if `true`. Defaults to `false`. 
  */
 
 /**

@@ -79,6 +79,7 @@ A `Layer` object describes a layer in the printed map.
 | `url` | `string` | URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`. |
 | `name` | `string` | Layer name (for WMS and WMTS layers). |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
+| `debug` | `boolean` | Print pink tiles with error code message for unavailable tiles, if `true`. Defaults to `false`.
 
 #### `PrintStatus` type
 
