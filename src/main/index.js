@@ -41,6 +41,7 @@ export { downloadBlob } from './utils';
 
 /**
  * @typedef {Object} ScaleBarSpec
+ * @property {string} [template] Scale text template. The string `{mapScale}` in the template will be replaced the actual value. Default is `Scale: {mapScale}`.
  * @property {string} position Position on the map. Possible values: "bottom-left" (default), "bottom-right".
  * @property {string} units Units for the graphical scalebar. Possible values: "metric" (default), "degrees", "imperial", "nautical", "us".
  */
