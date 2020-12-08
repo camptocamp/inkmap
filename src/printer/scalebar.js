@@ -2,6 +2,9 @@ import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
 import { Units } from 'ol/control/ScaleLine';
 
+const DEFAULT_TITLE = 'Scale: {mapScale}';
+
+
 /**
  * Determines scalebar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
@@ -91,7 +94,7 @@ function getScaleBarParams(frameState, spec) {
       pointResolution /= 1609.3472;
     }
   } else {
-    console.error('Invalid units: Please verifiy your scaleBar object');
+    console.error('Invalid units: Please verify your scaleBar object');
   }
 
   let i = 3 * Math.floor(Math.log(minWidth * pointResolution) / Math.log(10));
@@ -132,7 +135,7 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   const scaleText = `${scaleNumber} ${scaleUnit}`;
   const scaleTextWidth = ctx.measureText(scaleText).width;
 
-  const scaleTitle = `Echelle : ${mapScale}`;
+  const scaleTitle = (spec.scaleBar.template ? spec.scaleBar.template : DEFAULT_TITLE).replace('{mapScale}', mapScale);
   const scaleTitleWidth = ctx.measureText(scaleTitle).width;
 
   const line1 = 6;
