@@ -8,6 +8,16 @@ import '../printer';
 export { downloadBlob } from './utils';
 
 /**
+ * @typedef {Object} TileGrid
+ * @property {!Array<number>} resolutions Resolutions. The array index of each
+ * resolution needs to match the zoom level. This means that even if a `minZoom`
+ * is configured, the resolutions array will have a length of `maxZoom + 1`
+ * @property {Array<string>} matrixIds matrix IDs. The length of this array needs
+ * to match the length of the `resolutions` array.
+ * @property {number} tileSize Tile size.
+ */
+
+/**
  * @typedef {Object} WmsLayer
  * @property {'WMS'} type
  * @property {string} url
@@ -24,7 +34,20 @@ export { downloadBlob } from './utils';
  */
 
 /**
- * @typedef {WmsLayer|XyzLayer} Layer
+ * @typedef {Object} WmtsLayer
+ * @property {'WMTS'} type
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible)
+ * @property {string} url A URL for the service.
+ * @property {string} requestEncoding Request encoding; valid values are `KVP`, `REST`.
+ * @property {string} format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`
+ * @property {string} layer Layer name as advertised in the WMTS capabilities.
+ * @property {string} style Style name as advertised in the WMTS capabilities.
+ * @property {string} matrixSet Matrix set.
+ * @property {TileGrid} tileGrid Tile grid.
+ */
+
+/**
+ * @typedef {WmsLayer|XyzLayer|WmtsLayer} Layer
  */
 
 /**
