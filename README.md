@@ -80,6 +80,19 @@ A `Layer` object describes a layer in the printed map.
 | `name` | `string` | Layer name (for WMS and WMTS layers). |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
 
+#### `WMTS layer` type
+
+Additionnal options for `WMTS` layer to define the layer source. See https://openlayers.org/en/latest/apidoc/module-ol_source_WMTS-WMTS.html
+for the full list of options. The following table introduces the common options to use.
+
+| field | type | description |
+|---|---|---|
+| `requestEncoding` | `string` | Request encoding: `KVP`, `REST`. |
+| `format` | `string` | format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`. |
+| `layer` | `string` | Layer name as advertised in the WMTS capabilities. |
+| `style` | `number` | Style name as advertised in the WMTS capabilities. |
+| `tileGrid` | `TileGrid` | TileGrid object, see https://openlayers.org/en/latest/apidoc/module-ol_tilegrid_TileGrid-TileGrid.html for options |
+
 #### `PrintStatus` type
 
 A `PrintStatus` object describes the status of a print job.
