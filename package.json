@@ -9,7 +9,8 @@
     "format:check": "prettier src demo",
     "test:unit": "jest",
     "test:rendering": "node test/rendering/run.js",
-    "demo": "webpack-dev-server --config demo/webpack.config.js"
+    "demo": "webpack-dev-server --config demo/webpack.config.js",
+    "build:demo": "webpack --config demo/webpack.config.js --mode production"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
     "babel-loader": "^8.0.6",
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^6.15.0",
+    "html-webpack-plugin": "^4.5.0",
     "jest": "^26.6.1",
     "pixelmatch": "^5.2.1",
     "prettier": "^2.1.2",
