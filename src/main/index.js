@@ -79,16 +79,36 @@ export function print(printSpec) {
     .toPromise();
 }
 
-export function queuePrint() {
-  console.warn('Not implemented yet');
+/**
+ * Starts generating a map image from a print spec. Will simply return the job
+ * id for further monitoring.
+ * @param {PrintSpec} printSpec
+ * @return {Promise<number>} Promise resolving to the print job id.
+ */
+export function queuePrint(printSpec) {
+  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
+  return newJob$
+    .pipe(
+      take(1),
+      map((job) => job.id)
+    )
+    .toPromise();
 }
 
 export function getJobsStatus() {
   console.warn('Not implemented yet');
 }
 
-export function getJobStatus() {
-  console.warn('Not implemented yet');
+/**
+ * Returns an observable emitting status objects for a particular job.
+ * The observable will complete once the job is ready.
+ * @param {number} jobId
+ * @return {Observable<PrintStatus>} Observable emitting job status objects.
+ */
+export function getJobStatus(jobId) {
+  return getJobStatusObservable(jobId).pipe(
+    takeWhile((job) => job.progress < 1, true)
+  );
 }
 
 export function cancelJob() {

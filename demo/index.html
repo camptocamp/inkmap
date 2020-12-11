@@ -11,6 +11,21 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=PT+Sans:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <style>
     body {
@@ -34,72 +49,30 @@
         >
       </h1>
 
-      <div class="mt-5">
+      <div class="mt-5 example-01">
         <p>
           Give <strong>inkmap</strong> a JSON spec and it will use it to
           generate a PNG image in the background.
         </p>
-        <div class="row align-items-center print-unit">
-          <label class="col-8">
-            <textarea
-              class="spec form-control text-monospace"
-              rows="20"
-              style="font-size: 12px"
-            >
-{
-  "layers": [
-    {
-      "type": "XYZ",
-      "url": "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    },
-    {
-      "type": "WMS",
-      "url": "https://ows.mundialis.de/services/service",
-      "layer": "TOPO-OSM-WMS",
-      "opacity": 0.4,
-      "tiled": true
-    }
-  ],
-  "size": [800, 400],
-  "center": [12, 48],
-  "dpi": 200,
-  "scale": 40000000,
-  "scaleBar": {"position": "bottom-right", "units": "metric" },
-  "projection": "EPSG:3857",
-  "northArrow": "top-right"
-}</textarea
-            >
-            <small class="text-secondary"
-              >Please provide a valid JSON object.</small
-            >
-          </label>
-          <div class="col-3" style="display: initial">
-            <button role="button" class="start-btn btn btn-primary btn-block">
-              Generate!
-            </button>
-            <button
-              role="button"
-              disabled
-              class="wait-btn btn btn-secondary btn-block"
-              style="display: none"
-            >
-              <span
-                class="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              ></span>
-              Working...
-            </button>
-            <div class="progress mt-1" style="height: 5px; display: none">
-              <div
-                class="progress-bar"
-                style="width: 0"
-                role="progressbar"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              ></div>
-            </div>
-          </div>
+        <div class="row align-items-center">
+          <print-spec class="col-8" editable="true"></print-spec>
+          <custom-button class="col-3">
+            Generate!
+          </custom-button>
+        </div>
+      </div>
+
+      <div class="mt-5 example-02">
+        <h2>Showing progress</h2>
+        <p>
+          <strong>inkmap</strong> also enables finer monitoring by making the
+          jobs status observable.
+        </p>
+        <div class="row align-items-center">
+          <print-spec class="col-8" editable="false"></print-spec>
+          <custom-button class="col-3">
+            Generate!
+          </custom-button>
         </div>
       </div>
     </div>
