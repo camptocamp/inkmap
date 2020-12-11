@@ -38,7 +38,7 @@ const spec = {
 let layerSubjects;
 
 LayersMock.createLayer = jest.fn(() => {
-  const layer$ = new BehaviorSubject([0, null]);
+  const layer$ = new BehaviorSubject([0, null, []]);
   layerSubjects.push(layer$);
   return layer$;
 });
@@ -72,13 +72,14 @@ describe('job creation', () => {
         progress: 0,
         spec,
         status: 'ongoing',
+        errors: []
       },
     });
   });
   it('broadcast advancement status', () => {
-    layerSubjects[0].next([0.1, null]);
-    layerSubjects[1].next([0.9, null]);
-    layerSubjects[2].next([0.2, null]);
+    layerSubjects[0].next([0.1, null, []]);
+    layerSubjects[1].next([0.9, null, []]);
+    layerSubjects[2].next([0.2, null, []]);
     expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
       status: {
         id: expect.any(Number),
@@ -86,13 +87,14 @@ describe('job creation', () => {
         progress: 0.4,
         spec,
         status: 'ongoing',
+        errors: []
       },
     });
   });
   it('prints all layers to a final canvas when finished', () => {
-    layerSubjects[0].next([1, { style: {} }]);
-    layerSubjects[1].next([1, { style: {} }]);
-    layerSubjects[2].next([1, { style: {} }]);
+    layerSubjects[0].next([1, { style: {} }, []]);
+    layerSubjects[1].next([1, { style: {} }, []]);
+    layerSubjects[2].next([1, { style: {} }, []]);
     expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
       status: {
         id: expect.any(Number),
@@ -100,6 +102,7 @@ describe('job creation', () => {
         progress: 1,
         spec,
         status: 'finished',
+        errors: []
       },
     });
   });

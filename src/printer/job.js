@@ -45,10 +45,16 @@ export function createJob(spec) {
     .pipe(
       switchMap((layerStates) => {
         const allReady = layerStates.every(([progress]) => progress === 1);
-
+        let errors = [];
         if (allReady) {
           for (let i = 0; i < layerStates.length; i++) {
             context.drawImage(layerStates[i][1], 0, 0);
+            if (layerStates[i][2] && layerStates[i][2].length > 0) {
+              errors.push({
+                layer: layerStates[i][2][0].tile.key,
+                errors: layerStates[i][2],
+              });
+            }
           }
           if (spec.northArrow) {
             printNorthArrow(context, spec.northArrow);
@@ -56,22 +62,25 @@ export function createJob(spec) {
           if (spec.scaleBar) {
             printScaleBar(context, frameState, spec);
           }
-          return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
+          return canvasToBlob(context.canvas).pipe(
+            map((blob) => [1, blob, errors])
+          );
         } else {
           const rawProgress =
             layerStates.reduce((prev, [progress]) => progress + prev, 0) /
             layerStates.length;
           const progress = parseFloat(rawProgress.toFixed(4)); // only keep 4 digits precision
 
-          return of([progress, null]);
+          return of([progress, null, errors]);
         }
       }),
-      map(([progress, imageBlob]) => {
+      map(([progress, imageBlob, errors]) => {
         return {
           ...job,
           progress,
           imageBlob,
           status: progress === 1 ? 'finished' : 'ongoing',
+          errors: errors,
         };
       }),
       takeWhile((jobStatus) => jobStatus.progress < 1, true)

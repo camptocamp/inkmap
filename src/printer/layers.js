@@ -5,12 +5,13 @@ import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
 import ImageLayer from 'ol/layer/Image';
 import { createCanvasContext2D } from 'ol/dom';
-import { BehaviorSubject, interval } from 'rxjs';
+import { BehaviorSubject, interval, combineLatest } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 import { HTTP_CODES } from '../shared/constants';
 
 const update$ = interval(500);
+let error$ = new BehaviorSubject();
 
 /**
  * @typedef {Array} LayerPrintStatus
@@ -49,6 +50,7 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
   let frameState;
   let layer;
   let renderer;
+  let errors = [];
 
   layer = new TileLayer({
     transition: 0,
@@ -77,15 +79,12 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
         if (debug) {
           createErrorTile(image, tileSize, this.status);
         }
-        tile.setState(TileState.ERROR);
+        error$.next({ tile: tile, error: this.status });
       } else {
         if (data !== undefined) {
           tile.getImage().src = URL.createObjectURL(data);
         }
       }
-    });
-    xhr.addEventListener('error', function () {
-      tile.setState(TileState.ERROR);
     });
     xhr.open('GET', src);
     xhr.send();
@@ -122,14 +121,30 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
   renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
 
-  return update$.pipe(
-    startWith(true),
+  let updateWhile$ = update$.pipe(
+    startWith(0),
     takeWhile(() => {
       frameState.tileQueue.reprioritize();
       frameState.tileQueue.loadMoreTiles(12, 4);
       return frameState.tileQueue.getTilesLoading();
-    }, true),
-    map(() => {
+    }, true)
+  );
+
+  return combineLatest(updateWhile$, error$).pipe(
+    map((status) => {
+      let error = status[1];
+      // abort tile rendering if no pink error tiles are drawn
+      if (error && !debug) {
+        error.tile.setState(TileState.ERROR);
+      }
+      // check if error is not already present from previous interval
+      if (errors[errors.length - 1] !== error) {
+        // check if error comes from same source
+        if (source.key_ === error.tile.key) {
+          errors.push(error);
+        }
+      }
+
       let loadedTilesCount = Object.keys(frameState.tileQueue.queuedElements_)
         .length;
 
@@ -145,9 +160,9 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
           { ...frameState, time: Date.now() },
           context.canvas
         );
-        return [1, context.canvas];
+        return [1, context.canvas, errors];
       } else {
-        return [progress, null];
+        return [progress, null, errors];
       }
     }),
     throttleTime(500, undefined, { leading: true, trailing: true })
