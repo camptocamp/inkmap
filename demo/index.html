@@ -26,6 +26,11 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
+    <link
+      rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.4.1/styles/zenburn.min.css"
+    />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.4.1/highlight.min.js"></script>
   </head>
   <style>
     body {
@@ -41,7 +46,7 @@
     }
   </style>
   <body>
-    <div class="container" style="width: 960px">
+    <div class="container mb-5" style="width: 960px">
       <h1 class="mt-5">
         <strong>inkmap</strong><br />
         <span class="mt-2" style="font-size: 20px"
@@ -49,30 +54,74 @@
         >
       </h1>
 
-      <div class="mt-5 example-01">
+      <div class="mt-5" id="example-01">
         <p>
           Give <strong>inkmap</strong> a JSON spec and it will use it to
           generate a PNG image in the background.
         </p>
-        <div class="row align-items-center">
-          <print-spec class="col-8" editable="true"></print-spec>
-          <custom-button class="col-3">
-            Generate!
-          </custom-button>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-01-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-01-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-01-result show active">
+            <div class="row align-items-center">
+              <print-spec class="col-8" editable="true"></print-spec>
+              <custom-button class="col-3"> Generate! </custom-button>
+            </div>
+          </div>
+          <div class="tab-pane example-01-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example01 %></code></pre>
+          </div>
         </div>
       </div>
 
-      <div class="mt-5 example-02">
+      <div class="mt-5" id="example-02">
         <h2>Showing progress</h2>
         <p>
           <strong>inkmap</strong> also enables finer monitoring by making the
           jobs status observable.
         </p>
-        <div class="row align-items-center">
-          <print-spec class="col-8" editable="false"></print-spec>
-          <custom-button class="col-3">
-            Generate!
-          </custom-button>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-02-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-02-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-02-result show active">
+            <div class="row align-items-center">
+              <print-spec class="col-8" editable="false"></print-spec>
+              <custom-button class="col-3"> Generate! </custom-button>
+            </div>
+          </div>
+          <div class="tab-pane example-02-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example02 %></code></pre>
+          </div>
         </div>
       </div>
     </div>

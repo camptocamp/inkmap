@@ -1,25 +1,28 @@
-import { downloadBlob, getJobStatus, print, queuePrint } from '../../src/main';
-import { getFileName } from '../utils';
+import { downloadBlob, getJobStatus, queuePrint } from 'inkmap';
 
-const root = document.querySelector('.example-02');
-
-/** @type {CustomButton} */
-const btn = root.querySelector('custom-button');
-
-/** @type {PrintSpec} */
-const specElt = root.querySelector('print-spec');
+const root = document.getElementById('example-02');
+const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
+const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
 btn.addEventListener('click', async () => {
+  // display the loading spinner
   btn.working = true;
 
-  const jobId = await queuePrint(specElt.value);
+  // create a job, get a promise that resolves with the job id
+  const jobId = await queuePrint(spec.value);
 
   getJobStatus(jobId).subscribe((status) => {
+    // display the job progress
     btn.progress = status.progress;
 
+    // job is finished
     if (status.progress === 1) {
+      // hide the loading spinner
       btn.working = false;
-      downloadBlob(status.imageBlob, getFileName());
+
+      // download the result
+      const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
+      downloadBlob(status.imageBlob, filename);
     }
   });
 });

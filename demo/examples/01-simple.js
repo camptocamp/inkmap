@@ -1,20 +1,20 @@
-import { downloadBlob, print } from '../../src/main';
-import { getFileName } from '../utils';
+import { downloadBlob, print } from 'inkmap';
 
-const root = document.querySelector('.example-01');
-
-/** @type {CustomButton} */
-const btn = root.querySelector('custom-button');
-
-/** @type {PrintSpec} */
-const specElt = root.querySelector('print-spec');
+const root = document.getElementById('example-01');
+const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
+const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
 btn.addEventListener('click', async () => {
+  // display the loading spinner
   btn.working = true;
 
-  const blob = await print(specElt.value);
+  // create a job, get a promise that resolves when the job is finished
+  const blob = await print(spec.value);
 
+  // hide the loading spinner
   btn.working = false;
 
-  downloadBlob(blob, getFileName());
+  // download the result
+  const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
+  downloadBlob(blob, filename);
 });
