@@ -1,5 +1,22 @@
+const fs = require('fs');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const example01 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/01-simple.js')
+);
+const example02 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/02-progress.js')
+);
+const example03 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/03-cancel.js')
+);
+const example04 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/04-jobs.js')
+);
+const example05 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/05-pdf.js')
+);
 
 module.exports = {
   mode: 'development',
@@ -20,6 +37,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'index.html'),
+      templateParameters: {
+        example01,
+        example02,
+        example03,
+        example04,
+        example05,
+      },
       inject: false,
     }),
   ],
