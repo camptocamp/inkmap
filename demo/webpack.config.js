@@ -65,4 +65,9 @@ module.exports = {
       },
     ],
   },
+  resolve: {
+    alias: {
+      inkmap$: '../../src/main',
+    },
+  },
 };

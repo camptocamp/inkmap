@@ -1,5 +1,4 @@
-import { downloadBlob, print } from '../../src/main';
-import { getFileName } from '../utils';
+import { downloadBlob, print } from 'inkmap';
 
 const root = document.getElementById('example-01');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -16,5 +15,6 @@ btn.addEventListener('click', async () => {
   btn.working = false;
 
   // download the result
-  downloadBlob(blob, getFileName());
+  const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
+  downloadBlob(blob, filename);
 });
