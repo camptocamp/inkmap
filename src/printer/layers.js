@@ -11,7 +11,8 @@ import { isWorker } from '../worker/utils';
 import { HTTP_CODES } from '../shared/constants';
 
 const update$ = interval(500);
-let error$ = new BehaviorSubject();
+let errorTile$ = new BehaviorSubject();
+let errorWMS$ = new BehaviorSubject();
 
 /**
  * @typedef {Array} LayerPrintStatus
@@ -79,7 +80,7 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
         if (debug) {
           createErrorTile(image, tileSize, this.status);
         }
-        error$.next({ tile: tile, error: this.status });
+        errorTile$.next({ origin: tile.key, tile: tile, error: this.status });
       } else {
         if (data !== undefined) {
           tile.getImage().src = URL.createObjectURL(data);
@@ -130,7 +131,7 @@ function createTiledLayer(source, rootFrameState, opacity, debug) {
     }, true)
   );
 
-  return combineLatest(updateWhile$, error$).pipe(
+  return combineLatest(updateWhile$, errorTile$).pipe(
     map((status) => {
       let error = status[1];
       // abort tile rendering if no pink error tiles are drawn
@@ -249,6 +250,7 @@ function createLayerWMS(layerSpec, rootFrameState) {
   let frameState;
   let layer;
   let renderer;
+  let errors = [];
 
   layer = new ImageLayer({
     transition: 0,
@@ -274,6 +276,7 @@ function createLayerWMS(layerSpec, rootFrameState) {
           // create one error tile for entire WMS response
           createErrorTile(image, [width, height], this.status);
         }
+        errorWMS$.next({ origin: layerSpec.url, error: this.status });
       } else {
         if (data !== undefined) {
           image.src = URL.createObjectURL(data);
@@ -312,7 +315,7 @@ function createLayerWMS(layerSpec, rootFrameState) {
     };
   };
 
-  const progress$ = new BehaviorSubject([0, null]);
+  const progress$ = new BehaviorSubject([0, null, []]);
   layer.getSource().once('imageloadend', () => {
     renderer.prepareFrame({ ...frameState, time: Date.now() });
     renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
@@ -321,5 +324,18 @@ function createLayerWMS(layerSpec, rootFrameState) {
   });
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
-  return progress$;
+  return combineLatest(progress$, errorWMS$).pipe(
+    map((status) => {
+      let error = status[1];
+      // check if error comes from same wms
+      if (error && layerSpec.url === error.origin) {
+        errors[0] = error;
+      }
+      if (status[0][0] === 1 || error) {
+        return [1, context.canvas, errors];
+      } else {
+        return [0, null, []];
+      }
+    })
+  );
 }

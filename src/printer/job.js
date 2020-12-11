@@ -51,7 +51,7 @@ export function createJob(spec) {
             context.drawImage(layerStates[i][1], 0, 0);
             if (layerStates[i][2] && layerStates[i][2].length > 0) {
               errors.push({
-                layer: layerStates[i][2][0].tile.key,
+                origin: layerStates[i][2][0].origin,
                 errors: layerStates[i][2],
               });
             }

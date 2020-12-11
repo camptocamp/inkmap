@@ -129,7 +129,7 @@ describe('layer creation', () => {
     });
 
     it('initially emit a status with progress 0', () => {
-      expect(received).toEqual([0, null]);
+      expect(received).toEqual([0, null, []]);
     });
 
     it('when observable completes, canvas is received', () => {
