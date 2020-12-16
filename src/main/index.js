@@ -13,7 +13,7 @@ export { downloadBlob } from './utils';
  * resolution needs to match the zoom level. This means that even if a `minZoom`
  * is configured, the resolutions array will have a length of `maxZoom + 1`
  * @property {Array<string>} matrixIds matrix IDs. The length of this array needs
- * to match the length of the `resolutions` array.
+ * to match the length of the `resolutions` array. By default, it will be [0, 1, 2, ..., resolutions.length-1]
  * @property {number} tileSize Tile size.
  */
 
@@ -42,6 +42,7 @@ export { downloadBlob } from './utils';
  * @property {string} format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`
  * @property {string} layer Layer name as advertised in the WMTS capabilities.
  * @property {string} style Style name as advertised in the WMTS capabilities.
+ * @property {!ProjectionLike} projection Projection.
  * @property {string} matrixSet Matrix set.
  * @property {TileGrid} tileGrid Tile grid.
  */

@@ -88,7 +88,7 @@ for the full list of options. The following table introduces the common options 
 | field | type | description |
 |---|---|---|
 | `requestEncoding` | `string` | Request encoding: `KVP`, `REST`. |
-| `format` | `string` | format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`. |
+| `format` | `string` | Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`. |
 | `layer` | `string` | Layer name as advertised in the WMTS capabilities. |
 | `style` | `number` | Style name as advertised in the WMTS capabilities. |
 | `tileGrid` | `TileGrid` | TileGrid object, see https://openlayers.org/en/latest/apidoc/module-ol_tilegrid_TileGrid-TileGrid.html for options |

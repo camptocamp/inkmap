@@ -9,7 +9,6 @@ import { BehaviorSubject, interval } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-import { get as getProjection } from 'ol/proj';
 import { extentFromProjection } from 'ol/tilegrid';
 
 const update$ = interval(500);
@@ -245,9 +244,8 @@ function createLayerWMS(layerSpec, rootFrameState) {
  * @return {Observable<LayerPrintStatus>}
  */
 function createLayerWMTS(layerSpec, rootFrameState) {
-  let { matrixSet, tileGrid, projection } = layerSpec;
+  let { tileGrid, projection } = layerSpec;
   let { resolutions, extent, matrixIds } = tileGrid;
-  projection = projection || getProjection(matrixSet);
   extent = extent || extentFromProjection(projection);
   matrixIds = matrixIds || [...Array(resolutions.length).keys()];
 
