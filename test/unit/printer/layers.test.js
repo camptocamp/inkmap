@@ -83,25 +83,25 @@ describe('layer creation', () => {
     });
 
     it('initially emit a status with progress 0', () => {
-      expect(received).toEqual([0, null]);
+      expect(received).toEqual([0, null, undefined]);
     });
 
     it('status updates are sent regularly', () => {
       tileQueue._setQueuedCount(12, 12);
-      expect(received).toEqual([0.4, null]);
+      expect(received).toEqual([0.4, null, undefined]);
 
       tileQueue._setQueuedCount(2, 2);
-      expect(received).toEqual([0.9, null]);
+      expect(received).toEqual([0.9, null, undefined]);
     });
 
     it('when no queued elements left but tiles are remaining, do not complete', () => {
       tileQueue._setQueuedCount(0, 2);
-      expect(received).toEqual([0.999, null]);
+      expect(received).toEqual([0.999, null, undefined]);
     });
 
     it('when observable completes, canvas is received', () => {
       tileQueue._setQueuedCount(0, 0);
-      expect(received).toEqual([1, expect.objectContaining({})]);
+      expect(received).toEqual([1, expect.objectContaining({}), undefined]);
       expect(completed).toBeTruthy();
     });
   });
@@ -129,14 +129,14 @@ describe('layer creation', () => {
     });
 
     it('initially emit a status with progress 0', () => {
-      expect(received).toEqual([0, null]);
+      expect(received).toEqual([0, null, undefined]);
     });
 
     it('when observable completes, canvas is received', () => {
       triggerLoadEnd();
       jest.runOnlyPendingTimers();
 
-      expect(received).toEqual([1, expect.objectContaining({})]);
+      expect(received).toEqual([1, expect.objectContaining({}), undefined]);
       expect(completed).toBeTruthy();
     });
   });
@@ -167,25 +167,25 @@ describe('layer creation', () => {
     });
 
     it('initially emit a status with progress 0', () => {
-      expect(received).toEqual([0, null]);
+      expect(received).toEqual([0, null, undefined]);
     });
 
     it('status updates are sent regularly', () => {
       tileQueue._setQueuedCount(12, 12);
-      expect(received).toEqual([0.4, null]);
+      expect(received).toEqual([0.4, null, undefined]);
 
       tileQueue._setQueuedCount(2, 2);
-      expect(received).toEqual([0.9, null]);
+      expect(received).toEqual([0.9, null, undefined]);
     });
 
     it('when no queued elements left but tiles are remaining, do not complete', () => {
       tileQueue._setQueuedCount(0, 2);
-      expect(received).toEqual([0.999, null]);
+      expect(received).toEqual([0.999, null, undefined]);
     });
 
     it('when observable completes, canvas is received', () => {
       tileQueue._setQueuedCount(0, 0);
-      expect(received).toEqual([1, expect.objectContaining({})]);
+      expect(received).toEqual([1, expect.objectContaining({}), undefined]);
       expect(completed).toBeTruthy();
     });
   });

@@ -4,7 +4,6 @@ import { Units } from 'ol/control/ScaleLine';
 
 const DEFAULT_TITLE = 'Scale: {mapScale}';
 
-
 /**
  * Determines scalebar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
@@ -135,7 +134,10 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   const scaleText = `${scaleNumber} ${scaleUnit}`;
   const scaleTextWidth = ctx.measureText(scaleText).width;
 
-  const scaleTitle = (spec.scaleBar.template ? spec.scaleBar.template : DEFAULT_TITLE).replace('{mapScale}', mapScale);
+  const scaleTitle = (spec.scaleBar.template
+    ? spec.scaleBar.template
+    : DEFAULT_TITLE
+  ).replace('{mapScale}', mapScale);
   const scaleTitleWidth = ctx.measureText(scaleTitle).width;
 
   const line1 = 6;

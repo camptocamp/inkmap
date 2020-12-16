@@ -93,7 +93,13 @@ export { downloadBlob } from './utils';
  * @property {number} progress Job progress, from 0 to 1.
  * @property {'pending' | 'ongoing' | 'finished'} status Job status.
  * @property {Blob} [imageBlob] Finished image blob.
+ * @property {Array<SourceLoadError>} [sourceLoadErrors] Array of sources that encountered at least one 'tileloaderror' or 'imageloaderror'.
  */
+
+/**
+ * @typedef {Object} SourceLoadError
+ * @property {ol.source} source ol source that encountered at least one 'tileloaderror' or 'imageloaderror'.
+ * /
 
 /**
  * Starts generating a map image from a print spec.
