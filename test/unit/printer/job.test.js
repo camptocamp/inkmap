@@ -34,7 +34,7 @@ const spec = {
   scale: 40000000,
   projection: 'EPSG:3857',
 };
-
+const errorurl = 'https://my.url/z/y/x.png';
 let layerSubjects;
 
 LayersMock.createLayer = jest.fn(() => {
@@ -91,8 +91,8 @@ describe('job creation', () => {
       },
     });
   });
-  it('prints all layers to a final canvas when finished', () => {
-    layerSubjects[0].next([1, { style: {} }]);
+  it('prints all layers to a final canvas and passes errorurls to status when finished', () => {
+    layerSubjects[0].next([1, { style: {} }, errorurl]);
     layerSubjects[1].next([1, { style: {} }]);
     layerSubjects[2].next([1, { style: {} }]);
     expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
@@ -102,7 +102,9 @@ describe('job creation', () => {
         progress: 1,
         spec,
         status: 'finished',
-        sourceLoadErrors: []
+        sourceLoadErrors: [{
+          url: errorurl
+        }]
       },
     });
   });

@@ -1,5 +1,7 @@
 import { createLayer } from '../../../src/printer/layers';
-import { triggerLoadEnd } from '../../../__mocks__/ol/source/ImageWMS';
+import ImageWMSSourceMock, { triggerLoadEnd, triggerLoadError } from '../../../__mocks__/ol/source/ImageWMS';
+import TileWMSSourceMock, { triggerLoadError as triggerTileWMSError }  from '../../../__mocks__/ol/source/TileWMS';
+import XYZSourceMock, { triggerLoadError as triggerXYZError } from '../../../__mocks__/ol/source/XYZ';
 
 /** @type {FrameState} */
 const frameState = {
@@ -58,6 +60,12 @@ class TileQueueMock {
   }
 }
 
+export class SourceEventMock {
+  constructor(target) {
+    this.target = target;
+  }
+}
+
 jest.useFakeTimers();
 describe('layer creation', () => {
   describe('XYZ layer creation', () => {
@@ -70,6 +78,8 @@ describe('layer creation', () => {
     let received;
     let tileQueue;
     let completed;
+    const xyzSourceMock = new XYZSourceMock(['testurl']);
+    const tileErrorEventMock = new SourceEventMock(xyzSourceMock);
 
     beforeEach(() => {
       tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
@@ -104,6 +114,19 @@ describe('layer creation', () => {
       expect(received).toEqual([1, expect.objectContaining({}), undefined]);
       expect(completed).toBeTruthy();
     });
+
+    it('when error occurs during tile loading, error url is received', () => {
+      triggerXYZError(tileErrorEventMock);
+      tileQueue._setQueuedCount(2, 2);
+      expect(received).toEqual([0.9, null, 'testurl']);
+    });
+
+    it('when observable completes with error, canvas and error url are received', () => {
+      triggerXYZError(tileErrorEventMock);
+      tileQueue._setQueuedCount(0, 0);
+      expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
+      expect(completed).toBeTruthy();
+    });
   });
 
   describe('WMS layer creation', () => {
@@ -117,6 +140,8 @@ describe('layer creation', () => {
     let layer$;
     let received;
     let completed;
+    const imageWMSSourceMock = new ImageWMSSourceMock('testurl');
+    const errorEventMock = new SourceEventMock(imageWMSSourceMock);
 
     beforeEach(() => {
       completed = false;
@@ -139,6 +164,14 @@ describe('layer creation', () => {
       expect(received).toEqual([1, expect.objectContaining({}), undefined]);
       expect(completed).toBeTruthy();
     });
+
+    it('when observable completes with error, canvas and error url are received', () => {
+      triggerLoadError(errorEventMock);
+      jest.runOnlyPendingTimers();
+
+      expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
+      expect(completed).toBeTruthy();
+    });
   });
 
   describe('tiled WMS layer creation', () => {
@@ -154,6 +187,8 @@ describe('layer creation', () => {
     let received;
     let tileQueue;
     let completed;
+    const tileWMSSourceMock = new TileWMSSourceMock(['testurl']);
+    const tileErrorEventMock = new SourceEventMock(tileWMSSourceMock);
 
     beforeEach(() => {
       tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
@@ -186,6 +221,19 @@ describe('layer creation', () => {
     it('when observable completes, canvas is received', () => {
       tileQueue._setQueuedCount(0, 0);
       expect(received).toEqual([1, expect.objectContaining({}), undefined]);
+      expect(completed).toBeTruthy();
+    });
+
+    it('when error occurs during tile loading, error url is received', () => {
+      triggerTileWMSError(tileErrorEventMock);
+      tileQueue._setQueuedCount(2, 2);
+      expect(received).toEqual([0.9, null, 'testurl']);
+    });
+
+    it('when observable completes with error, canvas and error url are received', () => {
+      triggerTileWMSError(tileErrorEventMock);
+      tileQueue._setQueuedCount(0, 0);
+      expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
       expect(completed).toBeTruthy();
     });
   });
