@@ -124,6 +124,42 @@
           </div>
         </div>
       </div>
+
+      <div class="mt-5" id="example-05">
+        <h2>Printing to PDF</h2>
+        <p>
+          <strong>inkmap</strong> jobs give back a blob which can be inserted
+          into a PDF.
+        </p>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-05-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-05-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-05-result show active">
+            <div class="row align-items-center">
+              <print-spec class="col-8" editable="false"></print-spec>
+              <custom-button class="col-3"> Generate! </custom-button>
+            </div>
+          </div>
+          <div class="tab-pane example-05-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example05 %></code></pre>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="app.js"></script>
