@@ -77,8 +77,31 @@ A `Layer` object describes a layer in the printed map.
 |---|---|---|
 | `type` | `string` | Either `XYZ`, `WMTS` or `WMS`. |
 | `url` | `string` | URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`. |
-| `name` | `string` | Layer name (for WMS and WMTS layers). |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
+
+#### `WMS layer` type
+
+Additionnal options for `WMS` layer type.
+
+| field | type | description |
+|---|---|---|
+| `layer` | `string` | Layer name. |
+| `tiled` | `boolean` | Indicates whether the WMS layer should be requested as tiles. Defaults to `false`. |
+
+#### `WMTS layer` type
+
+Additionnal options for `WMTS` layer to define the layer source. See https://openlayers.org/en/latest/apidoc/module-ol_source_WMTS-WMTS.html
+for the full list of options. The following table introduces the common options to use.
+
+| field | type | description |
+|---|---|---|
+| `requestEncoding` | `string` | Request encoding: `KVP`, `REST`. |
+| `format` | `string` | Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`. |
+| `layer` | `string` | Layer name as advertised in the WMTS capabilities. |
+| `style` | `number` | Style name as advertised in the WMTS capabilities. |
+| `projection` | `string` | Projection. |
+| `matrixSet` | `string` | Matrix set. |
+| `tileGrid` | `TileGrid` | TileGrid object, see https://openlayers.org/en/latest/apidoc/module-ol_tilegrid_TileGrid-TileGrid.html for options |
 
 #### `PrintStatus` type
 

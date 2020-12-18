@@ -1,4 +1,5 @@
 import TileLayer from 'ol/layer/Tile';
+import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
@@ -7,6 +8,8 @@ import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import { extentFromProjection } from 'ol/tilegrid';
 
 const update$ = interval(500);
 
@@ -30,6 +33,8 @@ export function createLayer(layerSpec, rootFrameState) {
       return createLayerXYZ(layerSpec, rootFrameState);
     case 'WMS':
       return createLayerWMS(layerSpec, rootFrameState);
+    case 'WMTS':
+      return createLayerWMTS(layerSpec, rootFrameState);
   }
 }
 
@@ -231,4 +236,34 @@ function createLayerWMS(layerSpec, rootFrameState) {
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
   return progress$;
+}
+
+/**
+ * @param {WmtsLayer} layerSpec
+ * @param {FrameState} rootFrameState
+ * @return {Observable<LayerPrintStatus>}
+ */
+function createLayerWMTS(layerSpec, rootFrameState) {
+  let { tileGrid, projection } = layerSpec;
+  let { resolutions, extent, matrixIds } = tileGrid;
+  extent = extent || extentFromProjection(projection);
+  matrixIds = matrixIds || [...Array(resolutions.length).keys()];
+
+  tileGrid = new WMTSTileGrid({
+    ...tileGrid,
+    extent,
+    matrixIds,
+  });
+
+  return createTiledLayer(
+    new WMTS({
+      ...layerSpec,
+      tileGrid,
+      projection,
+      transition: 0,
+      crossOrigin: 'anonymous',
+    }),
+    rootFrameState,
+    layerSpec.opacity
+  );
 }
