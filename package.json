@@ -40,6 +40,7 @@
     "eslint-config-prettier": "^6.15.0",
     "html-webpack-plugin": "^4.5.0",
     "jest": "^26.6.1",
+    "jspdf": "^2.2.0",
     "pixelmatch": "^5.2.1",
     "prettier": "^2.1.2",
     "puppeteer": "^5.4.1",
