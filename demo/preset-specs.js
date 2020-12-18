@@ -81,10 +81,52 @@ export const WmtsSpec = {
   ],
 };
 
+const DownloadedProjection = {
+  layers: [
+    {
+      type: 'WMS',
+      url: 'https://wxs.ign.fr/jhyvi0fgmnuxvfv0zjzorvdn/geoportail/r/wms',
+      layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
+      tiled: false,
+    },
+  ],
+  size: [600, 400],
+  center: [4, 47],
+  dpi: 200,
+  scale: 10000000,
+  projection: 'EPSG:2154',
+};
+
+const CustomProjection = {
+  layers: [
+    {
+      type: 'WMS',
+      url: 'https://wxs.ign.fr/jhyvi0fgmnuxvfv0zjzorvdn/geoportail/r/wms',
+      layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
+      tiled: true,
+    },
+  ],
+  size: [600, 400],
+  center: [4, 47],
+  dpi: 200,
+  scale: 10000000,
+  projection: 'EPSG:3947',
+  projectionDefinitions: [
+    {
+      name: 'EPSG:3947',
+      bbox: [48.0, -4.77, 46.0, 7.63], // [maxlat, minlon, minlat, maxlon]
+      proj4:
+        '+proj=lcc +lat_1=46.25 +lat_2=47.75 +lat_0=47 +lon_0=3 +x_0=1700000 +y_0=6200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+    },
+  ],
+};
+
 const PresetSpecs = {
   'OpenStreetMap layer': OsmSpec,
   'Tiled WMS layer': TiledWmsSpec,
   'WMTS layer': WmtsSpec,
+  'Downloaded projection': DownloadedProjection,
+  'Custom projection': CustomProjection,
 };
 
 export default PresetSpecs;

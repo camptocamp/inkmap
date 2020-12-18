@@ -1,9 +1,10 @@
-import { getJobStatusObservable, newJob$ } from './jobs';
 import { map, switchMap, take, takeWhile } from 'rxjs/operators';
-import { MESSAGE_JOB_REQUEST } from '../shared/constants';
-import { messageToPrinter } from './exchange';
 
 import '../printer';
+import { MESSAGE_JOB_REQUEST } from '../shared/constants';
+import { registerWithExtent } from '../shared/projections';
+import { messageToPrinter } from './exchange';
+import { getJobStatusObservable, newJob$ } from './jobs';
 
 export { downloadBlob } from './utils';
 
@@ -52,6 +53,13 @@ export { downloadBlob } from './utils';
  */
 
 /**
+ * @typedef {Object} ProjectionDefinition
+ * @property {string} name Projection name written as `prefix:code`.
+ * @property {string} proj4 Proj4 definition.
+ * @property {[number, number, number, number]} bbox Projection validity extent.
+ */
+
+/**
  * @typedef {Object} PrintSpec
  * @property {Layer[]} layers Array of `Layer` objects that will be rendered in the map; last layers will be rendered on top of first layers.
  * @property {[number, number]|[number, number, string]} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
@@ -61,6 +69,7 @@ export { downloadBlob } from './utils';
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
  * @property {boolean | string} northArrow North arrow position.
+ * @property {ProjectionDefinition} projectionDefinition Projection definition to be newly registered.
  */
 
 /**
@@ -137,4 +146,12 @@ export function getJobStatus(jobId) {
 
 export function cancelJob() {
   console.warn('Not implemented yet');
+}
+
+/**
+ * Register a new projection from a projection definition.
+ * @param {ProjectionDefinition} definition
+ */
+export function registerProjection(definition) {
+  registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
