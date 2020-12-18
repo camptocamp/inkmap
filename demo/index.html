@@ -160,6 +160,46 @@
           </div>
         </div>
       </div>
+
+      <div class="mt-5" id="example-06">
+        <h2>Registering new projections</h2>
+        <p>
+          <strong>inkmap</strong> uses proj4 and allows for new projections
+          registration.
+        </p>
+        <p>
+          Here's an example registering 'EPSG:2154', so it should not be
+          downloaded with the 'Downloaded projection' predefined spec.
+        </p>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-06-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-06-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-06-result show active">
+            <div class="row align-items-center">
+              <print-spec class="col-8" editable="false"></print-spec>
+              <custom-button class="col-3"> Generate! </custom-button>
+            </div>
+          </div>
+          <div class="tab-pane example-06-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example06 %></code></pre>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="app.js"></script>

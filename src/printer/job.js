@@ -1,17 +1,22 @@
+import { createCanvasContext2D } from 'ol/dom';
+import { getForViewAndSize } from 'ol/extent';
+import { fromLonLat, get as getProjection } from 'ol/proj';
 import TileQueue, {
   getTilePriority as tilePriorityFunction,
 } from 'ol/TileQueue';
-import { fromLonLat, get as getProj } from 'ol/proj';
-import { getForViewAndSize } from 'ol/extent';
-import { createLayer } from './layers';
-import { createCanvasContext2D } from 'ol/dom';
 import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
-import { canvasToBlob } from './utils';
+
+import { CM_PER_INCH, MESSAGE_JOB_STATUS } from '../shared/constants';
+import {
+  registerWithExtent,
+  search as searchProjection,
+} from '../shared/projections';
 import { messageToMain } from './exchange';
-import { MESSAGE_JOB_STATUS, CM_PER_INCH } from '../shared/constants';
+import { createLayer } from './layers';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
+import { canvasToBlob } from './utils';
 
 let counter = 0;
 
@@ -21,9 +26,10 @@ let counter = 0;
  * until the job is over.
  * @param {PrintSpec} spec
  */
-export function createJob(spec) {
+export async function createJob(spec) {
+  registerProjections(spec.projectionDefinitions);
   const sizeInPixel = calculateSizeInPixel(spec);
-  const frameState = getFrameState(spec, sizeInPixel);
+  const frameState = await getFrameState(spec, sizeInPixel);
 
   /**
    * @type {PrintStatus}
@@ -85,8 +91,16 @@ export function createJob(spec) {
  * @param {Array} sizeInPixel
  * @return {FrameState}
  */
-function getFrameState(spec, sizeInPixel) {
-  const projection = getProj(spec.projection);
+async function getFrameState(spec, sizeInPixel) {
+  let projection = getProjection(spec.projection);
+
+  if (!projection && spec.projection.startsWith('EPSG:')) {
+    const splitted = spec.projection.split(':');
+    const { name, proj4def, bbox } = await searchProjection(splitted[1]);
+    registerWithExtent(name, proj4def, bbox);
+    projection = getProjection(spec.projection);
+  }
+
   const inchPerMeter = 39.3701;
   const resolution =
     spec.scale / spec.dpi / inchPerMeter / projection.getMetersPerUnit();
@@ -135,6 +149,14 @@ function getFrameState(spec, sizeInPixel) {
   );
 
   return frameState;
+}
+
+function registerProjections(definitions) {
+  if (definitions) {
+    for (const projection of definitions) {
+      registerWithExtent(projection.name, projection.proj4, projection.bbox);
+    }
+  }
 }
 
 /**

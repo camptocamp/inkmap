@@ -54,6 +54,10 @@ Takes in a job id and returns the same observable as the `print()` function.
 
 Takes in a job id and completes once the job is cancelled without emitting any value.
 
+#### `registerProjection(definition: ProjectionDefinition): void`
+
+Takes in a projection definition and registers it with proj4.
+
 #### `PrintSpec` type
 
 A `PrintSpec` object describes the content and aspect of the map to be printed.
@@ -66,8 +70,9 @@ A `PrintSpec` object describes the content and aspect of the map to be printed.
 | `dpi` | `number` | Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print. |
 | `scale` | `number` | Scale denominator. |
 | `scaleBar` | `boolean | ScaleBarSpec` | Indicates whether scalebar should be printed (`true`). Also allows to pass options object: `{"position": "bottom-left", "units": "metric" }` (default values). Possible values are: <ul><li>`position`: `"bottom-left" | "bottom-right"`</li><li>`units`: `"degrees" | "imperial" | "metric" | "nautical" | "us"` (same as `ol.control.ScaleLine`)</li></ul> |
-| `projection` | `string` | EPSG projection code. |
 | `northArrow` | `boolean | string` | North arrow position; either `'top-left'`, `'bottom-left'`, `'bottom-right'` or `'top-right'`; `true` defaults to `'top-right'`; absent or `false` means not to print the north arrow.
+| `projection` | `string` | Projection name. If starting with `EPSG:`, and other than `EPSG:3857` or `EPSG:4326`, definition will be downloaded on [https://epsg.io/]. |
+| `projectionDefinitions` | `[projectionDefinition]` | Optionnal. Registers new projections from the definitions. |
 
 #### `Layer` type
 
@@ -102,6 +107,16 @@ for the full list of options. The following table introduces the common options 
 | `projection` | `string` | Projection. |
 | `matrixSet` | `string` | Matrix set. |
 | `tileGrid` | `TileGrid` | TileGrid object, see https://openlayers.org/en/latest/apidoc/module-ol_tilegrid_TileGrid-TileGrid.html for options |
+
+#### `projectionDefinition` type
+
+A `projectionDefinition` object describes a projection to be registered in proj4.
+
+| field | type | description |
+|---|---|---|
+| `name` | `string` | Name of the projection, written as `prefix`:`code`. |
+| `bbox` | `[number, number, number, number]` | Extent of the projection, written as `[maxlat, minlon, minlat, maxlon]`. |
+| `proj4` | `string` | Proj4 definition string. |
 
 #### `PrintStatus` type
 
