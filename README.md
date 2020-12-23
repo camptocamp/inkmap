@@ -7,7 +7,18 @@
 **inkmap** can handle long-running jobs (e.g. A0 format in 300 dpi) and provides an API for following a job progress.
 It uses a service worker in the background provided the user browser supports [OffscreenCanvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), and falls back (almost) seamlessly to the main thread if not.
 
+
+## Demo
+[Demo](https://camptocamp.github.io/inkmap/master/)
+
+## Disclaimer
+**inkmap is still in development mode.**
+
+**inkmap is not published on npm yet.**
+
 ## Usage
+
+**(Not available yet)**
 
 To include the library in your project:
 ```bash
