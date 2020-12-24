@@ -1,4 +1,6 @@
 import './elements/custom-button';
+import './elements/custom-progress';
+import './elements/custom-progresses';
 import './elements/print-spec';
 import './examples/01-simple';
 import './examples/02-progress';

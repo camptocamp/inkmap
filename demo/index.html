@@ -93,7 +93,7 @@
         <h2>Showing progress</h2>
         <p>
           <strong>inkmap</strong> also enables finer monitoring by making the
-          jobs status observable.
+          job status observable.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -114,13 +114,55 @@
           <div class="tab-pane example-02-result show active">
             <div class="row align-items-center">
               <print-spec class="col-8" editable="false"></print-spec>
-              <custom-button class="col-3"> Generate! </custom-button>
+              <div class="col-3">
+                <custom-button> Generate! </custom-button>
+                <custom-progress></custom-progress>
+              </div>
             </div>
           </div>
           <div class="tab-pane example-02-source">
             <pre
               class="rounded small"
             ><code class="js"><%- example02 %></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5" id="example-04">
+        <h2>Monitoring multiple jobs</h2>
+        <p>
+          Multiple jobs can be monitored at once through a long lived
+          observable.
+        </p>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-04-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-04-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-04-result show active">
+            <div class="row align-items-center">
+              <print-spec class="col-8" editable="false"></print-spec>
+              <div class="col-3">
+                <custom-button> Add to the queue </custom-button>
+                <custom-progresses></custom-progresses>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane example-04-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example04 %></code></pre>
           </div>
         </div>
       </div>
