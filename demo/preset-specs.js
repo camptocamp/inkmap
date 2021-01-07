@@ -121,12 +121,47 @@ const CustomProjection = {
   ],
 };
 
+export const ErrorSpec = {
+  layers: [
+    {
+      type: 'WMS',
+      url: 'https://ows.mundialis.de/services/service',
+      layer: 'TOPO-OSM-WMS',
+      tiled: true,
+    },
+    {
+      type: 'WMS',
+      url: 'https://wrong.tiled.wms.url/services/service',
+      layer: 'TOPO-OSM-WMS',
+      tiled: true,
+    },
+    {
+      type: 'WMS',
+      url: 'https://wrong.wms.url/services/service',
+      layer: 'TOPO-OSM-WMS',
+      tiled: false,
+    },
+    {
+      type: 'XYZ',
+      url: 'https://wrong.xyz.url/osm-tiles/{z}/{x}/{y}.png',
+    },
+  ],
+  size: [256, 256],
+  center: [12, 48],
+  dpi: 50,
+  scale: 40000000,
+  scaleBar: { position: 'bottom-right', units: 'metric' },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+};
+
 const PresetSpecs = {
   'OpenStreetMap layer': OsmSpec,
   'Tiled WMS layer': TiledWmsSpec,
   'WMTS layer': WmtsSpec,
   'Downloaded projection': DownloadedProjection,
   'Custom projection': CustomProjection,
+  'Error layers': ErrorSpec,
 };
 
 export default PresetSpecs;

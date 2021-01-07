@@ -77,7 +77,11 @@ class PrintSpec extends HTMLElement {
       this.currentSpecName_ = null;
     });
 
-    this.selectSpec(specNames[0]);
+    if (this.getAttribute('select')) {
+      this.selectSpec(this.getAttribute('select'));
+    } else {
+      this.selectSpec(specNames[0]);
+    }
 
     this.refreshDOM();
   }

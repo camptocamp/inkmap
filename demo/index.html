@@ -200,6 +200,47 @@
           </div>
         </div>
       </div>
+
+      <div class="mt-5" id="example-07">
+        <h2>Error handling</h2>
+        <p>
+          <strong>inkmap</strong> status observable includes a list of error
+          objects with urls that encountered errors.
+        </p>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-07-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-07-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-07-result show active">
+            <div class="row align-items-center">
+              <print-spec
+                class="col-8"
+                editable="false"
+                select="Error layers"
+              ></print-spec>
+              <custom-button class="col-3"> Generate! </custom-button>
+            </div>
+          </div>
+          <div class="tab-pane example-07-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example07 %></code></pre>
+          </div>
+        </div>
+        <p id="errors" class="text-danger"></p>
+      </div>
     </div>
 
     <script src="app.js"></script>
