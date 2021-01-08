@@ -310,6 +310,8 @@ function createLayerWFS(layerSpec, rootFrameState) {
       xhr.open('GET', url);
       let onError = function () {
         vectorSource.removeLoadedExtent(extent);
+        progress$.next([1, context.canvas, layerSpec.url]);
+        progress$.complete();
       };
       xhr.onerror = onError;
       xhr.onload = function () {
