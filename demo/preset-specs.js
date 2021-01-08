@@ -24,9 +24,9 @@ export const OsmSpec = {
     },
   ],
   size: [800, 600],
-  center: [12, 48],
+  center: [-81, 43],
   dpi: 200,
-  scale: 40000000,
+  scale: 4000000,
   scaleBar: { position: 'bottom-right', units: 'metric' },
   projection: 'EPSG:3857',
   northArrow: 'top-right',
@@ -79,6 +79,27 @@ export const WmtsSpec = {
       opacity: 1,
     },
   ],
+};
+
+export const WfsSpec = {
+  layers: [
+    {
+      type: 'XYZ',
+      url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    },
+    {
+      type: 'WFS',
+      url: 'https://ahocevar.com/geoserver/wfs',
+      layer: 'osm:water_areas',
+    },
+  ],
+  size: [800, 600],
+  center: [-81, 43],
+  dpi: 200,
+  scale: 4000000,
+  scaleBar: { position: 'bottom-right', units: 'metric' },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
 };
 
 const DownloadedProjection = {
@@ -159,6 +180,7 @@ const PresetSpecs = {
   'OpenStreetMap layer': OsmSpec,
   'Tiled WMS layer': TiledWmsSpec,
   'WMTS layer': WmtsSpec,
+  'WFS layer': WfsSpec,
   'Downloaded projection': DownloadedProjection,
   'Custom projection': CustomProjection,
   'Error layers': ErrorSpec,
