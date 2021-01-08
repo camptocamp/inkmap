@@ -49,7 +49,15 @@ export { downloadBlob } from './utils';
  */
 
 /**
- * @typedef {WmsLayer|XyzLayer|WmtsLayer} Layer
+ * @typedef {Object} WfsLayer
+ * @property {'WFS'} type
+ * @property {string} url URL for the service.
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ * @property {string} layer Layer name as advertised in the WFS capabilities.
+ */
+
+/**
+ * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer} Layer
  */
 
 /**

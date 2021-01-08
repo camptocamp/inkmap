@@ -91,7 +91,7 @@ A `Layer` object describes a layer in the printed map.
 
 | field | type | description |
 |---|---|---|
-| `type` | `string` | Either `XYZ`, `WMTS` or `WMS`. |
+| `type` | `string` | Either `XYZ`, `WMTS`, `WMS` or `WFS`. |
 | `url` | `string` | URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`. |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
 
@@ -118,6 +118,14 @@ for the full list of options. The following table introduces the common options 
 | `projection` | `string` | Projection. |
 | `matrixSet` | `string` | Matrix set. |
 | `tileGrid` | `TileGrid` | TileGrid object, see https://openlayers.org/en/latest/apidoc/module-ol_tilegrid_TileGrid-TileGrid.html for options |
+
+#### `WFS layer` type
+
+Additionnal options for `WFS` layer type.
+
+| field | type | description |
+|---|---|---|
+| `layer` | `string` | Layer name. |
 
 #### `projectionDefinition` type
 
