@@ -378,7 +378,7 @@ function createLayerWFS(layerSpec, rootFrameState) {
         maxZoom: null,
         minResolution: 0,
         minZoom: null,
-        opacity: layerSpec.opacity !== undefined ? layerSpec.opacity : 1,
+        opacity: 1,
         sourceState: 'ready',
         visible: true,
         zIndex: 0,
