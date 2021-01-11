@@ -53,7 +53,7 @@ export { downloadBlob } from './utils';
  * @property {'WFS'} type
  * @property {string} url URL for the service.
  * @property {string} layer Layer name as advertised in the WFS capabilities.
- * @property {string} version Version of WFS protocol used: `1.0.0`, `1.1.0` or `2.0.0`.
+ * @property {string} version Version of WFS protocol used: `1.0.0`, `1.1.0` (default) or `2.0.0`.
 |* @property {string} format Format used when querying WFS, `gml` or `geojson` (default). inkmap determines the GML parser based on the WFS version used.
  */
 

@@ -324,7 +324,7 @@ function createLayerWFS(layerSpec, rootFrameState) {
       let params = {
         service: 'WFS',
         request: 'GetFeature',
-        version: layerSpec.version,
+        version: layerSpec.version ? layerSpec.version : '1.1.0',
         typename: layerSpec.layer,
         srsName: proj,
         bbox: extent.join(','),
