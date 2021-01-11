@@ -238,6 +238,32 @@ describe('layer creation', () => {
     });
   });
 
+  describe('WFS layer creation', () => {
+    /** @type {Layer} */
+    const spec = {
+      type: 'WFS',
+      url: 'https://my.url/wfs',
+    };
+    let layer$;
+    let received;
+    let completed;
+
+    beforeEach(() => {
+      completed = false;
+      layer$ = createLayer(spec, { ...frameState });
+      layer$.subscribe(
+        (status) => (received = status),
+        null,
+        () => (completed = true)
+      );
+    });
+
+    it('initially emit a status with progress 0', () => {
+      expect(received).toEqual([0, null]);
+    });
+
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
   });
