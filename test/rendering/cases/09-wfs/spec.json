@@ -1,0 +1,14 @@
+{
+  "layers": [
+    {
+      "type": "WFS",
+      "url": "https://ahocevar.com/geoserver/wfs",
+      "layer": "osm:water_areas"
+    }
+  ],
+  "size": [800, 600],
+  "center": [-80, 43],
+  "dpi": 200,
+  "scale": 4000000,
+  "projection": "EPSG:3857"
+}
