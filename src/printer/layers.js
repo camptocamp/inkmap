@@ -3,6 +3,10 @@ import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
+import WFS from 'ol/format/WFS';
+import GML2 from 'ol/format/GML2';
+import GML3 from 'ol/format/GML3';
+import GML32 from 'ol/format/GML32';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
 import ImageLayer from 'ol/layer/Image';
@@ -296,17 +300,42 @@ function createLayerWFS(layerSpec, rootFrameState) {
   context.canvas.style = {};
   let frameState;
   let renderer;
+  let format;
+  let gmlFormats = {
+    '1.0.0': new GML2(),
+    '1.1.0': new GML3(),
+    '2.0.0': new GML32(),
+  };
+
+  if (layerSpec.format === 'gml') {
+    format = new WFS({
+      version: layerSpec.version,
+      gmlFormat: gmlFormats[layerSpec.version],
+    });
+  } else {
+    format = new GeoJSON();
+  }
 
   let vectorSource = new VectorSource({
-    format: new GeoJSON(),
+    format: format,
     loader: function (extent, resolution, projection) {
       let proj = projection.getCode();
-      let url = `${
-        layerSpec.url
-      }?service=WFS&version=1.1.0&request=GetFeature&typename= 
-                ${layerSpec.layer}&outputFormat=application/json&srsname= 
-                ${proj}&bbox=${extent.join(',')},${proj}`;
       let xhr = new XMLHttpRequest();
+      let params = {
+        service: 'WFS',
+        request: 'GetFeature',
+        version: layerSpec.version,
+        typename: layerSpec.layer,
+        srsName: proj,
+        bbox: extent.join(','),
+      };
+      if (layerSpec.format !== 'gml') {
+        params['outputFormat'] = 'application/json';
+      }
+      let urlParams = Object.entries(params)
+        .map((e) => e.join('='))
+        .join('&');
+      let url = layerSpec.url + '?' + urlParams;
       xhr.open('GET', url);
       let onError = function () {
         vectorSource.removeLoadedExtent(extent);
