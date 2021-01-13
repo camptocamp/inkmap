@@ -2,7 +2,7 @@
   "layers": [
     {
       "type":"WMTS",
-      "url":"https://wxs.ign.fr/pratique/geoportail/wmts",
+      "url":"/wmts1.jpeg",
       "layer":"GEOGRAPHICALGRIDSYSTEMS.MAPS",
       "matrixSet":"PM",
       "projection": "EPSG:3857",
@@ -40,7 +40,7 @@
   ],
   "size": [256, 256],
   "center": [2.296572, 48.694077],
-  "dpi": 300,
+  "dpi": 50,
   "scale": 40000,
   "projection": "EPSG:3857"
 }
