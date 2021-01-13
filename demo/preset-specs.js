@@ -91,7 +91,7 @@ export const WfsSpec = {
       type: 'WFS',
       url: 'https://ahocevar.com/geoserver/wfs',
       layer: 'osm:water_areas',
-      format: 'gml',
+      format: 'geojson',
       version: '1.1.0',
     },
   ],

@@ -262,13 +262,13 @@ function createLayerWFS(layerSpec, rootFrameState) {
     '2.0.0': new GML32(),
   };
 
-  if (layerSpec.format === 'gml') {
+  if (layerSpec.format === 'geojson') {
+    format = new GeoJSON();
+  } else {
     format = new WFS({
       version: layerSpec.version,
       gmlFormat: gmlFormats[layerSpec.version],
     });
-  } else {
-    format = new GeoJSON();
   }
 
   let vectorSource = new VectorSource({
@@ -288,7 +288,7 @@ function createLayerWFS(layerSpec, rootFrameState) {
       urlObj.searchParams.set(typeNameLabel, layerSpec.layer);
       urlObj.searchParams.set('srsName', projCode);
       urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
-      if (layerSpec.format !== 'gml') {
+      if (layerSpec.format === 'geojson') {
         urlObj.searchParams.set('outputFormat', 'application/json');
       }
       xhr.open('GET', urlObj.href);

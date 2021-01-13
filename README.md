@@ -127,7 +127,7 @@ Additionnal options for `WFS` layer type.
 |---|---|---|
 | `layer` | `string` | Layer name. |
 | `version` | `string` | Version of WFS protocol used: `1.0.0`, `1.1.0` (default) or `2.0.0`. |
-| `format` | `string` | Format used when querying WFS, `gml` or `geojson` (default). inkmap determines the GML parser based on the WFS version used. |
+| `format` | `string` | Format used when querying WFS, `gml` (default) or `geojson`. inkmap determines the GML parser based on the WFS version used. |
 
 #### `projectionDefinition` type
 
