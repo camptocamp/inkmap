@@ -52,6 +52,7 @@ function createTiledLayer(source, rootFrameState, opacity) {
   let frameState;
   let layer;
   let renderer;
+  let tileLoadErrorUrl;
 
   layer = new TileLayer({
     transition: 0,
@@ -72,6 +73,10 @@ function createTiledLayer(source, rootFrameState, opacity) {
     }
 
     image.src = src;
+  });
+
+  layer.getSource().on('tileloaderror', function (e) {
+    tileLoadErrorUrl = e.target.getUrls()[0];
   });
 
   frameState = {
@@ -128,9 +133,9 @@ function createTiledLayer(source, rootFrameState, opacity) {
           { ...frameState, time: Date.now() },
           context.canvas
         );
-        return [1, context.canvas];
+        return [1, context.canvas, tileLoadErrorUrl];
       } else {
-        return [progress, null];
+        return [progress, null, tileLoadErrorUrl];
       }
     }),
     throttleTime(500, undefined, { leading: true, trailing: true })
@@ -226,11 +231,16 @@ function createLayerWMS(layerSpec, rootFrameState) {
     };
   };
 
-  const progress$ = new BehaviorSubject([0, null]);
+  const progress$ = new BehaviorSubject([0, null, undefined]);
+  layer.getSource().once('imageloaderror', function (e) {
+    const imageLoadErrorUrl = e.target.getUrl();
+    progress$.next([1, context.canvas, imageLoadErrorUrl]);
+    progress$.complete();
+  });
   layer.getSource().once('imageloadend', () => {
     renderer.prepareFrame({ ...frameState, time: Date.now() });
     renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
-    progress$.next([1, context.canvas]);
+    progress$.next([1, context.canvas, undefined]);
     progress$.complete();
   });
   renderer.prepareFrame({ ...frameState, time: Date.now() });

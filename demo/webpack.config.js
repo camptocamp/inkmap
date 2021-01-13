@@ -20,6 +20,9 @@ const example05 = fs.readFileSync(
 const example06 = fs.readFileSync(
   path.resolve(__dirname, 'examples/06-projection.js')
 );
+const example07 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/07-errors.js')
+);
 
 module.exports = {
   mode: 'development',
@@ -47,6 +50,7 @@ module.exports = {
         example04,
         example05,
         example06,
+        example07,
       },
       inject: false,
     }),

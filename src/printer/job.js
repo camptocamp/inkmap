@@ -39,6 +39,7 @@ export async function createJob(spec) {
     spec,
     status: 'pending',
     progress: 0,
+    sourceLoadErrors: [],
   };
 
   const context = createCanvasContext2D(sizeInPixel[0], sizeInPixel[1]);
@@ -51,10 +52,18 @@ export async function createJob(spec) {
     .pipe(
       switchMap((layerStates) => {
         const allReady = layerStates.every(([progress]) => progress === 1);
+        let sourceLoadErrors = [];
 
         if (allReady) {
           for (let i = 0; i < layerStates.length; i++) {
-            context.drawImage(layerStates[i][1], 0, 0);
+            const canvasImage = layerStates[i][1];
+            const errorUrl = layerStates[i][2];
+            context.drawImage(canvasImage, 0, 0);
+            if (errorUrl) {
+              sourceLoadErrors.push({
+                url: errorUrl,
+              });
+            }
           }
           if (spec.northArrow) {
             printNorthArrow(context, spec.northArrow);
@@ -62,22 +71,25 @@ export async function createJob(spec) {
           if (spec.scaleBar) {
             printScaleBar(context, frameState, spec);
           }
-          return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
+          return canvasToBlob(context.canvas).pipe(
+            map((blob) => [1, blob, sourceLoadErrors])
+          );
         } else {
           const rawProgress =
             layerStates.reduce((prev, [progress]) => progress + prev, 0) /
             layerStates.length;
           const progress = parseFloat(rawProgress.toFixed(4)); // only keep 4 digits precision
 
-          return of([progress, null]);
+          return of([progress, null, sourceLoadErrors]);
         }
       }),
-      map(([progress, imageBlob]) => {
+      map(([progress, imageBlob, sourceLoadErrors]) => {
         return {
           ...job,
           progress,
           imageBlob,
           status: progress === 1 ? 'finished' : 'ongoing',
+          sourceLoadErrors,
         };
       }),
       takeWhile((jobStatus) => jobStatus.progress < 1, true)
