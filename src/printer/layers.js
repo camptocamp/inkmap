@@ -18,6 +18,7 @@ import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
+import { setFrameState, useContainer } from './utils';
 
 const update$ = interval(500);
 
@@ -89,33 +90,10 @@ function createTiledLayer(source, rootFrameState, opacity) {
     tileLoadErrorUrl = e.target.getUrls()[0];
   });
 
-  frameState = {
-    ...rootFrameState,
-    layerStatesArray: [
-      {
-        layer,
-        managed: true,
-        maxResolution: null,
-        maxZoom: null,
-        minResolution: 0,
-        minZoom: null,
-        opacity: opacity !== undefined ? opacity : 1,
-        sourceState: 'ready',
-        visible: true,
-        zIndex: 0,
-      },
-    ],
-  };
+  frameState = setFrameState(rootFrameState, layer, opacity);
 
   renderer = layer.getRenderer();
-  renderer.useContainer = function () {
-    this.containerReused = false;
-    this.canvas = context.canvas;
-    this.context = context;
-    this.container = {
-      firstElementChild: context.canvas,
-    };
-  };
+  renderer.useContainer = useContainer.bind(renderer, context);
 
   renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
@@ -213,33 +191,10 @@ function createLayerWMS(layerSpec, rootFrameState) {
     image.src = src;
   });
 
-  frameState = {
-    ...rootFrameState,
-    layerStatesArray: [
-      {
-        layer,
-        managed: true,
-        maxResolution: null,
-        maxZoom: null,
-        minResolution: 0,
-        minZoom: null,
-        opacity: layerSpec.opacity !== undefined ? layerSpec.opacity : 1,
-        sourceState: 'ready',
-        visible: true,
-        zIndex: 0,
-      },
-    ],
-  };
+  frameState = setFrameState(rootFrameState, layer, layerSpec.opacity);
 
   renderer = layer.getRenderer();
-  renderer.useContainer = function () {
-    this.containerReused = false;
-    this.canvas = context.canvas;
-    this.context = context;
-    this.container = {
-      firstElementChild: context.canvas,
-    };
-  };
+  renderer.useContainer = useContainer.bind(renderer, context);
 
   const progress$ = new BehaviorSubject([0, null, undefined]);
   layer.getSource().once('imageloaderror', function (e) {
@@ -368,27 +323,9 @@ function createLayerWFS(layerSpec, rootFrameState) {
     source: vectorSource,
   });
 
-  frameState = {
-    ...rootFrameState,
-    layerStatesArray: [
-      {
-        layer,
-      },
-    ],
-  };
-
+  frameState = setFrameState(rootFrameState, layer);
   renderer = layer.getRenderer();
-  renderer.useContainer = function () {
-    this.containerReused = false;
-    this.canvas = context.canvas;
-    this.context = context;
-    this.container = {
-      firstElementChild: context.canvas,
-      style: {
-        opacity: 1,
-      },
-    };
-  };
+  renderer.useContainer = useContainer.bind(renderer, context);
 
   const progress$ = new BehaviorSubject([0, null]);
   renderer.prepareFrame({ ...frameState, time: Date.now() });
