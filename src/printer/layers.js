@@ -319,24 +319,24 @@ function createLayerWFS(layerSpec, rootFrameState) {
   let vectorSource = new VectorSource({
     format: format,
     loader: function (extent, resolution, projection) {
-      let proj = projection.getCode();
-      let xhr = new XMLHttpRequest();
-      let params = {
-        service: 'WFS',
-        request: 'GetFeature',
-        version: layerSpec.version ? layerSpec.version : '1.1.0',
-        typename: layerSpec.layer,
-        srsName: proj,
-        bbox: extent.join(','),
-      };
+      const projCode = projection.getCode();
+      const xhr = new XMLHttpRequest();
+      const urlObj = new URL(layerSpec.url);
+      const typeNameLabel =
+        layerSpec.version === '2.0.0' ? 'typenames' : 'typename';
+      urlObj.searchParams.set('SERVICE', 'WFS');
+      urlObj.searchParams.set(
+        'version',
+        layerSpec.version ? layerSpec.version : '1.1.0'
+      );
+      urlObj.searchParams.set('request', 'GetFeature');
+      urlObj.searchParams.set(typeNameLabel, layerSpec.layer);
+      urlObj.searchParams.set('srsName', projCode);
+      urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
       if (layerSpec.format !== 'gml') {
-        params['outputFormat'] = 'application/json';
+        urlObj.searchParams.set('outputFormat', 'application/json');
       }
-      let urlParams = Object.entries(params)
-        .map((e) => e.join('='))
-        .join('&');
-      let url = layerSpec.url + '?' + urlParams;
-      xhr.open('GET', url);
+      xhr.open('GET', urlObj.href);
       let onError = function () {
         vectorSource.removeLoadedExtent(extent);
         progress$.next([1, context.canvas, layerSpec.url]);
@@ -373,15 +373,6 @@ function createLayerWFS(layerSpec, rootFrameState) {
     layerStatesArray: [
       {
         layer,
-        managed: true,
-        maxResolution: null,
-        maxZoom: null,
-        minResolution: 0,
-        minZoom: null,
-        opacity: 1,
-        sourceState: 'ready',
-        visible: true,
-        zIndex: 0,
       },
     ],
   };
