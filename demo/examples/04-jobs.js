@@ -11,13 +11,9 @@ const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
 // subscribe to the long-running observable
 // beware of managing the unsubscription
-getJobsStatus()
-  .pipe(
-    tap((jobs) => {
-      bars.jobsStatus = jobs;
-    })
-  )
-  .subscribe();
+getJobsStatus().subscribe((jobs) => {
+  bars.jobsStatus = jobs;
+});
 
 btn.addEventListener('click', async () => {
   // create a job, get a promise that resolves with the job id
