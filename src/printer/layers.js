@@ -3,7 +3,7 @@ import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
-import GML from 'ol/format/GML';
+import WFS from 'ol/format/WFS';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
 import ImageLayer from 'ol/layer/Image';
@@ -252,17 +252,10 @@ function createLayerWFS(layerSpec, rootFrameState) {
   context.canvas.style = {};
   let frameState;
   let renderer;
-  let format, outputFormat;
   const version = layerSpec.version || '1.1.0';
   const typeNameLabel = version === '2.0.0' ? 'typenames' : 'typename';
-
-  if (layerSpec.format === 'geojson') {
-    outputFormat = 'application/json';
-    format = new GeoJSON();
-  } else {
-    outputFormat = 'GML3';
-    format = new GML();
-  }
+  const format =
+    layerSpec.format === 'geojson' ? new GeoJSON() : new WFS({ version });
 
   let vectorSource = new VectorSource({
     format,
@@ -275,7 +268,9 @@ function createLayerWFS(layerSpec, rootFrameState) {
       urlObj.searchParams.set(typeNameLabel, layerSpec.layer);
       urlObj.searchParams.set('srsName', projCode);
       urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
-      urlObj.searchParams.set('outputFormat', outputFormat);
+      if (layerSpec.format === 'geojson') {
+        urlObj.searchParams.set('outputFormat', 'application/json');
+      }
 
       const xhr = new XMLHttpRequest();
       xhr.open('GET', urlObj.href);
