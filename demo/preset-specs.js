@@ -98,7 +98,7 @@ export const WfsSpec = {
   size: [800, 600],
   center: [-81, 43],
   dpi: 200,
-  scale: 4000000,
+  scale: 400000,
   scaleBar: { position: 'bottom-right', units: 'metric' },
   projection: 'EPSG:3857',
   northArrow: 'top-right',

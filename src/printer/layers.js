@@ -3,10 +3,7 @@ import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
-import WFS from 'ol/format/WFS';
-import GML2 from 'ol/format/GML2';
-import GML3 from 'ol/format/GML3';
-import GML32 from 'ol/format/GML32';
+import GML from 'ol/format/GML';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
 import ImageLayer from 'ol/layer/Image';
@@ -255,42 +252,32 @@ function createLayerWFS(layerSpec, rootFrameState) {
   context.canvas.style = {};
   let frameState;
   let renderer;
-  let format;
-  let gmlFormats = {
-    '1.0.0': new GML2(),
-    '1.1.0': new GML3(),
-    '2.0.0': new GML32(),
-  };
+  let format, outputFormat;
+  const version = layerSpec.version || '1.1.0';
+  const typeNameLabel = version === '2.0.0' ? 'typenames' : 'typename';
 
   if (layerSpec.format === 'geojson') {
+    outputFormat = 'application/json';
     format = new GeoJSON();
   } else {
-    format = new WFS({
-      version: layerSpec.version,
-      gmlFormat: gmlFormats[layerSpec.version],
-    });
+    outputFormat = 'GML3';
+    format = new GML();
   }
 
   let vectorSource = new VectorSource({
-    format: format,
+    format,
     loader: function (extent, resolution, projection) {
       const projCode = projection.getCode();
-      const xhr = new XMLHttpRequest();
       const urlObj = new URL(layerSpec.url);
-      const typeNameLabel =
-        layerSpec.version === '2.0.0' ? 'typenames' : 'typename';
       urlObj.searchParams.set('SERVICE', 'WFS');
-      urlObj.searchParams.set(
-        'version',
-        layerSpec.version ? layerSpec.version : '1.1.0'
-      );
+      urlObj.searchParams.set('version', version);
       urlObj.searchParams.set('request', 'GetFeature');
       urlObj.searchParams.set(typeNameLabel, layerSpec.layer);
       urlObj.searchParams.set('srsName', projCode);
       urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
-      if (layerSpec.format === 'geojson') {
-        urlObj.searchParams.set('outputFormat', 'application/json');
-      }
+      urlObj.searchParams.set('outputFormat', outputFormat);
+
+      const xhr = new XMLHttpRequest();
       xhr.open('GET', urlObj.href);
       let onError = function () {
         vectorSource.removeLoadedExtent(extent);
