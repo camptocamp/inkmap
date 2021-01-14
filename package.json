@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/camptocamp/inkmap#readme",
   "dependencies": {
-    "ol": "^6.4.3",
+    "ol": "^6.5.0",
     "proj4": "^2.6.3",
     "rxjs": "^6.6.3"
   },
