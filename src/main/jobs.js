@@ -31,6 +31,20 @@ export const newJob$ = jobs$.pipe(
   })
 );
 
+export function getJobsStatusObservable() {
+  return jobs$.pipe(
+    pairwise(),
+    map(([prevJobs, jobs]) =>
+      jobs.filter(
+        (job) =>
+          !prevJobs.find(
+            (prevJob) => prevJob.id === job.id && prevJob.progress == 1
+          )
+      )
+    )
+  );
+}
+
 export function getJobStatusObservable(jobId) {
   return jobs$.pipe(
     map((jobs) => jobs.find((job) => job.id === jobId)),

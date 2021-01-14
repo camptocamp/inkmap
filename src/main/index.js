@@ -4,7 +4,11 @@ import '../printer';
 import { MESSAGE_JOB_REQUEST } from '../shared/constants';
 import { registerWithExtent } from '../shared/projections';
 import { messageToPrinter } from './exchange';
-import { getJobStatusObservable, newJob$ } from './jobs';
+import {
+  getJobsStatusObservable,
+  getJobStatusObservable,
+  newJob$,
+} from './jobs';
 
 export { downloadBlob } from './utils';
 
@@ -134,8 +138,13 @@ export function queuePrint(printSpec) {
     .toPromise();
 }
 
+/**
+ * Returns a long-running observable which emits an array of print job status.
+ * This observable will never complete.
+ * @return {Observable<PrintStatus[]>} Observable emitting jobs status array.
+ */
 export function getJobsStatus() {
-  console.warn('Not implemented yet');
+  return getJobsStatusObservable();
 }
 
 /**
