@@ -77,6 +77,9 @@ export function generateGetFeatureUrl(
   projCode,
   extent
 ) {
+  if (baseUrl.substring(0, 4) !== 'http') {
+    return baseUrl;
+  }
   const urlObj = new URL(baseUrl);
   const typeNameLabel = wfsVersion === '2.0.0' ? 'typenames' : 'typename';
   urlObj.searchParams.set('SERVICE', 'WFS');
