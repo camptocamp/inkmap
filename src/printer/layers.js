@@ -15,7 +15,7 @@ import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
-import { setFrameState, useContainer } from './utils';
+import { setFrameState, useContainer, generateGetFeatureUrl } from './utils';
 
 const update$ = interval(500);
 
@@ -253,7 +253,6 @@ function createLayerWFS(layerSpec, rootFrameState) {
   let frameState;
   let renderer;
   const version = layerSpec.version || '1.1.0';
-  const typeNameLabel = version === '2.0.0' ? 'typenames' : 'typename';
   const format =
     layerSpec.format === 'geojson' ? new GeoJSON() : new WFS({ version });
 
@@ -261,19 +260,16 @@ function createLayerWFS(layerSpec, rootFrameState) {
     format,
     loader: function (extent, resolution, projection) {
       const projCode = projection.getCode();
-      const urlObj = new URL(layerSpec.url);
-      urlObj.searchParams.set('SERVICE', 'WFS');
-      urlObj.searchParams.set('version', version);
-      urlObj.searchParams.set('request', 'GetFeature');
-      urlObj.searchParams.set(typeNameLabel, layerSpec.layer);
-      urlObj.searchParams.set('srsName', projCode);
-      urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
-      if (layerSpec.format === 'geojson') {
-        urlObj.searchParams.set('outputFormat', 'application/json');
-      }
-
+      const requestUrl = generateGetFeatureUrl(
+        layerSpec.url,
+        version,
+        layerSpec.layer,
+        layerSpec.format,
+        projCode,
+        extent
+      );
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', urlObj.href);
+      xhr.open('GET', requestUrl);
       let onError = function () {
         vectorSource.removeLoadedExtent(extent);
         progress$.next([1, context.canvas, layerSpec.url]);

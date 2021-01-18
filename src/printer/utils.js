@@ -60,3 +60,33 @@ export let useContainer = function (context) {
     },
   };
 };
+
+/**
+ * @param {string} baseUrl
+ * @param {string} wfsVersion
+ * @param {string} layerName
+ * @param {string} format
+ * @param {string} projCode
+ * @param {[number, number, number, number]} extent
+ */
+export function generateGetFeatureUrl(
+  baseUrl,
+  wfsVersion,
+  layerName,
+  format,
+  projCode,
+  extent
+) {
+  const urlObj = new URL(baseUrl);
+  const typeNameLabel = wfsVersion === '2.0.0' ? 'typenames' : 'typename';
+  urlObj.searchParams.set('SERVICE', 'WFS');
+  urlObj.searchParams.set('version', wfsVersion);
+  urlObj.searchParams.set('request', 'GetFeature');
+  urlObj.searchParams.set(typeNameLabel, layerName);
+  urlObj.searchParams.set('srsName', projCode);
+  urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
+  if (format === 'geojson') {
+    urlObj.searchParams.set('outputFormat', 'application/json');
+  }
+  return urlObj.href;
+}
