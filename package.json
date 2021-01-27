@@ -1,8 +1,8 @@
 {
-  "name": "inkmap",
+  "name": "@camptocamp/inkmap",
   "version": "0.0.1",
   "description": "A library for generating printable, high quality maps in the browser.",
-  "main": "index.js",
+  "main": "dist/inkmap.js",
   "scripts": {
     "lint": "eslint src",
     "format": "prettier --write src demo test",
@@ -10,7 +10,8 @@
     "test:unit": "jest",
     "test:rendering": "node test/rendering/run.js",
     "demo": "webpack-dev-server --config demo/webpack.config.js",
-    "build:demo": "webpack --config demo/webpack.config.js --mode production"
+    "build:demo": "webpack --config demo/webpack.config.js --mode production",
+    "build:lib": "webpack --config ./webpack.config.js --mode production"
   },
   "repository": {
     "type": "git",
@@ -30,11 +31,13 @@
   "dependencies": {
     "geostyler": "^4.6.1",
     "ol": "^6.5.0",
+    "@babel/runtime": "^7.12.5",
     "proj4": "^2.6.3",
     "rxjs": "^6.6.3"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
+    "@babel/plugin-transform-runtime": "^7.12.10",
     "@babel/preset-env": "^7.12.1",
     "babel-jest": "^26.6.1",
     "babel-loader": "^8.0.6",
