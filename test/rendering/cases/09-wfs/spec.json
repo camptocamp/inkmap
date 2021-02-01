@@ -1,0 +1,16 @@
+{
+  "layers": [
+    {
+      "type": "WFS",
+      "url": "/wfs.json",
+      "layer": "osm:water_areas",
+      "format": "geojson",
+      "version": "1.1.0"
+    }
+  ],
+  "size": [800, 600],
+  "center": [-80.419202, 43.398141],
+  "dpi": 200,
+  "scale": 400000,
+  "projection": "EPSG:3857"
+}

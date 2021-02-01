@@ -1,15 +1,15 @@
 {
   "layers": [
     {
-      "type":"WMTS",
-      "url":"/wmts1.jpeg",
-      "layer":"GEOGRAPHICALGRIDSYSTEMS.MAPS",
-      "matrixSet":"PM",
+      "type": "WMTS",
+      "url": "/wmts1.jpeg",
+      "layer": "GEOGRAPHICALGRIDSYSTEMS.MAPS",
+      "matrixSet": "PM",
       "projection": "EPSG:3857",
-      "format":"image/jpeg",
+      "format": "image/jpeg",
       "style": "normal",
       "tileGrid": {
-        "resolutions":[
+        "resolutions": [
           156543.03392811998,
           78271.51696391999,
           39135.758481959994,
@@ -33,9 +33,9 @@
           0.14929107086935997,
           0.07464553543467999
         ],
-        "tileSize":256
+        "tileSize": 256
       },
-      "opacity":1
+      "opacity": 1
     }
   ],
   "size": [256, 256],

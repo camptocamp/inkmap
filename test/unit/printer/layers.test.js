@@ -1,7 +1,15 @@
 import { createLayer } from '../../../src/printer/layers';
-import ImageWMSSourceMock, { triggerLoadEnd, triggerLoadError } from '../../../__mocks__/ol/source/ImageWMS';
-import TileWMSSourceMock, { triggerLoadError as triggerTileWMSError }  from '../../../__mocks__/ol/source/TileWMS';
-import XYZSourceMock, { triggerLoadError as triggerXYZError } from '../../../__mocks__/ol/source/XYZ';
+import { generateGetFeatureUrl } from '../../../src/printer/utils';
+import ImageWMSSourceMock, {
+  triggerLoadEnd,
+  triggerLoadError,
+} from '../../../__mocks__/ol/source/ImageWMS';
+import TileWMSSourceMock, {
+  triggerLoadError as triggerTileWMSError,
+} from '../../../__mocks__/ol/source/TileWMS';
+import XYZSourceMock, {
+  triggerLoadError as triggerXYZError,
+} from '../../../__mocks__/ol/source/XYZ';
 
 /** @type {FrameState} */
 const frameState = {
@@ -235,6 +243,48 @@ describe('layer creation', () => {
       tileQueue._setQueuedCount(0, 0);
       expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
       expect(completed).toBeTruthy();
+    });
+  });
+
+  describe('WFS layer creation', () => {
+    /** @type {Layer} */
+    const spec = {
+      type: 'WFS',
+      url: 'https://my.url/wfs',
+      layer: 'my:layername',
+      format: 'geojson',
+      version: '1.1.0',
+    };
+    let layer$;
+    let received;
+    let completed;
+
+    beforeEach(() => {
+      completed = false;
+      layer$ = createLayer(spec, { ...frameState });
+      layer$.subscribe(
+        (status) => (received = status),
+        null,
+        () => (completed = true)
+      );
+    });
+
+    it('initially emit a status with progress 0', () => {
+      expect(received).toEqual([0, null]);
+    });
+
+    it('generates GetFeature URL according to spec', () => {
+      const url = generateGetFeatureUrl(
+        spec.url,
+        spec.version,
+        spec.layer,
+        spec.format,
+        frameState.viewState.projection,
+        frameState.extent
+      );
+      expect(url).toEqual(
+        'https://my.url/wfs?SERVICE=WFS&version=1.1.0&request=GetFeature&typename=my%3Alayername&srsName=EPSG%3A3857&bbox=-696165.0132013096%2C5090855.383524774%2C3367832.7922398755%2C7122854.286245367%2CEPSG%3A3857&outputFormat=application%2Fjson'
+      );
     });
   });
 

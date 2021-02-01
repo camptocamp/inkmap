@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src",
-    "format": "prettier --write src demo",
-    "format:check": "prettier src demo",
+    "format": "prettier --write src demo test",
+    "format:check": "prettier src demo test",
     "test:unit": "jest",
     "test:rendering": "node test/rendering/run.js",
     "demo": "webpack-dev-server --config demo/webpack.config.js",
@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/camptocamp/inkmap#readme",
   "dependencies": {
-    "ol": "^6.4.3",
+    "ol": "^6.5.0",
     "proj4": "^2.6.3",
     "rxjs": "^6.6.3"
   },

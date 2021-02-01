@@ -28,7 +28,7 @@ const spec = {
       opacity: 0.4,
     },
   ],
-  size: [8, 4, "cm"],
+  size: [8, 4, 'cm'],
   center: [12, 48],
   dpi: 200,
   scale: 40000000,
@@ -47,9 +47,9 @@ UtilsMock.canvasToBlob = jest.fn(() => of({ blob: true }));
 
 olDomMock.createCanvasContext2D = jest.fn(() => {
   return {
-    drawImage: jest.fn()
+    drawImage: jest.fn(),
   };
-})
+});
 
 describe('job creation', () => {
   beforeEach(() => {
@@ -72,7 +72,7 @@ describe('job creation', () => {
         progress: 0,
         spec,
         status: 'ongoing',
-        sourceLoadErrors: []
+        sourceLoadErrors: [],
       },
     });
   });
@@ -87,7 +87,7 @@ describe('job creation', () => {
         progress: 0.4,
         spec,
         status: 'ongoing',
-        sourceLoadErrors: []
+        sourceLoadErrors: [],
       },
     });
   });
@@ -102,9 +102,11 @@ describe('job creation', () => {
         progress: 1,
         spec,
         status: 'finished',
-        sourceLoadErrors: [{
-          url: errorurl
-        }]
+        sourceLoadErrors: [
+          {
+            url: errorurl,
+          },
+        ],
       },
     });
   });

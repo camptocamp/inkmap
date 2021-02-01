@@ -3,13 +3,19 @@ import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
+import WFS from 'ol/format/WFS';
+import GeoJSON from 'ol/format/GeoJSON';
+import VectorSource from 'ol/source/Vector';
 import ImageLayer from 'ol/layer/Image';
+import VectorLayer from 'ol/layer/Vector';
+import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval } from 'rxjs';
 import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
+import { setFrameState, useContainer, generateGetFeatureUrl } from './utils';
 
 const update$ = interval(500);
 
@@ -35,6 +41,8 @@ export function createLayer(layerSpec, rootFrameState) {
       return createLayerWMS(layerSpec, rootFrameState);
     case 'WMTS':
       return createLayerWMTS(layerSpec, rootFrameState);
+    case 'WFS':
+      return createLayerWFS(layerSpec, rootFrameState);
   }
 }
 
@@ -79,33 +87,10 @@ function createTiledLayer(source, rootFrameState, opacity) {
     tileLoadErrorUrl = e.target.getUrls()[0];
   });
 
-  frameState = {
-    ...rootFrameState,
-    layerStatesArray: [
-      {
-        layer,
-        managed: true,
-        maxResolution: null,
-        maxZoom: null,
-        minResolution: 0,
-        minZoom: null,
-        opacity: opacity !== undefined ? opacity : 1,
-        sourceState: 'ready',
-        visible: true,
-        zIndex: 0,
-      },
-    ],
-  };
+  frameState = setFrameState(rootFrameState, layer, opacity);
 
   renderer = layer.getRenderer();
-  renderer.useContainer = function () {
-    this.containerReused = false;
-    this.canvas = context.canvas;
-    this.context = context;
-    this.container = {
-      firstElementChild: context.canvas,
-    };
-  };
+  renderer.useContainer = useContainer.bind(renderer, context);
 
   renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
@@ -203,33 +188,10 @@ function createLayerWMS(layerSpec, rootFrameState) {
     image.src = src;
   });
 
-  frameState = {
-    ...rootFrameState,
-    layerStatesArray: [
-      {
-        layer,
-        managed: true,
-        maxResolution: null,
-        maxZoom: null,
-        minResolution: 0,
-        minZoom: null,
-        opacity: layerSpec.opacity !== undefined ? layerSpec.opacity : 1,
-        sourceState: 'ready',
-        visible: true,
-        zIndex: 0,
-      },
-    ],
-  };
+  frameState = setFrameState(rootFrameState, layer, layerSpec.opacity);
 
   renderer = layer.getRenderer();
-  renderer.useContainer = function () {
-    this.containerReused = false;
-    this.canvas = context.canvas;
-    this.context = context;
-    this.container = {
-      firstElementChild: context.canvas,
-    };
-  };
+  renderer.useContainer = useContainer.bind(renderer, context);
 
   const progress$ = new BehaviorSubject([0, null, undefined]);
   layer.getSource().once('imageloaderror', function (e) {
@@ -276,4 +238,75 @@ function createLayerWMTS(layerSpec, rootFrameState) {
     rootFrameState,
     layerSpec.opacity
   );
+}
+
+/**
+ * @param {WfsLayer} layerSpec
+ * @param {FrameState} rootFrameState
+ * @return {Observable<LayerPrintStatus>}
+ */
+function createLayerWFS(layerSpec, rootFrameState) {
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  context.canvas.style = {};
+  let frameState;
+  let renderer;
+  const version = layerSpec.version || '1.1.0';
+  const format =
+    layerSpec.format === 'geojson' ? new GeoJSON() : new WFS({ version });
+
+  let vectorSource = new VectorSource({
+    format,
+    loader: function (extent, resolution, projection) {
+      const projCode = projection.getCode();
+      const requestUrl = generateGetFeatureUrl(
+        layerSpec.url,
+        version,
+        layerSpec.layer,
+        layerSpec.format,
+        projCode,
+        extent
+      );
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', requestUrl);
+      let onError = function () {
+        vectorSource.removeLoadedExtent(extent);
+        progress$.next([1, context.canvas, layerSpec.url]);
+        progress$.complete();
+      };
+      xhr.onerror = onError;
+      xhr.onload = function () {
+        if (xhr.status == 200) {
+          vectorSource.addFeatures(
+            vectorSource.getFormat().readFeatures(xhr.responseText)
+          );
+          renderer.prepareFrame({ ...frameState, time: Date.now() });
+          renderer.renderFrame(
+            { ...frameState, time: Date.now() },
+            context.canvas
+          );
+          progress$.next([1, context.canvas]);
+          progress$.complete();
+        } else {
+          onError();
+        }
+      };
+      xhr.send();
+    },
+    strategy: bbox,
+  });
+
+  let layer = new VectorLayer({
+    source: vectorSource,
+  });
+
+  frameState = setFrameState(rootFrameState, layer);
+  renderer = layer.getRenderer();
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  const progress$ = new BehaviorSubject([0, null]);
+  renderer.prepareFrame({ ...frameState, time: Date.now() });
+
+  return progress$;
 }
