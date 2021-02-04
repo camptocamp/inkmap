@@ -16,6 +16,7 @@ import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
 import { setFrameState, useContainer, generateGetFeatureUrl } from './utils';
+import OpenLayersParser from 'geostyler-openlayers-parser';
 
 const update$ = interval(500);
 
@@ -300,6 +301,14 @@ function createLayerWFS(layerSpec, rootFrameState) {
   let layer = new VectorLayer({
     source: vectorSource,
   });
+
+  if (layerSpec.style) {
+    const parser = new OpenLayersParser();
+    parser
+      .writeStyle(layerSpec.style)
+      .then((olStyle) => layer.setStyle(olStyle))
+      .catch((error) => console.log(error));
+  }
 
   frameState = setFrameState(rootFrameState, layer);
   renderer = layer.getRenderer();
