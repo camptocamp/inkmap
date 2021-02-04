@@ -58,11 +58,13 @@ export async function createJob(spec) {
           for (let i = 0; i < layerStates.length; i++) {
             const canvasImage = layerStates[i][1];
             const errorUrl = layerStates[i][2];
-            context.drawImage(canvasImage, 0, 0);
-            if (errorUrl) {
-              sourceLoadErrors.push({
-                url: errorUrl,
-              });
+            if (canvasImage.width !== 0 && canvasImage.height !== 0) {
+              context.drawImage(canvasImage, 0, 0);
+              if (errorUrl) {
+                sourceLoadErrors.push({
+                  url: errorUrl,
+                });
+              }
             }
           }
           if (spec.northArrow) {
