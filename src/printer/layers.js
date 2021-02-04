@@ -282,11 +282,13 @@ function createLayerWFS(layerSpec, rootFrameState) {
           vectorSource.addFeatures(
             vectorSource.getFormat().readFeatures(xhr.responseText)
           );
-          renderer.prepareFrame({ ...frameState, time: Date.now() });
-          renderer.renderFrame(
-            { ...frameState, time: Date.now() },
-            context.canvas
-          );
+          if (vectorSource.getFeatures().length !== 0) {
+            renderer.prepareFrame({ ...frameState, time: Date.now() });
+            renderer.renderFrame(
+              { ...frameState, time: Date.now() },
+              context.canvas
+            );
+          }
           progress$.next([1, context.canvas]);
           progress$.complete();
         } else {
