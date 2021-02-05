@@ -1,6 +1,7 @@
 import { getJobsStatus, queuePrint } from 'inkmap';
 import { tap } from 'rxjs/operators';
 import { downloadBlob, getJobStatus } from '../../src/main';
+import { generateFileName } from '../fileutils';
 
 const root = document.getElementById('example-04');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -23,9 +24,7 @@ btn.addEventListener('click', async () => {
     // job is finished
     if (printStatus.progress === 1) {
       // download the result
-      const filename = `inkmap-${jobId}-${new Date()
-        .toISOString()
-        .substr(0, 10)}.png`;
+      const filename = generateFileName();
       downloadBlob(printStatus.imageBlob, filename);
     }
   });

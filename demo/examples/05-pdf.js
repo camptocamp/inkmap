@@ -1,5 +1,6 @@
 import { print } from 'inkmap';
 import { jsPDF } from 'jspdf';
+import { generateFileName } from '../fileutils';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -37,7 +38,7 @@ btn.addEventListener('click', async () => {
     );
 
     // download the result
-    const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.pdf`;
+    const filename = generateFileName('pdf');
     doc.save(filename);
   };
 });

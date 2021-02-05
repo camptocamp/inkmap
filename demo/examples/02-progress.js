@@ -1,4 +1,5 @@
 import { downloadBlob, getJobStatus, queuePrint } from 'inkmap';
+import { generateFileName } from '../fileutils';
 
 const root = document.getElementById('example-02');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -27,7 +28,7 @@ btn.addEventListener('click', async () => {
       btn.working = false;
 
       // download the result
-      const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
+      const filename = generateFileName();
       downloadBlob(printStatus.imageBlob, filename);
     }
   });
