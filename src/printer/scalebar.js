@@ -2,8 +2,6 @@ import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
 import { Units } from 'ol/control/ScaleLine';
 
-const DEFAULT_TITLE = 'Scale: {mapScale}';
-
 /**
  * Determines scalebar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
@@ -125,8 +123,6 @@ function getScaleBarParams(frameState, spec) {
  * @param {PrintSpec} spec
  */
 function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
-  const mapScale = `1 / ${spec.scale}`;
-
   const scaleWidth = scaleBarParams.width;
   const scaleNumber = scaleBarParams.scalenumber;
   const scaleUnit = scaleBarParams.suffix;
@@ -134,18 +130,12 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   const scaleText = `${scaleNumber} ${scaleUnit}`;
   const scaleTextWidth = ctx.measureText(scaleText).width;
 
-  const scaleTitle = (spec.scaleBar.template
-    ? spec.scaleBar.template
-    : DEFAULT_TITLE
-  ).replace('{mapScale}', mapScale);
-  const scaleTitleWidth = ctx.measureText(scaleTitle).width;
-
   const line1 = 6;
   // use position from spec if provided, default "bottom-left"
-  const scaleMaxWidth = Math.max(scaleWidth + scaleTextWidth, scaleTitleWidth);
+  const scaleTotalWidth = scaleWidth + scaleTextWidth;
   const xOffset =
     spec.scaleBar.position === 'bottom-right'
-      ? frameState.size[0] - scaleMaxWidth - 20
+      ? frameState.size[0] - scaleTotalWidth - 20
       : 10;
   const yOffset = 10;
   const fontsize1 = 12;
@@ -171,9 +161,7 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   ctx.fillStyle = '#000000';
   ctx.lineWidth = 5;
   ctx.font = font1;
-  // Title
-  ctx.strokeText([scaleTitle], xOffset, yzero - fontsize1);
-  ctx.fillText([scaleTitle], xOffset, yzero - fontsize1);
+
   // Number with units
   ctx.strokeText([scaleText], xzero + 5, yzero + fontsize1 / 2);
   ctx.fillText([scaleText], xzero + 5, yzero + fontsize1 / 2);
