@@ -87,7 +87,7 @@ export function generateGetFeatureUrl(
   urlObj.searchParams.set('request', 'GetFeature');
   urlObj.searchParams.set(typeNameLabel, layerName);
   urlObj.searchParams.set('srsName', projCode);
-  urlObj.searchParams.set('bbox', `${extent.join(',')},${projCode}`);
+  urlObj.searchParams.set('bbox', `${extent.join(',')}`);
   if (format === 'geojson') {
     urlObj.searchParams.set('outputFormat', 'application/json');
   }
