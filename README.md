@@ -80,8 +80,8 @@ A `PrintSpec` object describes the content and aspect of the map to be printed.
 | `center` | `[number, number]` | Longitude and latitude of the map center. |
 | `dpi` | `number` | Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print. |
 | `scale` | `number` | Scale denominator. |
-| `scaleBar` | `boolean | ScaleBarSpec` | Indicates whether scalebar should be printed (`true`). Also allows to pass options object: `{"position": "bottom-left", "units": "metric" }` (default values). Possible values are: <ul><li>`position`: `"bottom-left" | "bottom-right"`</li><li>`units`: `"degrees" | "imperial" | "metric" | "nautical" | "us"` (same as `ol.control.ScaleLine`)</li></ul> |
-| `northArrow` | `boolean | string` | North arrow position; either `'top-left'`, `'bottom-left'`, `'bottom-right'` or `'top-right'`; `true` defaults to `'top-right'`; absent or `false` means not to print the north arrow.
+| `scaleBar` | `boolean \| ScaleBarSpec` | Indicates whether scalebar should be printed (`true`). Also allows to pass options object: `{"position": "bottom-left", "units": "metric" }` (default values). Possible values are: <ul><li>`position`: `"bottom-left" \| "bottom-right"`</li><li>`units`: `"degrees" \| "imperial" \| "metric" \| "nautical" \| "us"` (same as `ol.control.ScaleLine`)</li></ul> |
+| `northArrow` | `boolean \| string` | North arrow position; either `'top-left'`, `'bottom-left'`, `'bottom-right'` or `'top-right'`; `true` defaults to `'top-right'`; absent or `false` means not to print the north arrow.
 | `projection` | `string` | Projection name. If starting with `EPSG:`, and other than `EPSG:3857` or `EPSG:4326`, definition will be downloaded on [https://epsg.io/]. |
 | `projectionDefinitions` | `[projectionDefinition]` | Optionnal. Registers new projections from the definitions. |
 
