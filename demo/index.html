@@ -90,10 +90,10 @@
       </div>
 
       <div class="mt-5" id="example-02">
-        <h2>Showing progress</h2>
+        <h2>Showing progress and cancelation</h2>
         <p>
           <strong>inkmap</strong> also enables finer monitoring by making the
-          job status observable.
+          job status observable and cancelable.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -117,6 +117,12 @@
               <div class="col-3">
                 <custom-button> Generate! </custom-button>
                 <custom-progress></custom-progress>
+                <button
+                  role="button"
+                  class="cancel-btn btn btn-danger btn-block mt-2"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

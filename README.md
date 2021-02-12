@@ -147,7 +147,7 @@ A `PrintStatus` object describes the status of a print job.
 |---|---|---|
 | `id` | `number` | Job id. |
 | `progress` | `number` | Job progress, from 0 to 1. |
-| `status` | `string` | Either `'pending'`, `'ongoing'` or `'finished'`. |
+| `status` | `string` | Either `'pending'`, `'ongoing'`, `'finished'` or `'canceled'`. |
 | `resultImageUrl` | `string` | An URL used to access the print result (PNG image). This will only be available once the job status is `'finished'`.|
 
 ## Architecture
