@@ -1,7 +1,7 @@
 import { map, switchMap, take, takeWhile } from 'rxjs/operators';
 
 import '../printer';
-import { MESSAGE_JOB_REQUEST } from '../shared/constants';
+import { MESSAGE_JOB_CANCEL, MESSAGE_JOB_REQUEST } from '../shared/constants';
 import { registerWithExtent } from '../shared/projections';
 import { messageToPrinter } from './exchange';
 import {
@@ -104,7 +104,7 @@ export { downloadBlob } from './utils';
  * @property {number} id Job id.
  * @property {PrintSpec} spec Job initial spec.
  * @property {number} progress Job progress, from 0 to 1.
- * @property {'pending' | 'ongoing' | 'finished'} status Job status.
+ * @property {'pending' | 'ongoing' | 'finished' | 'canceled'} status Job status.
  * @property {Blob} [imageBlob] Finished image blob.
  * @property {SourceLoadError[]} [sourceLoadErrors] Array of `SourceLoadError` objects.
  */
@@ -164,12 +164,12 @@ export function getJobsStatus() {
  */
 export function getJobStatus(jobId) {
   return getJobStatusObservable(jobId).pipe(
-    takeWhile((job) => job.progress < 1, true)
+    takeWhile((job) => job.progress < 1 && job.progress !== -1, true)
   );
 }
 
-export function cancelJob() {
-  console.warn('Not implemented yet');
+export function cancelJob(jobId) {
+  messageToPrinter(MESSAGE_JOB_CANCEL, { jobId });
 }
 
 /**

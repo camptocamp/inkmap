@@ -1,4 +1,4 @@
-import { createLayer } from '../../../src/printer/layers';
+import { cancel$, createLayer } from '../../../src/printer/layers';
 import { generateGetFeatureUrl } from '../../../src/printer/utils';
 import ImageWMSSourceMock, {
   triggerLoadEnd,
@@ -77,6 +77,7 @@ export class SourceEventMock {
 jest.useFakeTimers();
 describe('layer creation', () => {
   describe('XYZ layer creation', () => {
+    const jobId = 1;
     /** @type {Layer} */
     const spec = {
       type: 'XYZ',
@@ -92,7 +93,7 @@ describe('layer creation', () => {
     beforeEach(() => {
       tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
       completed = false;
-      layer$ = createLayer(spec, { ...frameState, tileQueue });
+      layer$ = createLayer(jobId, spec, { ...frameState, tileQueue });
       layer$.subscribe(
         (status) => (received = status),
         null,
@@ -135,9 +136,16 @@ describe('layer creation', () => {
       expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
       expect(completed).toBeTruthy();
     });
+
+    it('when canceled, canvas and error are not defined, then complete', () => {
+      cancel$.next(1);
+      expect(received).toEqual([-1, null, undefined]);
+      expect(completed).toBeTruthy();
+    });
   });
 
   describe('WMS layer creation', () => {
+    const jobId = 1;
     /** @type {Layer} */
     const spec = {
       type: 'WMS',
@@ -153,7 +161,7 @@ describe('layer creation', () => {
 
     beforeEach(() => {
       completed = false;
-      layer$ = createLayer(spec, frameState);
+      layer$ = createLayer(jobId, spec, frameState);
       layer$.subscribe(
         (status) => (received = status),
         null,
@@ -183,6 +191,7 @@ describe('layer creation', () => {
   });
 
   describe('tiled WMS layer creation', () => {
+    const jobId = 1;
     /** @type {Layer} */
     const spec = {
       type: 'WMS',
@@ -201,7 +210,7 @@ describe('layer creation', () => {
     beforeEach(() => {
       tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
       completed = false;
-      layer$ = createLayer(spec, { ...frameState, tileQueue });
+      layer$ = createLayer(jobId, spec, { ...frameState, tileQueue });
       layer$.subscribe(
         (status) => (received = status),
         null,
@@ -244,9 +253,16 @@ describe('layer creation', () => {
       expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
       expect(completed).toBeTruthy();
     });
+
+    it('when canceled, canvas and error are not defined, then complete', () => {
+      cancel$.next(1);
+      expect(received).toEqual([-1, null, undefined]);
+      expect(completed).toBeTruthy();
+    });
   });
 
   describe('WFS layer creation', () => {
+    const jobId = 1;
     /** @type {Layer} */
     const spec = {
       type: 'WFS',
@@ -261,7 +277,7 @@ describe('layer creation', () => {
 
     beforeEach(() => {
       completed = false;
-      layer$ = createLayer(spec, { ...frameState });
+      layer$ = createLayer(jobId, spec, { ...frameState });
       layer$.subscribe(
         (status) => (received = status),
         null,
