@@ -93,6 +93,22 @@ export const WfsSpec = {
       layer: 'osm:water_areas',
       format: 'geojson',
       version: '1.1.0',
+      style: {
+        name: 'Demo Style',
+        rules: [
+          {
+            name: 'Rule 1',
+            symbolizers: [
+              {
+                kind: 'Line',
+                color: '#2e37c5',
+                width: 3,
+                opacity: 0.7,
+              },
+            ],
+          },
+        ],
+      },
     },
   ],
   size: [800, 600],
