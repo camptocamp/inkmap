@@ -90,10 +90,10 @@
       </div>
 
       <div class="mt-5" id="example-02">
-        <h2>Showing progress and cancelation</h2>
+        <h2>Showing progress</h2>
         <p>
           <strong>inkmap</strong> also enables finer monitoring by making the
-          job status observable and cancelable.
+          job status observable.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -117,6 +117,42 @@
               <div class="col-3">
                 <custom-button> Generate! </custom-button>
                 <custom-progress></custom-progress>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane example-02-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example02 %></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5" id="example-03">
+        <h2>Canceling a job</h2>
+        <p><strong>inkmap</strong> also enables job cancelation.</p>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-03-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-03-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-03-result show active">
+            <div class="row align-items-center">
+              <print-spec class="col-8" editable="false"></print-spec>
+              <div class="col-3">
+                <custom-button> Generate! </custom-button>
+                <custom-progress></custom-progress>
                 <button
                   role="button"
                   class="cancel-btn btn btn-danger btn-block mt-2"
@@ -126,10 +162,10 @@
               </div>
             </div>
           </div>
-          <div class="tab-pane example-02-source">
+          <div class="tab-pane example-03-source">
             <pre
               class="rounded small"
-            ><code class="js"><%- example02 %></code></pre>
+            ><code class="js"><%- example03 %></code></pre>
           </div>
         </div>
       </div>
