@@ -10,8 +10,16 @@ import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
-import { BehaviorSubject, interval } from 'rxjs';
-import { map, startWith, takeWhile, throttleTime } from 'rxjs/operators';
+import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
+import {
+  filter,
+  map,
+  startWith,
+  take,
+  takeWhile,
+  tap,
+  throttleTime,
+} from 'rxjs/operators';
 import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
@@ -19,31 +27,33 @@ import { setFrameState, useContainer, generateGetFeatureUrl } from './utils';
 import OpenLayersParser from 'geostyler-openlayers-parser';
 
 const update$ = interval(500);
+export const cancel$ = new Subject();
 
 /**
  * @typedef {Array} LayerPrintStatus
- * @property {number} 0 Progress, from 0 to 1.
+ * @property {number} 0 Progress, from 0 to 1, or -1 when canceled.
  * @property {HTMLCanvasElement|OffscreenCanvas|null} 1 Canvas on which the layer is printed, or null if progress < 1.
+ * @property {string} 2 URL which caused an error.
  */
 
 /**
  * Returns an observable emitting the printing status for this layer
- * The observable will emit a final value with the finished canvas
- * and complete.
+ * The observable will emit a final value, with the finished canvas
+ * if not canceled, and complete.
  * @param {Layer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
-export function createLayer(layerSpec, rootFrameState) {
+export function createLayer(jobId, layerSpec, rootFrameState) {
   switch (layerSpec.type) {
     case 'XYZ':
-      return createLayerXYZ(layerSpec, rootFrameState);
+      return createLayerXYZ(jobId, layerSpec, rootFrameState);
     case 'WMS':
-      return createLayerWMS(layerSpec, rootFrameState);
+      return createLayerWMS(jobId, layerSpec, rootFrameState);
     case 'WMTS':
-      return createLayerWMTS(layerSpec, rootFrameState);
+      return createLayerWMTS(jobId, layerSpec, rootFrameState);
     case 'WFS':
-      return createLayerWFS(layerSpec, rootFrameState);
+      return createLayerWFS(jobId, layerSpec, rootFrameState);
   }
 }
 
@@ -53,7 +63,7 @@ export function createLayer(layerSpec, rootFrameState) {
  * @param {number} [opacity=1]
  * @return {Observable<LayerPrintStatus>}
  */
-function createTiledLayer(source, rootFrameState, opacity) {
+function createTiledLayer(jobId, source, rootFrameState, opacity) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
@@ -96,7 +106,7 @@ function createTiledLayer(source, rootFrameState, opacity) {
   renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
 
-  return update$.pipe(
+  const updatedProgress$ = update$.pipe(
     startWith(true),
     takeWhile(() => {
       frameState.tileQueue.reprioritize();
@@ -126,6 +136,15 @@ function createTiledLayer(source, rootFrameState, opacity) {
     }),
     throttleTime(500, undefined, { leading: true, trailing: true })
   );
+
+  const canceledProgress$ = cancel$.pipe(
+    filter((canceledJobId) => canceledJobId === jobId),
+    map(() => [-1, null, undefined])
+  );
+
+  return merge(updatedProgress$, canceledProgress$).pipe(
+    takeWhile(([progress]) => progress !== -1 && progress !== 1, true)
+  );
 }
 
 /**
@@ -133,8 +152,9 @@ function createTiledLayer(source, rootFrameState, opacity) {
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
-function createLayerXYZ(layerSpec, rootFrameState) {
+function createLayerXYZ(jobId, layerSpec, rootFrameState) {
   return createTiledLayer(
+    jobId,
     new XYZ({
       crossOrigin: 'anonymous',
       url: layerSpec.url,
@@ -150,9 +170,10 @@ function createLayerXYZ(layerSpec, rootFrameState) {
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
-function createLayerWMS(layerSpec, rootFrameState) {
+function createLayerWMS(jobId, layerSpec, rootFrameState) {
   if (layerSpec.tiled) {
     return createTiledLayer(
+      jobId,
       new TileWMS({
         crossOrigin: 'anonymous',
         url: layerSpec.url,
@@ -171,6 +192,7 @@ function createLayerWMS(layerSpec, rootFrameState) {
   let frameState;
   let layer;
   let renderer;
+  const progress$ = new BehaviorSubject([0, null, undefined]);
 
   layer = new ImageLayer({
     transition: 0,
@@ -186,6 +208,21 @@ function createLayerWMS(layerSpec, rootFrameState) {
     if (isWorker()) {
       image.hintImageSize(width, height);
     }
+
+    const blankSrc =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    cancel$
+      .pipe(
+        filter((canceledJobId) => canceledJobId === jobId),
+        take(1),
+        tap(() => {
+          progress$.next([-1, null, undefined]);
+          progress$.complete();
+          image.src = blankSrc;
+        })
+      )
+      .subscribe();
+
     image.src = src;
   });
 
@@ -194,7 +231,6 @@ function createLayerWMS(layerSpec, rootFrameState) {
   renderer = layer.getRenderer();
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  const progress$ = new BehaviorSubject([0, null, undefined]);
   layer.getSource().once('imageloaderror', function (e) {
     const imageLoadErrorUrl = e.target.getUrl();
     progress$.next([1, context.canvas, imageLoadErrorUrl]);
@@ -216,7 +252,7 @@ function createLayerWMS(layerSpec, rootFrameState) {
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
-function createLayerWMTS(layerSpec, rootFrameState) {
+function createLayerWMTS(jobId, layerSpec, rootFrameState) {
   let { tileGrid, projection } = layerSpec;
   let { resolutions, extent, matrixIds } = tileGrid;
   extent = extent || extentFromProjection(projection);
@@ -229,6 +265,7 @@ function createLayerWMTS(layerSpec, rootFrameState) {
   });
 
   return createTiledLayer(
+    jobId,
     new WMTS({
       ...layerSpec,
       tileGrid,
@@ -246,7 +283,7 @@ function createLayerWMTS(layerSpec, rootFrameState) {
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
-function createLayerWFS(layerSpec, rootFrameState) {
+function createLayerWFS(jobId, layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
@@ -256,6 +293,7 @@ function createLayerWFS(layerSpec, rootFrameState) {
   const version = layerSpec.version || '1.1.0';
   const format =
     layerSpec.format === 'geojson' ? new GeoJSON() : new WFS({ version });
+  const progress$ = new BehaviorSubject([0, null]);
 
   let vectorSource = new VectorSource({
     format,
@@ -295,6 +333,19 @@ function createLayerWFS(layerSpec, rootFrameState) {
           onError();
         }
       };
+
+      cancel$
+        .pipe(
+          filter((canceledJobId) => canceledJobId === jobId),
+          take(1),
+          tap(() => {
+            progress$.next([-1, null]);
+            progress$.complete();
+            xhr.abort();
+          })
+        )
+        .subscribe();
+
       xhr.send();
     },
     strategy: bbox,
@@ -316,7 +367,6 @@ function createLayerWFS(layerSpec, rootFrameState) {
   renderer = layer.getRenderer();
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  const progress$ = new BehaviorSubject([0, null]);
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
   return progress$;

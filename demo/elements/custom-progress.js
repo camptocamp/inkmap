@@ -9,7 +9,7 @@ class CustomProgress extends HTMLElement {
     /** @type {?number} */
     this.progress_ = null;
 
-    /** @type {?'pending' | 'ongoing' | 'finished'} */
+    /** @type {?'pending' | 'ongoing' | 'finished' | 'canceled'} */
     this.status_ = 'pending';
 
     /** @type {HTMLElement} */
@@ -34,12 +34,13 @@ class CustomProgress extends HTMLElement {
    * * pending: secondary
    * * ongoing: primary
    * * finished: success
+   * * canceled: danger
    *
    * defaults to pending
-   * @param {?'pending' | 'ongoing' | 'finished'} progress
+   * @param {?'pending' | 'ongoing' | 'finished' | 'canceled'} progress
    */
   set status(status) {
-    if (!['pending', 'ongoing', 'finished'].includes(status)) {
+    if (!['pending', 'ongoing', 'finished', 'canceled'].includes(status)) {
       this.status_ = 'pending';
     } else {
       this.status_ = status;
@@ -91,16 +92,25 @@ class CustomProgress extends HTMLElement {
         this.progressBarInner.classList.add('bg-secondary');
         this.progressBarInner.classList.remove('bg-primary');
         this.progressBarInner.classList.remove('bg-success');
+        this.progressBarInner.classList.remove('bg-danger');
         break;
       case 'ongoing':
         this.progressBarInner.classList.remove('bg-secondary');
         this.progressBarInner.classList.add('bg-primary');
         this.progressBarInner.classList.remove('bg-success');
+        this.progressBarInner.classList.remove('bg-danger');
         break;
       case 'finished':
         this.progressBarInner.classList.remove('bg-secondary');
         this.progressBarInner.classList.remove('bg-primary');
         this.progressBarInner.classList.add('bg-success');
+        this.progressBarInner.classList.remove('bg-danger');
+        break;
+      case 'canceled':
+        this.progressBarInner.classList.remove('bg-secondary');
+        this.progressBarInner.classList.remove('bg-primary');
+        this.progressBarInner.classList.remove('bg-success');
+        this.progressBarInner.classList.add('bg-danger');
         break;
     }
   }

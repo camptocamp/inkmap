@@ -13,7 +13,7 @@ import {
   search as searchProjection,
 } from '../shared/projections';
 import { messageToMain } from './exchange';
-import { createLayer } from './layers';
+import { cancel$, createLayer } from './layers';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
 import { canvasToBlob } from './utils';
@@ -46,12 +46,13 @@ export async function createJob(spec) {
 
   combineLatest(
     spec.layers.map((layer) => {
-      return createLayer(layer, frameState);
+      return createLayer(job.id, layer, frameState);
     })
   )
     .pipe(
       switchMap((layerStates) => {
         const allReady = layerStates.every(([progress]) => progress === 1);
+        const oneCanceled = layerStates.some(([progress]) => progress === -1);
         let sourceLoadErrors = [];
 
         if (allReady) {
@@ -76,6 +77,8 @@ export async function createJob(spec) {
           return canvasToBlob(context.canvas).pipe(
             map((blob) => [1, blob, sourceLoadErrors])
           );
+        } else if (oneCanceled) {
+          return of([-1, null, sourceLoadErrors]);
         } else {
           const rawProgress =
             layerStates.reduce((prev, [progress]) => progress + prev, 0) /
@@ -90,11 +93,19 @@ export async function createJob(spec) {
           ...job,
           progress,
           imageBlob,
-          status: progress === 1 ? 'finished' : 'ongoing',
+          status:
+            progress === 1
+              ? 'finished'
+              : progress === -1
+              ? 'canceled'
+              : 'ongoing',
           sourceLoadErrors,
         };
       }),
-      takeWhile((jobStatus) => jobStatus.progress < 1, true)
+      takeWhile(
+        (jobStatus) => jobStatus.progress < 1 && jobStatus.progress !== -1,
+        true
+      )
     )
     .subscribe((status) => messageToMain(MESSAGE_JOB_STATUS, { status }));
 }
@@ -210,4 +221,8 @@ function calculateSizeInPixel(spec) {
   }
 
   return [Math.round(pixelX), Math.round(pixelY)];
+}
+
+export function cancelJob(jobId) {
+  cancel$.next(jobId);
 }
