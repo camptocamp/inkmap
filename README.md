@@ -1,5 +1,8 @@
 <div style="text-align: center"><strong>inkmap</strong>, a library for generating high resolution maps in the browser</div>
 
+
+##### [Live demo here!](https://camptocamp.github.io/inkmap/master/)
+
 ## Introduction
 
 **inkmap** is based on [OpenLayers](https://www.openlayers.org) and will generate maps in PNG format based on a given JSON specification.
@@ -7,27 +10,20 @@
 **inkmap** can handle long-running jobs (e.g. A0 format in 300 dpi) and provides an API for following a job progress.
 It uses a service worker in the background provided the user browser supports [OffscreenCanvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), and falls back (almost) seamlessly to the main thread if not.
 
-
-## Demo
-[Demo](https://camptocamp.github.io/inkmap/master/)
-
-## Disclaimer
-**inkmap is still in development mode.**
-
-**inkmap is not published on npm yet.**
+Please note that **inkmap** has been entirely funded and supported by the [French Ministry of Ecology](https://www.ecologie.gouv.fr/) as part of their Descartes web mapping toolkit.
 
 ## Usage
 
-**(Not available yet)**
+### Basic
 
 To include the library in your project:
 ```bash
-$ npm install --save inkmap
+$ npm install --save @camptocamp/inkmap
 ```
 
 Then import the different methods from the `inkmap` package:
 ```js
-import { print, getJobsStatus } from 'inkmap';
+import { print, getJobsStatus } from '@camptocamp/inkmap';
 
 print({
   layers: [ ... ],
@@ -38,9 +34,36 @@ print({
 getJobsStatus().subscribe(jobs => ...);
 ```
 
+### Enabling the service worker
+
+**inkmap** can _and will_ use a dedicated service worker for running print jobs if given the chance. This offers the following
+advantages:
+* Jobs run in a separate thread, meaning the user navigation will not be impacted at all by any CPU-intensive task
+* The service worker isn't tied to a window or tab, so jobs will continue running when the tab is closed (and even when the browser is closed, depending on the platform)
+* Push notifications might be sent to the user when a print job complete (not implemented yet)
+
+**To enable this, the `inkmap-worker.js` file located in the `dist` folder must be published on the same path as the application
+using inkmap**.
+
+The worker file can be published either using a symbolic link or by actually copying the file, for example in the application build pipeline.
+
+If using Webpack to build the application, a solution is to use the [CopyWebpackPlugin](https://webpack.js.org/plugins/copy-webpack-plugin/):
+
+```js
+module.exports = {
+  ...
+  plugins: [
+     new CopyWebpackPlugin([
+       { from: 'node_modules/@camptocamp/inkmap/dist/inkmap-worker.js', to: '/dist' },
+     ]),
+  ],
+  ...
+}
+```
+
 ## API
 
-All API functions are named exports from the `inkmap` package.
+Important note: all API functions are named exports from the `inkmap` package.
 
 #### `print(jsonSpec: PrintSpec): Observable<PrintStatus>`
 
@@ -97,7 +120,7 @@ A `Layer` object describes a layer in the printed map.
 
 #### `WMS layer` type
 
-Additionnal options for `WMS` layer type.
+Additional options for `WMS` layer type.
 
 | field | type | description |
 |---|---|---|
@@ -106,7 +129,7 @@ Additionnal options for `WMS` layer type.
 
 #### `WMTS layer` type
 
-Additionnal options for `WMTS` layer to define the layer source. See https://openlayers.org/en/latest/apidoc/module-ol_source_WMTS-WMTS.html
+Additional options for `WMTS` layer to define the layer source. See https://openlayers.org/en/latest/apidoc/module-ol_source_WMTS-WMTS.html
 for the full list of options. The following table introduces the common options to use.
 
 | field | type | description |
@@ -121,7 +144,7 @@ for the full list of options. The following table introduces the common options 
 
 #### `WFS layer` type
 
-Additionnal options for `WFS` layer type.
+Additional options for `WFS` layer type.
 
 | field | type | description |
 |---|---|---|
