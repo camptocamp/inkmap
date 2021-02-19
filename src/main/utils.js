@@ -20,7 +20,7 @@ export function downloadBlob(imageBlob, filename) {
  * True means a worker is used for print jobs
  * @type {Promise<boolean>}
  */
-export const printerReady = new Promise((resolve, reject) => {
+export const printerReady = new Promise((resolve) => {
   if (hasOffscreenCanvasSupport()) {
     navigator.serviceWorker.register('inkmap-worker.js').then(
       () => {
@@ -32,9 +32,11 @@ export const printerReady = new Promise((resolve, reject) => {
           resolve(true);
         }, 100);
       },
-      (error) => {
-        console.log('Service worker registration failed:', error);
-        reject();
+      () => {
+        console.log(
+          '[inkmap] Service worker was not found. See https://github.com/camptocamp/inkmap for using multi-threading'
+        );
+        resolve(false);
       }
     );
   } else {

@@ -1,0 +1,4 @@
+demo/dist
+dist
+./*.js
+__mocks__
