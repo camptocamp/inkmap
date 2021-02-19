@@ -33,9 +33,7 @@ btn.addEventListener('click', async () => {
         errors.innerHTML = '';
       }
 
-      // download the result
-      const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
-      downloadBlob(status.imageBlob, filename);
+      downloadBlob(status.imageBlob, 'inkmap.png');
     }
   });
 });

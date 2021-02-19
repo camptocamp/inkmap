@@ -15,7 +15,5 @@ btn.addEventListener('click', async () => {
 
   btn.hideSpinner();
 
-  // download the result
-  const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
-  downloadBlob(blob, filename);
+  downloadBlob(blob, 'inkmap.png');
 });

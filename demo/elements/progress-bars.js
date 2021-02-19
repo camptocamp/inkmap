@@ -1,4 +1,4 @@
-class CustomProgresses extends HTMLElement {
+class ProgressBars extends HTMLElement {
   constructor() {
     super();
 
@@ -35,4 +35,4 @@ class CustomProgresses extends HTMLElement {
   }
 }
 
-customElements.define('custom-progresses', CustomProgresses);
+customElements.define('progress-bars', ProgressBars);

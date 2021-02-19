@@ -1,19 +1,15 @@
-import { getJobsStatus, queuePrint } from 'inkmap';
-import { tap } from 'rxjs/operators';
-import { downloadBlob, getJobStatus } from '../../src/main';
+import { getJobsStatus, queuePrint, downloadBlob, getJobStatus } from 'inkmap';
 
 const root = document.getElementById('example-04');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
-const bars = /** @type {CustomProgresses} */ root.querySelector(
-  'custom-progresses'
-);
+const bars = /** @type {ProgressBars} */ root.querySelector('progress-bars');
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
 // make sure the spec is valid to allow printing
 spec.onValidityCheck((valid) => (btn.enabled = valid));
 
-// subscribe to the long-running observable
-// beware of managing the unsubscription
+// subscribe to the jobs status updates
+// ATTENTION! subscriptions to long-running observables might cause memory leaks!
 getJobsStatus().subscribe((jobs) => {
   bars.jobsStatus = jobs;
 });
@@ -25,11 +21,7 @@ btn.addEventListener('click', async () => {
   getJobStatus(jobId).subscribe((printStatus) => {
     // job is finished
     if (printStatus.progress === 1) {
-      // download the result
-      const filename = `inkmap-${jobId}-${new Date()
-        .toISOString()
-        .substr(0, 10)}.png`;
-      downloadBlob(printStatus.imageBlob, filename);
+      downloadBlob(printStatus.imageBlob, `inkmap-${jobId}.png`);
     }
   });
 });

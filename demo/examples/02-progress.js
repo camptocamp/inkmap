@@ -26,10 +26,7 @@ btn.addEventListener('click', async () => {
     // job is finished
     if (printStatus.progress === 1) {
       btn.hideSpinner();
-
-      // download the result
-      const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
-      downloadBlob(printStatus.imageBlob, filename);
+      downloadBlob(printStatus.imageBlob, 'inkmap.png');
     }
   });
 });

@@ -77,8 +77,7 @@ btn.addEventListener('click', async () => {
     }
 
     // download the result
-    const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.pdf`;
-    doc.save(filename);
+    doc.save('inkmap.pdf');
   };
 });
 
