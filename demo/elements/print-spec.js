@@ -20,6 +20,9 @@ class PrintSpec extends HTMLElement {
 
     /** @type {string} */
     this.error_ = '';
+
+    /** @type {function(boolean):void} */
+    this.onValidityCheckHandler_ = null;
   }
 
   /**
@@ -31,6 +34,10 @@ class PrintSpec extends HTMLElement {
     } catch {
       return null;
     }
+  }
+
+  onValidityCheck(value) {
+    this.onValidityCheckHandler_ = value;
   }
 
   connectedCallback() {
@@ -56,6 +63,21 @@ class PrintSpec extends HTMLElement {
       JSON.parse(this.specContent);
     } catch (err) {
       this.error_ = err.message;
+    }
+
+    const hasError = !!this.error_;
+
+    const jsonValidElt = this.querySelector('.json-validity');
+    if (jsonValidElt) {
+      jsonValidElt.classList.toggle('text-success', !hasError);
+      jsonValidElt.classList.toggle('text-danger', hasError);
+      jsonValidElt.textContent = hasError
+        ? 'The JSON object is invalid: ' + this.error_
+        : 'The JSON object is valid!';
+    }
+
+    if (!!this.onValidityCheckHandler_) {
+      this.onValidityCheckHandler_.call(this, !this.error_);
     }
   }
 
@@ -88,12 +110,8 @@ class PrintSpec extends HTMLElement {
     >${this.specContent}</textarea>
   </label>
 </div>
-<small class="${!!this.error_ ? 'text-danger' : 'text-secondary'}">
-  ${
-    !!this.error_
-      ? 'The JSON object is invalid: ' + this.error_
-      : 'Please provide a valid JSON object.'
-  }
+<small class="json-validity text-secondary">
+  Please provide a valid JSON object.
 </small>`
       : `
 <div class="dropdown d-flex flex-row align-items-baseline p-1 border rounded">
@@ -133,9 +151,6 @@ class PrintSpec extends HTMLElement {
         specName.innerText = 'Custom spec ';
         this.currentSpecName_ = 'Custom spec';
         this.checkSpecValidity();
-      });
-      textElt.addEventListener('change', () => {
-        this.refreshDOM();
       });
     }
 

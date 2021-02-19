@@ -10,6 +10,9 @@ class CustomButton extends HTMLElement {
 
     /** @type {HTMLButtonElement} */
     this.waitBtn = null;
+
+    /** @type {boolean} */
+    this.enabled_ = true;
   }
 
   /**
@@ -21,6 +24,19 @@ class CustomButton extends HTMLElement {
       this.progress_ = null;
     }
     this.refreshDOM();
+  }
+
+  set enabled(enabled) {
+    this.enabled_ = enabled;
+    this.refreshDOM();
+  }
+
+  showSpinner() {
+    this.working = true;
+  }
+
+  hideSpinner() {
+    this.working = false;
   }
 
   connectedCallback() {
@@ -50,6 +66,7 @@ class CustomButton extends HTMLElement {
   refreshDOM() {
     this.waitBtn.style.display = this.working_ ? null : 'none';
     this.startBtn.style.display = this.working_ ? 'none' : null;
+    this.startBtn.disabled = !this.enabled_;
   }
 }
 
