@@ -125,6 +125,7 @@ Additional options for `WMS` layer type.
 | field | type | description |
 |---|---|---|
 | `layer` | `string` | Layer name. |
+| `version` | `string` | Version of WMS protocol used: `1.1.1` or `1.3.0` (default). |
 | `tiled` | `boolean` | Indicates whether the WMS layer should be requested as tiles. Defaults to `false`. |
 
 #### `WMTS layer` type

@@ -27,6 +27,7 @@ export { downloadBlob } from './utils';
  * @property {'WMS'} type
  * @property {string} url
  * @property {string} layer Layer name.
+ * @property {string} version Version of WMS protocol used: `1.1.1` or `1.3.0` (default).
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
  */

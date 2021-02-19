@@ -167,6 +167,23 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
 
 /**
  * @param {WmsLayer} layerSpec
+ * @return {Object.<string, string|boolean>}
+ */
+export function getWMSParams(layerSpec) {
+  return layerSpec.tiled
+    ? {
+        LAYERS: layerSpec.layer,
+        VERSION: layerSpec.version || '1.3.0',
+        TILED: true,
+      }
+    : {
+        LAYERS: layerSpec.layer,
+        VERSION: layerSpec.version || '1.3.0',
+      };
+}
+
+/**
+ * @param {WmsLayer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
@@ -177,7 +194,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
       new TileWMS({
         crossOrigin: 'anonymous',
         url: layerSpec.url,
-        params: { LAYERS: layerSpec.layer, TILED: true },
+        params: getWMSParams(layerSpec),
         transition: 0,
       }),
       rootFrameState,
@@ -199,7 +216,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     source: new ImageWMS({
       crossOrigin: 'anonymous',
       url: layerSpec.url,
-      params: { LAYERS: layerSpec.layer },
+      params: getWMSParams(layerSpec),
       ratio: 1,
     }),
   });
