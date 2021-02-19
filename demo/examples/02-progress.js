@@ -5,9 +5,11 @@ const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
+// make sure the spec is valid to allow printing
+spec.onValidityCheck((valid) => (btn.enabled = valid));
+
 btn.addEventListener('click', async () => {
-  // display the loading spinner
-  btn.working = true;
+  btn.showSpinner();
 
   // display the job progress
   bar.progress = 0;
@@ -23,8 +25,7 @@ btn.addEventListener('click', async () => {
 
     // job is finished
     if (printStatus.progress === 1) {
-      // hide the loading spinner
-      btn.working = false;
+      btn.hideSpinner();
 
       // download the result
       const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;

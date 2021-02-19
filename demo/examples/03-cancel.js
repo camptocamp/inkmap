@@ -7,9 +7,11 @@ const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
 let jobId;
 
+// make sure the spec is valid to allow printing
+spec.onValidityCheck((valid) => (btn.enabled = valid));
+
 btn.addEventListener('click', async () => {
-  // display the loading spinner
-  btn.working = true;
+  btn.showSpinner();
 
   // display the job progress
   bar.progress = 0;
@@ -25,8 +27,7 @@ btn.addEventListener('click', async () => {
 
     // job is finished or canceled
     if (printStatus.progress === 1 || printStatus.progress === -1) {
-      // hide the loading spinner
-      btn.working = false;
+      btn.hideSpinner();
     }
 
     // job is finished

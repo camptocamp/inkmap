@@ -9,6 +9,9 @@ const bars = /** @type {CustomProgresses} */ root.querySelector(
 );
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
+// make sure the spec is valid to allow printing
+spec.onValidityCheck((valid) => (btn.enabled = valid));
+
 // subscribe to the long-running observable
 // beware of managing the unsubscription
 getJobsStatus().subscribe((jobs) => {

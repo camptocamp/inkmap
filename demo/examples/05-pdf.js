@@ -5,9 +5,11 @@ const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
+// make sure the spec is valid to allow printing
+spec.onValidityCheck((valid) => (btn.enabled = valid));
+
 btn.addEventListener('click', async () => {
-  // display the loading spinner
-  btn.working = true;
+  btn.showSpinner();
 
   // Get map size from printSpec
   const specValue = {
@@ -18,8 +20,7 @@ btn.addEventListener('click', async () => {
   // create a job, get a promise that resolves when the job is finished
   const blob = await print(specValue);
 
-  // hide the loading spinner
-  btn.working = false;
+  btn.hideSpinner();
 
   // convert the result into a Data URL
   const reader = new FileReader();
