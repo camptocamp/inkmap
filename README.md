@@ -10,7 +10,7 @@
 **inkmap** can handle long-running jobs (e.g. A0 format in 300 dpi) and provides an API for following a job progress.
 It uses a service worker in the background provided the user browser supports [OffscreenCanvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), and falls back (almost) seamlessly to the main thread if not.
 
-Please note that **inkmap** has been entirely funded and supported by the [French Ministry of Ecology](https://www.ecologie.gouv.fr/) as part of their Descartes web mapping toolkit.
+Please note that **inkmap** has been entirely funded and supported by the [French Ministry of Ecology](https://www.ecologie.gouv.fr/) as part of their Descartes web mapping toolkit, hosted here: https://adullact.net/projects/descartes/
 
 ## Usage
 
