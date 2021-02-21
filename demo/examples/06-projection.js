@@ -1,5 +1,4 @@
-import { downloadBlob, print } from 'inkmap';
-import { registerProjection } from '../../src/main';
+import { downloadBlob, print, registerProjection } from 'inkmap';
 
 const root = document.getElementById('example-06');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');

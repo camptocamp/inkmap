@@ -59,6 +59,10 @@
           Give <strong>inkmap</strong> a JSON spec and it will use it to
           generate a PNG image in the background.
         </p>
+        <p>
+          Use the <code>print</code> API to begin printing a spec.
+          This function returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a> which resolves to a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob">Blob</a> containing the map image.
+        </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a
@@ -95,6 +99,10 @@
           <strong>inkmap</strong> also enables finer monitoring by making the
           job status observable.
         </p>
+        <p>
+          Use the <code>enqueuePrint</code> API to start a print job asynchronously. This functions returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a> which resolves to a job id.
+          You can then feed the job id to <code>getJobStatus</code> which will return an observable that you can <code>subscribe</code> to, emitting updates on the given print job status.
+        </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a
@@ -130,7 +138,8 @@
 
       <div class="mt-5" id="example-03">
         <h2>Canceling a job</h2>
-        <p><strong>inkmap</strong> also enables job cancelation.</p>
+        <p><strong>inkmap</strong> also enables job cancellation.</p>
+        <p>Use <code>cancelJob</code> after having started a job with <code>enqueuePrint</code>.</p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a
@@ -176,6 +185,10 @@
           Multiple jobs can be monitored at once through a long lived
           observable.
         </p>
+        <p>
+          Use <code>getJobsStatus</code> to receive a long-lived observable that you can <code>subscribe</code> to and
+          which will regularly give you status updates on all running jobs.
+        </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a
@@ -212,8 +225,8 @@
       <div class="mt-5" id="example-05">
         <h2>Printing to PDF</h2>
         <p>
-          <strong>inkmap</strong> jobs give back a blob which can be inserted
-          into a PDF.
+          <strong>inkmap</strong> jobs give back a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob">Blob</a> which can be inserted
+          into a PDF. This is for example supported by <a href="http://raw.githack.com/MrRio/jsPDF/master/docs/module-addImage.html#~addImage">jsPDF</a>, as showcased here.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -246,14 +259,13 @@
       </div>
 
       <div class="mt-5" id="example-06">
-        <h2>Registering new projections</h2>
+        <h2>Using projections</h2>
         <p>
-          <strong>inkmap</strong> uses proj4 and allows for new projections
-          registration.
+          <strong>inkmap</strong> supports a large amount of projections for rendering the map.
+          Projections can be defined and registered using <code>registerProjection</code>. If the map projection is not registered, <strong>inkmap</strong> will look it up on <a href="https://epsg.io/">epsg.io</a>.
         </p>
         <p>
-          Here's an example registering 'EPSG:2154', so it should not be
-          downloaded with the 'Downloaded projection' predefined spec.
+          Under the hood, <strong>inkmap</strong> uses <a href="http://proj4js.org/">proj4js</a>.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -288,8 +300,8 @@
       <div class="mt-5" id="example-07">
         <h2>Error handling</h2>
         <p>
-          <strong>inkmap</strong> status observable includes a list of error
-          objects with urls that encountered errors.
+          When errors are encountered while loading data for one or several layers, <strong>inkmap</strong> includes a list of error
+          objects with urls in the status updates.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
