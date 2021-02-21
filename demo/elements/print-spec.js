@@ -86,7 +86,7 @@ class PrintSpec extends HTMLElement {
       ? `
 <div class="border rounded p-1">
   <div class="dropdown d-flex flex-row align-items-baseline">
-    <button class="btn btn-sm btn-info dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       ${this.currentSpecName_}
     </button>
     <div class="dropdown-menu" aria-label="List of print specs">
@@ -115,7 +115,7 @@ class PrintSpec extends HTMLElement {
 </small>`
       : `
 <div class="dropdown d-flex flex-row align-items-baseline p-1 border rounded">
-  <button class="btn btn-sm btn-info dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     ${this.currentSpecName_}
   </button>
   <div class="dropdown-menu" aria-label="List of print specs">
