@@ -1,73 +1,134 @@
-export const TiledWmsSpec = {
-  layers: [
-    {
-      type: 'WMS',
-      url: 'https://ows.mundialis.de/services/service',
-      layer: 'TOPO-OSM-WMS',
-      tiled: true,
-    },
-  ],
-  size: [800, 600],
-  center: [12, 48],
-  dpi: 200,
-  scale: 40000000,
-  scaleBar: { position: 'bottom-right', units: 'metric' },
-  projection: 'EPSG:3857',
-  northArrow: 'top-right',
-};
-
-export const WmsSpec = {
-  layers: [
-    {
-      type: 'WMS',
-      url: 'https://ows.mundialis.de/services/service',
-      layer: 'TOPO-OSM-WMS',
-      tiled: false,
-    },
-  ],
-  size: [800, 600],
-  center: [12, 48],
-  dpi: 200,
-  scale: 40000000,
-  scaleBar: { position: 'bottom-right', units: 'metric' },
-  projection: 'EPSG:3857',
-  northArrow: 'top-right',
-};
-
-export const OsmSpec = {
+const OsmSpec = {
   layers: [
     {
       type: 'XYZ',
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     },
   ],
-  size: [800, 600],
-  center: [12, 48],
+  size: [2000, 1200],
+  center: [12, 56],
   dpi: 200,
   scale: 40000000,
+  scaleBar: {
+    position: 'bottom-right',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+};
+
+const OsmWmsSpec = {
+  layers: [
+    {
+      type: 'WMS',
+      url: 'https://ows.mundialis.de/services/service',
+      layer: 'OSM-WMS',
+      tiled: true,
+    },
+  ],
+  size: [2000, 1200],
+  center: [12, 56],
+  dpi: 200,
+  scale: 40000000,
+  scaleBar: {
+    position: 'bottom-right',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+};
+
+const AuvergneTerrainSpec = {
+  layers: [
+    {
+      type: 'WMS',
+      url: 'http://tiles.craig.fr/mnt/service',
+      layer: 'relief',
+    },
+  ],
+  size: [1000, 1000],
+  center: [2.959, 45.768],
+  dpi: 200,
+  scale: 150000,
+  scaleBar: {
+    position: 'bottom-right',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+};
+
+const PolarProjectionSpec = {
+  layers: [
+    {
+      type: 'XYZ',
+      url:
+        'https://services.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+    },
+  ],
+  size: [1000, 1000],
+  center: [0, 89],
+  dpi: 200,
+  scale: 40000000,
+  scaleBar: {
+    position: 'bottom-right',
+    units: 'metric',
+  },
+  projection: 'EPSG:3413',
+  northArrow: 'top-right',
+};
+
+// Mars perseverance landing site
+const MarsRoverLandingSpec = {
+  layers: [
+    {
+      type: 'XYZ',
+      url:
+        'https://mars.nasa.gov/mmgis-maps/M20/Layers/Jezero_Balanced_Visible_HiRISE_HRSCcolor_IHS_pansharp/{z}/{x}/{-y}.png',
+    },
+  ],
+  size: [1000, 1000],
+  center: [77.451, 18.444],
+  dpi: 200,
+  scale: 180000,
   scaleBar: { position: 'bottom-right', units: 'metric' },
   projection: 'EPSG:3857',
   northArrow: 'top-right',
 };
 
-export const WmtsSpec = {
-  size: [800, 600],
-  center: [12, 48],
-  dpi: 200,
-  scale: 40000000,
-  scaleBar: { position: 'bottom-right', units: 'metric' },
-  projection: 'EPSG:3857',
-  northArrow: 'top-right',
+export const BayonneWmtsSpec = {
   layers: [
     {
       type: 'WMTS',
-      url: 'https://wxs.ign.fr/pratique/geoportail/wmts',
-      layer: 'GEOGRAPHICALGRIDSYSTEMS.MAPS',
-      matrixSet: 'PM',
+      url:
+        'https://sextant.ifremer.fr/geowebcache/service/wmts?layer=SXT_PHOTOANCIENNE_BAYONNE&style=&tilematrixset=EPSG%3A3857&Service=WMTS',
+      layer: 'SXT_PHOTOANCIENNE_BAYONNE',
+      matrixSet: 'EPSG:3857',
       projection: 'EPSG:3857',
-      format: 'image/jpeg',
-      style: 'normal',
+      format: 'image/png',
+      style: '',
       tileGrid: {
+        matrixIds: [
+          'EPSG:3857:0',
+          'EPSG:3857:1',
+          'EPSG:3857:2',
+          'EPSG:3857:3',
+          'EPSG:3857:4',
+          'EPSG:3857:5',
+          'EPSG:3857:6',
+          'EPSG:3857:7',
+          'EPSG:3857:8',
+          'EPSG:3857:9',
+          'EPSG:3857:10',
+          'EPSG:3857:11',
+          'EPSG:3857:12',
+          'EPSG:3857:13',
+          'EPSG:3857:14',
+          'EPSG:3857:15',
+          'EPSG:3857:16',
+          'EPSG:3857:17',
+          'EPSG:3857:18',
+        ],
         resolutions: [
           156543.03392811998,
           78271.51696391999,
@@ -94,9 +155,18 @@ export const WmtsSpec = {
         ],
         tileSize: 256,
       },
-      opacity: 1,
     },
   ],
+  size: [1200, 1400],
+  center: [-1.473, 43.499],
+  dpi: 200,
+  scale: 25000,
+  scaleBar: {
+    position: 'bottom-right',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
 };
 
 export const WfsSpec = {
@@ -136,22 +206,6 @@ export const WfsSpec = {
   scaleBar: { position: 'bottom-right', units: 'metric' },
   projection: 'EPSG:3857',
   northArrow: 'top-right',
-};
-
-const DownloadedProjection = {
-  layers: [
-    {
-      type: 'WMS',
-      url: 'https://wxs.ign.fr/jhyvi0fgmnuxvfv0zjzorvdn/geoportail/r/wms',
-      layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
-      tiled: false,
-    },
-  ],
-  size: [600, 400],
-  center: [4, 47],
-  dpi: 200,
-  scale: 10000000,
-  projection: 'EPSG:2154',
 };
 
 const CustomProjection = {
@@ -213,14 +267,15 @@ export const ErrorSpec = {
 };
 
 const PresetSpecs = {
-  'OpenStreetMap layer': OsmSpec,
-  'Tiled WMS layer': TiledWmsSpec,
-  'WMS layer': WmsSpec,
-  'WMTS layer': WmtsSpec,
-  'WFS layer': WfsSpec,
-  'Downloaded projection': DownloadedProjection,
-  'Custom projection': CustomProjection,
-  'Error layers': ErrorSpec,
+  'Europe in OpenStreetMap': OsmSpec,
+  'Europe in OpenStreetMap (WMS, tiled)': OsmWmsSpec,
+  'Volcanoes Terrain model (WMS)': AuvergneTerrainSpec,
+  'Mars Perseverance Rover Landing Site': MarsRoverLandingSpec,
+  'Bayonne, 1935 (WMTS)': BayonneWmtsSpec,
+  'North pole, arctic projection (WMS)': PolarProjectionSpec,
+  'WFS layer example': WfsSpec,
+  'Custom projection example': CustomProjection,
+  'Spec with invalid sources': ErrorSpec,
 };
 
 export default PresetSpecs;

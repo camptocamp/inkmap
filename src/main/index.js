@@ -36,6 +36,7 @@ export { downloadBlob } from './utils';
  * @typedef {Object} XyzLayer
  * @property {'XYZ'} type
  * @property {string} url URL or URL template for the layer; can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`.
+ *   Note: tile grids are expected to have their x=0,y=0 point at the top left corner; for tile grids where it is at the bottom left corner, use the `{-y}` placeholder.
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  */
 
