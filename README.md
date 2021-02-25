@@ -106,7 +106,8 @@ A `PrintSpec` object describes the content and aspect of the map to be printed.
 | `scaleBar` | `boolean \| ScaleBarSpec` | Indicates whether scalebar should be printed (`true`). Also allows to pass options object: `{"position": "bottom-left", "units": "metric" }` (default values). Possible values are: <ul><li>`position`: `"bottom-left" \| "bottom-right"`</li><li>`units`: `"degrees" \| "imperial" \| "metric" \| "nautical" \| "us"` (same as `ol.control.ScaleLine`)</li></ul> |
 | `northArrow` | `boolean \| string` | North arrow position; either `'top-left'`, `'bottom-left'`, `'bottom-right'` or `'top-right'`; `true` defaults to `'top-right'`; absent or `false` means not to print the north arrow.
 | `projection` | `string` | Projection name. If starting with `EPSG:`, and other than `EPSG:3857` or `EPSG:4326`, definition will be downloaded on [https://epsg.io/]. |
-| `projectionDefinitions` | `[projectionDefinition]` | Optionnal. Registers new projections from the definitions. |
+| `projectionDefinitions` | `[projectionDefinition]` | Optional. Registers new projections from the definitions. |
+| `attributions` | `boolean \| string` | Position of the attributions to be printed on the map; either `'top-left'`, `'bottom-left'`, `'bottom-right'` or `'top-right'`; if not defined, attributions will not be printed.  |
 
 #### `Layer` type
 
@@ -117,6 +118,7 @@ A `Layer` object describes a layer in the printed map.
 | `type` | `string` | Either `XYZ`, `WMTS`, `WMS` or `WFS`. |
 | `url` | `string` | URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`. |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
+| `attribution` | `string` | Attribution for the data present in the layer. |
 
 #### `WMS layer` type
 

@@ -30,6 +30,7 @@ export { downloadBlob } from './utils';
  * @property {string} version Version of WMS protocol used: `1.1.1` or `1.3.0` (default).
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
+ * @property {string} attribution Attribution for the data used in the layer
  */
 
 /**
@@ -86,6 +87,7 @@ export { downloadBlob } from './utils';
  * @property {string} projection EPSG projection code.
  * @property {boolean | string} northArrow North arrow position.
  * @property {ProjectionDefinition} projectionDefinition Projection definition to be newly registered.
+ * @property {string} attributions Position where the attributions should be printed
  */
 
 /**

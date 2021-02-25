@@ -1,5 +1,6 @@
 import { print } from 'inkmap';
 import { jsPDF } from 'jspdf';
+import { computeAttributionsText } from '../../src/printer/attributions';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -18,6 +19,7 @@ btn.addEventListener('click', async () => {
   const specValue = {
     ...spec.value,
     size: [mapWidth, mapHeight, 'mm'],
+    attributions: null, // do not print the attributions on the map
   };
 
   // create a job, get a promise that resolves when the job is finished
@@ -57,14 +59,7 @@ btn.addEventListener('click', async () => {
   // add attribution
   doc.setFont('courier', 'normal');
   doc.setFontSize(12);
-  doc.text(
-    `Credit to whoever helped make this wonderful map.`,
-    287,
-    200,
-    null,
-    null,
-    'right'
-  );
+  doc.text(computeAttributionsText(spec.value), 287, 200, null, null, 'right');
 
   // download the result
   doc.save('inkmap.pdf');

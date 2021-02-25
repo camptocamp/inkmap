@@ -17,6 +17,7 @@ import { cancel$, createLayer } from './layers';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
 import { canvasToBlob } from './utils';
+import { printAttributions } from './attributions';
 
 let counter = 0;
 
@@ -73,6 +74,9 @@ export async function createJob(spec) {
           }
           if (spec.scaleBar) {
             printScaleBar(context, frameState, spec);
+          }
+          if (spec.attributions) {
+            printAttributions(context, spec);
           }
           return canvasToBlob(context.canvas).pipe(
             map((blob) => [1, blob, sourceLoadErrors])
