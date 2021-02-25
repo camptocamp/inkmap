@@ -183,3 +183,7 @@ of loading all the map images and data, composing them together and giving them 
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md).
+
+## License
+
+[CeCILL-C](https://cecill.info/licences/Licence_CeCILL-C_V1-en.txt)
