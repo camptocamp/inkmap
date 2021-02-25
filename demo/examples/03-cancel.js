@@ -4,12 +4,15 @@ const root = document.getElementById('example-03');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
+const btnCancel = /** @type {Button} */ root.querySelector('.cancel-btn');
+
+// make sure the spec is valid to allow printing
+spec.onValidityCheck((valid) => (btn.enabled = valid));
 
 let jobId;
 
 btn.addEventListener('click', async () => {
-  // display the loading spinner
-  btn.working = true;
+  btn.showSpinner();
 
   // display the job progress
   bar.progress = 0;
@@ -25,21 +28,17 @@ btn.addEventListener('click', async () => {
 
     // job is finished or canceled
     if (printStatus.progress === 1 || printStatus.progress === -1) {
-      // hide the loading spinner
-      btn.working = false;
+      btn.hideSpinner();
     }
 
     // job is finished
     if (printStatus.progress === 1) {
-      // download the result
-      const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
-      downloadBlob(printStatus.imageBlob, filename);
+      downloadBlob(printStatus.imageBlob, 'inkmap.png');
     }
   });
 });
 
-const btnCancel = /** @type {Button} */ root.querySelector('.cancel-btn');
-
 btnCancel.addEventListener('click', async () => {
+  // cancel job based on job id
   cancelJob(jobId);
 });

@@ -5,9 +5,11 @@ const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 const errors = root.querySelector('#errors');
 
+// make sure the spec is valid to allow printing
+spec.onValidityCheck((valid) => (btn.enabled = valid));
+
 btn.addEventListener('click', async () => {
-  // display the loading spinner
-  btn.working = true;
+  btn.showSpinner();
 
   // create a job, get a promise that resolves with the job id
   const jobId = await queuePrint(spec.value);
@@ -18,8 +20,7 @@ btn.addEventListener('click', async () => {
 
     // job is finished
     if (status.progress === 1) {
-      // hide the loading spinner
-      btn.working = false;
+      btn.hideSpinner();
 
       // display urls with errors
       if (status.sourceLoadErrors.length > 0) {
@@ -32,9 +33,7 @@ btn.addEventListener('click', async () => {
         errors.innerHTML = '';
       }
 
-      // download the result
-      const filename = `inkmap-${new Date().toISOString().substr(0, 10)}.png`;
-      downloadBlob(status.imageBlob, filename);
+      downloadBlob(status.imageBlob, 'inkmap.png');
     }
   });
 });

@@ -1,11 +1,13 @@
 import PresetSpecs from '../preset-specs';
 
+const PresetSpecsNames = Object.keys(PresetSpecs);
+
 class PrintSpec extends HTMLElement {
   constructor() {
     super();
 
     /** @type {boolean} */
-    this.editable_ = false;
+    this.expanded_ = false;
 
     /**
      * Name of the selected preset spec, or null if a custom spec
@@ -13,93 +15,155 @@ class PrintSpec extends HTMLElement {
      */
     this.currentSpecName_ = null;
 
-    /** @type {HTMLButtonElement[]} */
-    this.presetSpecElts = null;
+    /** @type {string} */
+    this.specContent = '';
 
-    /** @type {HTMLTextAreaElement} */
-    this.textElt = null;
+    /** @type {string} */
+    this.error_ = '';
+
+    /** @type {function(boolean):void} */
+    this.onValidityCheckHandler_ = null;
   }
 
   /**
-   * @return {PrintSpec}
+   * @return {?PrintSpec}
    */
   get value() {
-    return JSON.parse(this.textElt.value);
+    try {
+      return JSON.parse(this.specContent);
+    } catch {
+      return null;
+    }
+  }
+
+  onValidityCheck(value) {
+    this.onValidityCheckHandler_ = value;
   }
 
   connectedCallback() {
-    const specNames = Object.keys(PresetSpecs);
+    this.expanded_ = this.getAttribute('expanded') === 'true';
 
-    this.innerHTML = `
-<div>
-  <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Choose a predefined spec below
+    if (this.getAttribute('select')) {
+      this.selectSpec(this.getAttribute('select'));
+    } else {
+      this.selectSpec(PresetSpecsNames[0]);
+    }
+  }
+
+  selectSpec(name) {
+    this.currentSpecName_ = name;
+    const spec = PresetSpecs[name];
+    this.specContent = JSON.stringify(spec, null, 2);
+    this.refreshDOM();
+  }
+
+  checkSpecValidity() {
+    try {
+      this.error_ = '';
+      JSON.parse(this.specContent);
+    } catch (err) {
+      this.error_ = err.message;
+    }
+
+    const hasError = !!this.error_;
+
+    const jsonValidElt = this.querySelector('.json-validity');
+    if (jsonValidElt) {
+      jsonValidElt.classList.toggle('text-success', !hasError);
+      jsonValidElt.classList.toggle('text-danger', hasError);
+      jsonValidElt.textContent = hasError
+        ? 'The JSON object is invalid: ' + this.error_
+        : 'The JSON object is valid!';
+    }
+
+    if (!!this.onValidityCheckHandler_) {
+      this.onValidityCheckHandler_.call(this, !this.error_);
+    }
+  }
+
+  refreshDOM() {
+    this.innerHTML = this.expanded_
+      ? `
+<div class="border rounded p-1">
+  <div class="dropdown d-flex flex-row align-items-baseline">
+    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      ${this.currentSpecName_}
     </button>
     <div class="dropdown-menu" aria-label="List of print specs">
-      ${specNames
-        .map(
-          (name) => `
-        <button type="button" class="dropdown-item preset-spec" data-name="${name}">
+      ${PresetSpecsNames.map(
+        (name) => `
+        <button type="button" class="dropdown-item preset-spec ${
+          name === this.currentSpecName_ ? 'active' : ''
+        }" data-name="${name}">
           ${name}
         </button>`
-        )
-        .join('\n')}
+      ).join('\n')}
     </div>
+    <span class="mx-2 flex-grow-1">Choose a predefined spec from the list.</span>
+    <a href="#" class="mx-2 toggle-spec-btn">Hide</a>
   </div>
-  <label class="d-block mt-2">
+  <label class="d-block m-0 mt-1">
     <textarea
-      class="spec form-control text-monospace"
+      class="spec form-control text-monospace border-0"
       rows="20"
       style="font-size: 12px"
-    ></textarea>
-    <small class="text-secondary">
-      Please provide a valid JSON object.
-    </small>
+    >${this.specContent}</textarea>
   </label>
+</div>
+<small class="json-validity text-secondary">
+  Please provide a valid JSON object.
+</small>`
+      : `
+<div class="dropdown d-flex flex-row align-items-baseline p-1 border rounded">
+  <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    ${this.currentSpecName_}
+  </button>
+  <div class="dropdown-menu" aria-label="List of print specs">
+    ${PresetSpecsNames.map(
+      (name) => `
+      <button type="button" class="dropdown-item preset-spec ${
+        name === this.currentSpecName_ ? 'active' : ''
+      }" data-name="${name}">
+        ${name}
+      </button>`
+    ).join('\n')}
+  </div>
+  <span class="mx-2 flex-grow-1">Choose a predefined spec from the list.</span>
+  <a href="#" class="mx-2 toggle-spec-btn">Show</a>
 </div>`;
 
-    this.presetSpecElts =
+    const presetSpecElts =
       /** @type {HTMLButtonElement[]} */
       Array.from(this.querySelectorAll('.preset-spec'));
-    this.textElt = this.querySelector('.spec');
 
-    this.editable_ = this.getAttribute('editable') === 'true';
-
-    this.presetSpecElts.forEach((elt) =>
+    presetSpecElts.forEach((elt) =>
       elt.addEventListener('click', () => {
         this.selectSpec(elt.getAttribute('data-name'));
         this.refreshDOM();
       })
     );
 
-    this.textElt.addEventListener('change', () => {
-      this.currentSpecName_ = null;
-    });
-
-    if (this.getAttribute('select')) {
-      this.selectSpec(this.getAttribute('select'));
-    } else {
-      this.selectSpec(specNames[0]);
+    if (this.expanded_) {
+      const textElt = this.querySelector('.spec');
+      const specName = this.querySelector('.dropdown-toggle');
+      textElt.addEventListener('input', () => {
+        this.specContent = textElt.value;
+        specName.innerText = 'Custom spec ';
+        this.currentSpecName_ = 'Custom spec';
+        this.checkSpecValidity();
+      });
     }
 
-    this.refreshDOM();
-  }
-
-  selectSpec(name) {
-    this.currentSpecName_ = name;
-    const spec = PresetSpecs[name];
-    this.textElt.value = JSON.stringify(spec, null, 2);
-  }
-
-  refreshDOM() {
-    this.textElt.parentElement.classList.toggle('d-none', !this.editable_);
-    this.textElt.parentElement.classList.toggle('d-block', this.editable_);
-
-    this.presetSpecElts.forEach((elt) => {
-      const name = elt.getAttribute('data-name');
-      elt.classList.toggle('active', name === this.currentSpecName_);
+    const toggleSpecBtn = this.querySelector('.toggle-spec-btn');
+    toggleSpecBtn.addEventListener('click', (evt) => {
+      this.setExpanded(!this.expanded_);
+      evt.preventDefault();
     });
+  }
+
+  setExpanded(expanded) {
+    this.expanded_ = expanded;
+    this.refreshDOM();
   }
 }
 
