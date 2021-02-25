@@ -110,7 +110,7 @@
         </p>
         <p>
           Use the <code>enqueuePrint</code> API to start a print job
-          asynchronously. This functions returns a
+          asynchronously. This function returns a
           <a
             href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"
             >Promise</a
@@ -317,7 +317,11 @@
         <div class="tab-content mt-2">
           <div class="tab-pane example-06-result show active">
             <div class="row align-items-start">
-              <print-spec class="col-8" expanded="false"></print-spec>
+              <print-spec
+                class="col-8"
+                expanded="false"
+                select="Custom projection example"
+              ></print-spec>
               <custom-button class="col-3"> Generate! </custom-button>
             </div>
           </div>
@@ -357,7 +361,7 @@
               <print-spec
                 class="col-8"
                 expanded="false"
-                select="Error layers"
+                select="Spec with invalid sources"
               ></print-spec>
               <custom-button class="col-3"> Generate! </custom-button>
             </div>
