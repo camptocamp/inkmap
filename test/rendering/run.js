@@ -151,7 +151,7 @@ async function validateResult(name) {
   );
   const errorPercentage = count / (width * height);
 
-  if (errorPercentage > 0.01) {
+  if (errorPercentage > 0.003) {
     console.log(
       `Image comparison failed for case ${name} with an error of ${(
         errorPercentage * 100
