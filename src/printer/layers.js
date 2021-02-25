@@ -103,7 +103,18 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
   renderer = layer.getRenderer();
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+  // this is used to make sure that tile transitions are skipped
+  // TODO: remove this once the reprojected tile transitions are fixed in OL
+  let fakeTime = 0;
+  const frameStateWithTime = {
+    ...frameState,
+    get time() {
+      fakeTime += 10000;
+      return fakeTime;
+    },
+  };
+
+  renderer.renderFrame(frameStateWithTime, context.canvas);
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
 
   const updatedProgress$ = update$.pipe(
@@ -125,10 +136,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
       }
 
       if (progress === 1) {
-        renderer.renderFrame(
-          { ...frameState, time: Date.now() },
-          context.canvas
-        );
+        renderer.renderFrame(frameStateWithTime, context.canvas);
         return [1, context.canvas, tileLoadErrorUrl];
       } else {
         return [progress, null, tileLoadErrorUrl];

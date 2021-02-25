@@ -274,7 +274,7 @@ const PresetSpecs = {
   'Bayonne, 1935 (WMTS)': BayonneWmtsSpec,
   'North pole, arctic projection (WMS)': PolarProjectionSpec,
   'WFS layer example': WfsSpec,
-  'Custom projection example': CustomProjection,
+  'Custom local projection (WMS)': CustomProjection,
   'Spec with invalid sources': ErrorSpec,
 };
 
