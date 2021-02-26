@@ -6,7 +6,7 @@ import { Units } from 'ol/control/ScaleLine';
  * Determines scalebar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
  * @param {FrameState} frameState
- * @param {PrintSpec} spec
+ * @param {import('../main/index').PrintSpec} spec
  */
 export function printScaleBar(ctx, frameState, spec) {
   const scaleBarParams = getScaleBarParams(frameState, spec);
@@ -16,8 +16,8 @@ export function printScaleBar(ctx, frameState, spec) {
 /**
  * Gets width and annotation for graphical scalebar.
  * @param {FrameState} frameState
- * @param {PrintSpec} spec
- * @return {ScaleBarParams}
+ * @param {import('../main/index').PrintSpec} spec
+ * @return {import('../main/index').ScaleBarParams}
  */
 function getScaleBarParams(frameState, spec) {
   // default values like ol.control.ScaleLine
@@ -119,8 +119,8 @@ function getScaleBarParams(frameState, spec) {
  * Renders scalebar on canvas.
  * @param {CanvasRenderingContext2D} ctx
  * @param {FrameState} frameState
- * @param {ScaleBarParams} scaleBarParams
- * @param {PrintSpec} spec
+ * @param {import('../main/index').ScaleBarParams} scaleBarParams
+ * @param {import('../main/index').PrintSpec} spec
  */
 function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   const scaleWidth = scaleBarParams.width;

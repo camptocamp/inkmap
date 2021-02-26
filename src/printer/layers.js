@@ -40,7 +40,7 @@ export const cancel$ = new Subject();
  * Returns an observable emitting the printing status for this layer
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
- * @param {Layer} layerSpec
+ * @param {import('../main/index').Layer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
@@ -58,7 +58,8 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {TileSource} source
+ * @param {number} jobId
+ * @param {import('ol/source/Tile').default} source
  * @param {FrameState} rootFrameState
  * @param {number} [opacity=1]
  * @return {Observable<LayerPrintStatus>}
@@ -156,7 +157,8 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
 }
 
 /**
- * @param {XyzLayer} layerSpec
+ * @param {number} jobId
+ * @param {import('../main/index').XyzLayer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
@@ -174,7 +176,7 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {WmsLayer} layerSpec
+ * @param {import('../main/index').WmsLayer} layerSpec
  * @return {Object.<string, string|boolean>}
  */
 export function getWMSParams(layerSpec) {
@@ -191,7 +193,8 @@ export function getWMSParams(layerSpec) {
 }
 
 /**
- * @param {WmsLayer} layerSpec
+ * @param {number} jobId
+ * @param {import('../main/index').WmsLayer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
@@ -273,7 +276,8 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {WmtsLayer} layerSpec
+ * @param {number} jobId
+ * @param {import('../main/index').WmtsLayer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */
@@ -304,7 +308,8 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {WfsLayer} layerSpec
+ * @param {number} jobId
+ * @param {import('../main/index').WfsLayer} layerSpec
  * @param {FrameState} rootFrameState
  * @return {Observable<LayerPrintStatus>}
  */

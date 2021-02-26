@@ -20,6 +20,7 @@ export { downloadBlob } from './utils';
  * @property {Array<string>} matrixIds matrix IDs. The length of this array needs
  * to match the length of the `resolutions` array. By default, it will be [0, 1, 2, ..., resolutions.length-1]
  * @property {number} tileSize Tile size.
+ * @property {[number, number, number, number]} [extent] Extent for the tile grid.
  */
 
 /**
@@ -30,7 +31,7 @@ export { downloadBlob } from './utils';
  * @property {string} version Version of WMS protocol used: `1.1.1` or `1.3.0` (default).
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
- * @property {string} attribution Attribution for the data used in the layer
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -39,6 +40,7 @@ export { downloadBlob } from './utils';
  * @property {string} url URL or URL template for the layer; can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`.
  *   Note: tile grids are expected to have their x=0,y=0 point at the top left corner; for tile grids where it is at the bottom left corner, use the `{-y}` placeholder.
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -53,6 +55,7 @@ export { downloadBlob } from './utils';
  * @property {!ProjectionLike} projection Projection.
  * @property {string} matrixSet Matrix set.
  * @property {TileGrid} tileGrid Tile grid.
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -63,6 +66,7 @@ export { downloadBlob } from './utils';
  * @property {string} version Version of WFS protocol used: `1.0.0`, `1.1.0` (default) or `2.0.0`.
  * @property {string} format Format used when querying WFS, `gml` (default) or `geojson`. inkmap determines the GML parser based on the WFS version used.
  * @property {Object} style JSON object in geostyler notation, defining the layer style.
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -173,6 +177,9 @@ export function getJobStatus(jobId) {
   );
 }
 
+/**
+ * @param {number} jobId
+ */
 export function cancelJob(jobId) {
   messageToPrinter(MESSAGE_JOB_CANCEL, { jobId });
 }
