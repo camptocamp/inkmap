@@ -9,6 +9,7 @@ import { isWorker } from '../worker/utils';
  */
 export function messageToMain(type, message) {
   if (isWorker()) {
+    // @ts-ignore
     self.clients
       .matchAll({
         type: 'window',

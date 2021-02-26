@@ -118,7 +118,7 @@ export async function createJob(spec) {
  * Returns an OpenLayers frame state for a given job spec
  * @param {import('../main/index').PrintSpec} spec
  * @param {Array} sizeInPixel
- * @return {FrameState}
+ * @return {import('ol/PluggableMap).FrameState}
  */
 async function getFrameState(spec, sizeInPixel) {
   let projection = getProjection(spec.projection);

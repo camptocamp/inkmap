@@ -52,7 +52,7 @@ export { downloadBlob } from './utils';
  * @property {string} format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`
  * @property {string} layer Layer name as advertised in the WMTS capabilities.
  * @property {string} style Style name as advertised in the WMTS capabilities.
- * @property {!ProjectionLike} projection Projection.
+ * @property {!string} projection Projection expressed in a code, e.g. 'EPSG:4326'.
  * @property {string} matrixSet Matrix set.
  * @property {TileGrid} tileGrid Tile grid.
  * @property {string} [attribution] Attribution for the data used in the layer
@@ -159,7 +159,7 @@ export function queuePrint(printSpec) {
 /**
  * Returns a long-running observable which emits an array of print job status.
  * This observable will never complete.
- * @return {Observable<PrintStatus[]>} Observable emitting jobs status array.
+ * @return {import('rxjs').Observable<PrintStatus[]>} Observable emitting jobs status array.
  */
 export function getJobsStatus() {
   return getJobsStatusObservable();
@@ -169,7 +169,7 @@ export function getJobsStatus() {
  * Returns an observable emitting status objects for a particular job.
  * The observable will complete once the job is ready.
  * @param {number} jobId
- * @return {Observable<PrintStatus>} Observable emitting job status objects.
+ * @return {import('rxjs').Observable<PrintStatus>} Observable emitting job status objects.
  */
 export function getJobStatus(jobId) {
   return getJobStatusObservable(jobId).pipe(

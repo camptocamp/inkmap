@@ -41,8 +41,8 @@ export const cancel$ = new Subject();
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
  * @param {import('../main/index').Layer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 export function createLayer(jobId, layerSpec, rootFrameState) {
   switch (layerSpec.type) {
@@ -59,15 +59,16 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
 
 /**
  * @param {number} jobId
- * @param {import('ol/source/Tile').default} source
- * @param {FrameState} rootFrameState
+ * @param {import('ol/source/TileImage').default} source
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
  * @param {number} [opacity=1]
- * @return {Observable<LayerPrintStatus>}
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createTiledLayer(jobId, source, rootFrameState, opacity) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
+  // @ts-ignore
   context.canvas.style = {};
   let frameState;
   let layer;
@@ -75,11 +76,11 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
   let tileLoadErrorUrl;
 
   layer = new TileLayer({
-    transition: 0,
     source,
   });
-  layer.getSource().setTileLoadFunction(function (tile, src) {
-    const image = tile.getImage();
+  source.setTileLoadFunction(function (tile, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (tile).getImage();
 
     if (isWorker()) {
       const tileSize = layer
@@ -89,6 +90,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
           rootFrameState.pixelRatio,
           rootFrameState.viewState.projection
         );
+      // @ts-ignore
       image.hintImageSize(tileSize[0], tileSize[1]);
     }
 
@@ -102,6 +104,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
   frameState = setFrameState(rootFrameState, layer, opacity);
 
   renderer = layer.getRenderer();
+  // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
   // this is used to make sure that tile transitions are skipped
@@ -159,8 +162,8 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').XyzLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerXYZ(jobId, layerSpec, rootFrameState) {
   return createTiledLayer(
@@ -195,8 +198,8 @@ export function getWMSParams(layerSpec) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').WmsLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWMS(jobId, layerSpec, rootFrameState) {
   if (layerSpec.tiled) {
@@ -216,24 +219,28 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
+  // @ts-ignore
   context.canvas.style = {};
   let frameState;
   let layer;
   let renderer;
   const progress$ = new BehaviorSubject([0, null, undefined]);
 
-  layer = new ImageLayer({
-    transition: 0,
-    source: new ImageWMS({
-      crossOrigin: 'anonymous',
-      url: layerSpec.url,
-      params: getWMSParams(layerSpec),
-      ratio: 1,
-    }),
+  const source = new ImageWMS({
+    crossOrigin: 'anonymous',
+    url: layerSpec.url,
+    params: getWMSParams(layerSpec),
+    ratio: 1,
   });
-  layer.getSource().setImageLoadFunction(function (layerImage, src) {
-    const image = layerImage.getImage();
+  layer = new ImageLayer({
+    source,
+  });
+  source.setImageLoadFunction(function (layerImage, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (layerImage).getImage();
+
     if (isWorker()) {
+      // @ts-ignore
       image.hintImageSize(width, height);
     }
 
@@ -257,6 +264,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
   frameState = setFrameState(rootFrameState, layer, layerSpec.opacity);
 
   renderer = layer.getRenderer();
+  // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
   layer.getSource().once('imageloaderror', function (e) {
@@ -278,8 +286,8 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').WmtsLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWMTS(jobId, layerSpec, rootFrameState) {
   let { tileGrid, projection } = layerSpec;
@@ -310,14 +318,16 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').WfsLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWFS(jobId, layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
+  // @ts-ignore
   context.canvas.style = {};
+
   let frameState;
   let renderer;
   const version = layerSpec.version || '1.1.0';
@@ -395,6 +405,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
 
   frameState = setFrameState(rootFrameState, layer);
   renderer = layer.getRenderer();
+  // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
   renderer.prepareFrame({ ...frameState, time: Date.now() });
