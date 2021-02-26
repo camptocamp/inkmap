@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "baseUrl": "./",
+    "moduleResolution": "node",
+    "target": "es6",
+    "paths": {
+      "ol": [
+        "node_modules/ol/src"
+      ],
+      "ol/*": [
+        "node_modules/ol/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.js",
+    "node_modules/ol/**/*.js"
+  ],
+  "typeAcquisition": {
+    "exclude": [
+      "ol"
+    ]
+  }
+}
