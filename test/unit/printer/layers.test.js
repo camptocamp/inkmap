@@ -15,7 +15,7 @@ import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
 } from '../../../__mocks__/ol/source/XYZ';
 
-/** @type {FrameState} */
+/** @type {import('ol/PluggableMap').FrameState} */
 const frameState = {
   animate: false,
   coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],

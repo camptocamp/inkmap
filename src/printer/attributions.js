@@ -1,7 +1,7 @@
 /**
  * Print all attributions from the spec in one single line.
  * @param {CanvasRenderingContext2D} ctx
- * @param {PrintSpec} spec
+ * @param {import('../main/index').PrintSpec} spec
  */
 export function printAttributions(ctx, spec) {
   const gutter = 10;
@@ -46,7 +46,7 @@ export function printAttributions(ctx, spec) {
 
 /**
  * Compute full attributions text.
- * @param {PrintSpec} spec
+ * @param {import('../main/index').PrintSpec} spec
  */
 export function computeAttributionsText(spec) {
   return (

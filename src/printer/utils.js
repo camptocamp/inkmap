@@ -1,17 +1,19 @@
 import { isWorker } from '../worker/utils';
 import { from, Observable } from 'rxjs';
+import sourceState from 'ol/source/State';
 
 /**
  * Transforms a canvas to a Blob through an observable
  * @param {OffscreenCanvas|HTMLCanvasElement}canvas
- * @return {Observable<Blob>} an observable that will emit the Blob object
+ * @return {import('rxjs').Observable<Blob>} an observable that will emit the Blob object
  *  and complete immediately.
  */
 export function canvasToBlob(canvas) {
+  // @ts-ignore
   if (isWorker()) return from(canvas.convertToBlob());
 
   return new Observable((subscriber) => {
-    canvas.toBlob((blob) => {
+    /** @type {HTMLCanvasElement} */ (canvas).toBlob((blob) => {
       subscriber.next(blob);
       subscriber.complete();
     }, 'image/png');
@@ -19,10 +21,10 @@ export function canvasToBlob(canvas) {
 }
 
 /**
- * @param {FrameState} rootFrameState
- * @param {ol.layer.Layer} layer
- * @param {number} opacity
- * @return {FrameState}
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/layer/Layer').default} layer
+ * @param {number} [opacity] Opacity (0 to 1), 1 if not defined
+ * @return {import('ol/PluggableMap').FrameState}
  */
 export function setFrameState(rootFrameState, layer, opacity) {
   return {
@@ -36,7 +38,7 @@ export function setFrameState(rootFrameState, layer, opacity) {
         minResolution: 0,
         minZoom: null,
         opacity: opacity !== undefined ? opacity : 1,
-        sourceState: 'ready',
+        sourceState,
         visible: true,
         zIndex: 0,
       },
@@ -45,11 +47,10 @@ export function setFrameState(rootFrameState, layer, opacity) {
 }
 
 /**
- *
+ * Reusable helper for OpenLayers renderers
  * @param {CanvasRenderingContext2D} context
- * @return {function}
  */
-export let useContainer = function (context) {
+export function useContainer(context) {
   this.containerReused = false;
   this.canvas = context.canvas;
   this.context = context;
@@ -59,7 +60,7 @@ export let useContainer = function (context) {
       opacity: 1,
     },
   };
-};
+}
 
 /**
  * @param {string} baseUrl

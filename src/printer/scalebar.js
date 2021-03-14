@@ -5,8 +5,8 @@ import { Units } from 'ol/control/ScaleLine';
 /**
  * Determines scalebar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
- * @param {FrameState} frameState
- * @param {PrintSpec} spec
+ * @param {import('ol/PluggableMap').FrameState} frameState
+ * @param {import('../main/index').PrintSpec} spec
  */
 export function printScaleBar(ctx, frameState, spec) {
   const scaleBarParams = getScaleBarParams(frameState, spec);
@@ -15,9 +15,9 @@ export function printScaleBar(ctx, frameState, spec) {
 
 /**
  * Gets width and annotation for graphical scalebar.
- * @param {FrameState} frameState
- * @param {PrintSpec} spec
- * @return {ScaleBarParams}
+ * @param {import('ol/PluggableMap').FrameState} frameState
+ * @param {import('../main/index').PrintSpec} spec
+ * @return {import('../main/index').ScaleBarParams}
  */
 function getScaleBarParams(frameState, spec) {
   // default values like ol.control.ScaleLine
@@ -27,9 +27,12 @@ function getScaleBarParams(frameState, spec) {
   const center = frameState.viewState.center;
   const projection = frameState.viewState.projection;
   // use units from spec if provided, default "metric"
-  const units = spec.scaleBar.units ? spec.scaleBar.units : 'metric';
+  const units =
+    typeof spec.scaleBar === 'object' && spec.scaleBar.units
+      ? spec.scaleBar.units
+      : 'metric';
   const pointResolutionUnits =
-    units == Units.DEGREES ? ProjUnits.DEGREES : ProjUnits.METERS;
+    units === Units.DEGREES ? ProjUnits.DEGREES : ProjUnits.METERS;
   let pointResolution = getPointResolution(
     projection,
     frameState.viewState.resolution,
@@ -40,7 +43,7 @@ function getScaleBarParams(frameState, spec) {
   let nominalCount = minWidth * pointResolution;
   let suffix = '';
 
-  if (units == Units.DEGREES) {
+  if (units === Units.DEGREES) {
     const metersPerDegree = METERS_PER_UNIT[ProjUnits.DEGREES];
     nominalCount *= metersPerDegree;
     if (nominalCount < metersPerDegree / 60) {
@@ -52,7 +55,7 @@ function getScaleBarParams(frameState, spec) {
     } else {
       suffix = '\u00b0'; // degrees
     }
-  } else if (units == Units.IMPERIAL) {
+  } else if (units === Units.IMPERIAL) {
     if (nominalCount < 0.9144) {
       suffix = 'in';
       pointResolution /= 0.0254;
@@ -63,10 +66,10 @@ function getScaleBarParams(frameState, spec) {
       suffix = 'mi';
       pointResolution /= 1609.344;
     }
-  } else if (units == Units.NAUTICAL) {
+  } else if (units === Units.NAUTICAL) {
     pointResolution /= 1852;
     suffix = 'nm';
-  } else if (units == Units.METRIC) {
+  } else if (units === Units.METRIC) {
     if (nominalCount < 0.001) {
       suffix = 'μm';
       pointResolution *= 1000000;
@@ -79,7 +82,7 @@ function getScaleBarParams(frameState, spec) {
       suffix = 'km';
       pointResolution /= 1000;
     }
-  } else if (units == Units.US) {
+  } else if (units === Units.US) {
     if (nominalCount < 0.9144) {
       suffix = 'in';
       pointResolution *= 39.37;
@@ -118,9 +121,9 @@ function getScaleBarParams(frameState, spec) {
 /**
  * Renders scalebar on canvas.
  * @param {CanvasRenderingContext2D} ctx
- * @param {FrameState} frameState
- * @param {ScaleBarParams} scaleBarParams
- * @param {PrintSpec} spec
+ * @param {import('ol/PluggableMap').FrameState} frameState
+ * @param {import('../main/index').ScaleBarParams} scaleBarParams
+ * @param {import('../main/index').PrintSpec} spec
  */
 function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   const scaleWidth = scaleBarParams.width;
@@ -134,6 +137,7 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   // use position from spec if provided, default "bottom-left"
   const scaleTotalWidth = scaleWidth + scaleTextWidth;
   const xOffset =
+    typeof spec.scaleBar === 'object' &&
     spec.scaleBar.position === 'bottom-right'
       ? frameState.size[0] - scaleTotalWidth - 20
       : 10;
@@ -163,8 +167,8 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   ctx.font = font1;
 
   // Number with units
-  ctx.strokeText([scaleText], xzero + 5, yzero + fontsize1 / 2);
-  ctx.fillText([scaleText], xzero + 5, yzero + fontsize1 / 2);
+  ctx.strokeText(scaleText, xzero + 5, yzero + fontsize1 / 2);
+  ctx.fillText(scaleText, xzero + 5, yzero + fontsize1 / 2);
 
   // Stroke
   ctx.beginPath();

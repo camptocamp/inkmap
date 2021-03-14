@@ -30,6 +30,11 @@ export async function search(query) {
   }
 }
 
+/**
+ * @param {string} name Projection name written as `prefix:code`.
+ * @param {string} proj4def Proj4 definition.
+ * @param {[number, number, number, number]} bbox Projection validity extent.
+ */
 export function registerWithExtent(name, proj4def, bbox) {
   proj4.defs(name, proj4def);
   register(proj4);

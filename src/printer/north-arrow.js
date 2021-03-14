@@ -25,14 +25,12 @@ const NORTH_ARROW_HEIGHT = 72;
  * @param {boolean|string} position Position of the arrow; `true` defaults to `'top-right'`
  */
 export function printNorthArrow(ctx, position) {
-  if (position === true) {
-    position = 'top-right';
-  }
+  const positionStr = typeof position === 'boolean' ? 'top-right' : position;
 
   let xTranslate = ctx.canvas.width - NORTH_ARROW_WIDTH - 10;
   let yTranslate = 10;
 
-  const splitted = position.split('-');
+  const splitted = positionStr.split('-');
 
   if (splitted[0] === 'bottom') {
     yTranslate = ctx.canvas.height - NORTH_ARROW_HEIGHT - 10;

@@ -18,8 +18,9 @@ export { downloadBlob } from './utils';
  * resolution needs to match the zoom level. This means that even if a `minZoom`
  * is configured, the resolutions array will have a length of `maxZoom + 1`
  * @property {Array<string>} matrixIds matrix IDs. The length of this array needs
- * to match the length of the `resolutions` array. By default, it will be [0, 1, 2, ..., resolutions.length-1]
+ * to match the length of the `resolutions` array. By default, it will be ['0', '1', '2', ..., resolutions.length-1]
  * @property {number} tileSize Tile size.
+ * @property {[number, number, number, number]} [extent] Extent for the tile grid.
  */
 
 /**
@@ -30,7 +31,7 @@ export { downloadBlob } from './utils';
  * @property {string} version Version of WMS protocol used: `1.1.1` or `1.3.0` (default).
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
- * @property {string} attribution Attribution for the data used in the layer
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -39,6 +40,7 @@ export { downloadBlob } from './utils';
  * @property {string} url URL or URL template for the layer; can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`.
  *   Note: tile grids are expected to have their x=0,y=0 point at the top left corner; for tile grids where it is at the bottom left corner, use the `{-y}` placeholder.
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -50,9 +52,10 @@ export { downloadBlob } from './utils';
  * @property {string} format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`
  * @property {string} layer Layer name as advertised in the WMTS capabilities.
  * @property {string} style Style name as advertised in the WMTS capabilities.
- * @property {!ProjectionLike} projection Projection.
+ * @property {!string} projection Projection expressed in a code, e.g. 'EPSG:4326'.
  * @property {string} matrixSet Matrix set.
  * @property {TileGrid} tileGrid Tile grid.
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -63,6 +66,7 @@ export { downloadBlob } from './utils';
  * @property {string} version Version of WFS protocol used: `1.0.0`, `1.1.0` (default) or `2.0.0`.
  * @property {string} format Format used when querying WFS, `gml` (default) or `geojson`. inkmap determines the GML parser based on the WFS version used.
  * @property {Object} style JSON object in geostyler notation, defining the layer style.
+ * @property {string} [attribution] Attribution for the data used in the layer
  */
 
 /**
@@ -155,7 +159,7 @@ export function queuePrint(printSpec) {
 /**
  * Returns a long-running observable which emits an array of print job status.
  * This observable will never complete.
- * @return {Observable<PrintStatus[]>} Observable emitting jobs status array.
+ * @return {import('rxjs').Observable<PrintStatus[]>} Observable emitting jobs status array.
  */
 export function getJobsStatus() {
   return getJobsStatusObservable();
@@ -165,7 +169,7 @@ export function getJobsStatus() {
  * Returns an observable emitting status objects for a particular job.
  * The observable will complete once the job is ready.
  * @param {number} jobId
- * @return {Observable<PrintStatus>} Observable emitting job status objects.
+ * @return {import('rxjs').Observable<PrintStatus>} Observable emitting job status objects.
  */
 export function getJobStatus(jobId) {
   return getJobStatusObservable(jobId).pipe(
@@ -173,6 +177,9 @@ export function getJobStatus(jobId) {
   );
 }
 
+/**
+ * @param {number} jobId
+ */
 export function cancelJob(jobId) {
   messageToPrinter(MESSAGE_JOB_CANCEL, { jobId });
 }

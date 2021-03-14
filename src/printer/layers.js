@@ -40,9 +40,9 @@ export const cancel$ = new Subject();
  * Returns an observable emitting the printing status for this layer
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
- * @param {Layer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {import('../main/index').Layer} layerSpec
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 export function createLayer(jobId, layerSpec, rootFrameState) {
   switch (layerSpec.type) {
@@ -58,15 +58,17 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {TileSource} source
- * @param {FrameState} rootFrameState
+ * @param {number} jobId
+ * @param {import('ol/source/TileImage').default} source
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
  * @param {number} [opacity=1]
- * @return {Observable<LayerPrintStatus>}
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createTiledLayer(jobId, source, rootFrameState, opacity) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
+  // @ts-ignore
   context.canvas.style = {};
   let frameState;
   let layer;
@@ -74,11 +76,11 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
   let tileLoadErrorUrl;
 
   layer = new TileLayer({
-    transition: 0,
     source,
   });
-  layer.getSource().setTileLoadFunction(function (tile, src) {
-    const image = tile.getImage();
+  source.setTileLoadFunction(function (tile, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (tile).getImage();
 
     if (isWorker()) {
       const tileSize = layer
@@ -88,6 +90,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
           rootFrameState.pixelRatio,
           rootFrameState.viewState.projection
         );
+      // @ts-ignore
       image.hintImageSize(tileSize[0], tileSize[1]);
     }
 
@@ -101,6 +104,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
   frameState = setFrameState(rootFrameState, layer, opacity);
 
   renderer = layer.getRenderer();
+  // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
   // this is used to make sure that tile transitions are skipped
@@ -156,9 +160,10 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
 }
 
 /**
- * @param {XyzLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {number} jobId
+ * @param {import('../main/index').XyzLayer} layerSpec
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerXYZ(jobId, layerSpec, rootFrameState) {
   return createTiledLayer(
@@ -174,7 +179,7 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {WmsLayer} layerSpec
+ * @param {import('../main/index').WmsLayer} layerSpec
  * @return {Object.<string, string|boolean>}
  */
 export function getWMSParams(layerSpec) {
@@ -191,9 +196,10 @@ export function getWMSParams(layerSpec) {
 }
 
 /**
- * @param {WmsLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {number} jobId
+ * @param {import('../main/index').WmsLayer} layerSpec
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWMS(jobId, layerSpec, rootFrameState) {
   if (layerSpec.tiled) {
@@ -213,24 +219,28 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
+  // @ts-ignore
   context.canvas.style = {};
   let frameState;
   let layer;
   let renderer;
   const progress$ = new BehaviorSubject([0, null, undefined]);
 
-  layer = new ImageLayer({
-    transition: 0,
-    source: new ImageWMS({
-      crossOrigin: 'anonymous',
-      url: layerSpec.url,
-      params: getWMSParams(layerSpec),
-      ratio: 1,
-    }),
+  const source = new ImageWMS({
+    crossOrigin: 'anonymous',
+    url: layerSpec.url,
+    params: getWMSParams(layerSpec),
+    ratio: 1,
   });
-  layer.getSource().setImageLoadFunction(function (layerImage, src) {
-    const image = layerImage.getImage();
+  layer = new ImageLayer({
+    source,
+  });
+  source.setImageLoadFunction(function (layerImage, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (layerImage).getImage();
+
     if (isWorker()) {
+      // @ts-ignore
       image.hintImageSize(width, height);
     }
 
@@ -254,6 +264,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
   frameState = setFrameState(rootFrameState, layer, layerSpec.opacity);
 
   renderer = layer.getRenderer();
+  // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
   layer.getSource().once('imageloaderror', function (e) {
@@ -273,15 +284,20 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {WmtsLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {number} jobId
+ * @param {import('../main/index').WmtsLayer} layerSpec
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWMTS(jobId, layerSpec, rootFrameState) {
   let { tileGrid, projection } = layerSpec;
   let { resolutions, extent, matrixIds } = tileGrid;
   extent = extent || extentFromProjection(projection);
-  matrixIds = matrixIds || [...Array(resolutions.length).keys()];
+  matrixIds =
+    matrixIds ||
+    Array(resolutions.length)
+      .fill(0)
+      .map((_, i) => `${i}`);
 
   tileGrid = new WMTSTileGrid({
     ...tileGrid,
@@ -304,15 +320,18 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {WfsLayer} layerSpec
- * @param {FrameState} rootFrameState
- * @return {Observable<LayerPrintStatus>}
+ * @param {number} jobId
+ * @param {import('../main/index').WfsLayer} layerSpec
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWFS(jobId, layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
+  // @ts-ignore
   context.canvas.style = {};
+
   let frameState;
   let renderer;
   const version = layerSpec.version || '1.1.0';
@@ -332,18 +351,16 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
         projCode,
         extent
       );
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', requestUrl);
-      let onError = function () {
-        vectorSource.removeLoadedExtent(extent);
-        progress$.next([1, context.canvas, layerSpec.url]);
-        progress$.complete();
-      };
-      xhr.onerror = onError;
-      xhr.onload = function () {
-        if (xhr.status == 200) {
+      fetch(requestUrl)
+        .then((response) => {
+          if (response.status >= 400) {
+            throw new Error();
+          }
+          return response.text();
+        })
+        .then((responseText) => {
           vectorSource.addFeatures(
-            vectorSource.getFormat().readFeatures(xhr.responseText)
+            vectorSource.getFormat().readFeatures(responseText)
           );
           if (vectorSource.getFeatures().length !== 0) {
             renderer.prepareFrame({ ...frameState, time: Date.now() });
@@ -354,10 +371,11 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
           }
           progress$.next([1, context.canvas]);
           progress$.complete();
-        } else {
-          onError();
-        }
-      };
+        })
+        .catch(() => {
+          progress$.next([1, context.canvas, layerSpec.url]);
+          progress$.complete();
+        });
 
       cancel$
         .pipe(
@@ -366,12 +384,9 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
           tap(() => {
             progress$.next([-1, null]);
             progress$.complete();
-            xhr.abort();
           })
         )
         .subscribe();
-
-      xhr.send();
     },
     strategy: bbox,
   });
@@ -390,6 +405,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
 
   frameState = setFrameState(rootFrameState, layer);
   renderer = layer.getRenderer();
+  // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
   renderer.prepareFrame({ ...frameState, time: Date.now() });

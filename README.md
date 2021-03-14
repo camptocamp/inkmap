@@ -84,7 +84,7 @@ Once a job is finished it will appear once in the array and then will not be par
 
 Takes in a job id and returns the same observable as the `print()` function.
 
-#### `cancelJob(id: number): Observable<>`
+#### `cancelJob(id: number): void<>`
 
 Takes in a job id and completes once the job is cancelled without emitting any value.
 

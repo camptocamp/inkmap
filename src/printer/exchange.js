@@ -9,6 +9,7 @@ import { isWorker } from '../worker/utils';
  */
 export function messageToMain(type, message) {
   if (isWorker()) {
+    // @ts-ignore
     self.clients
       .matchAll({
         type: 'window',
@@ -39,5 +40,5 @@ const events$ = isWorker()
   : fromEvent(window, 'inkmap.toPrinter').pipe(pluck('detail'));
 
 export const messageToPrinter$ = events$.pipe(
-  tap((message) => console.log('message to printer:', message))
+  tap((message) => console.log('[inkmap] message to printer:', message))
 );

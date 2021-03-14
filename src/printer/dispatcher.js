@@ -11,6 +11,6 @@ messageToPrinter$.subscribe((message) => {
       cancelJob(message.jobId);
       break;
     default:
-      console.log('Unhandled message', message);
+      console.log('[inkmap] Unhandled message', message);
   }
 });

@@ -25,15 +25,15 @@ let counter = 0;
  * Add a new job in the queue
  * Note: this will broadcast the job status updates to the main thread
  * until the job is over.
- * @param {PrintSpec} spec
+ * @param {import('../main/index').PrintSpec} spec
  */
 export async function createJob(spec) {
-  registerProjections(spec.projectionDefinitions);
+  registerProjections(spec.projectionDefinition);
   const sizeInPixel = calculateSizeInPixel(spec);
   const frameState = await getFrameState(spec, sizeInPixel);
 
   /**
-   * @type {PrintStatus}
+   * @type {import('../main/index').PrintStatus}
    */
   const job = {
     id: counter++,
@@ -116,9 +116,9 @@ export async function createJob(spec) {
 
 /**
  * Returns an OpenLayers frame state for a given job spec
- * @param {PrintSpec} spec
+ * @param {import('../main/index').PrintSpec} spec
  * @param {Array} sizeInPixel
- * @return {FrameState}
+ * @return {import('ol/PluggableMap').FrameState}
  */
 async function getFrameState(spec, sizeInPixel) {
   let projection = getProjection(spec.projection);
@@ -190,13 +190,13 @@ function registerProjections(definitions) {
 
 /**
  * Returns the map canvas size in pixels based on size units and dpi given in spec
- * @param {PrintSpec} spec
- * @return {Array<Number>}
+ * @param {import('../main/index').PrintSpec} spec
+ * @return {[number, number]}
  */
 function calculateSizeInPixel(spec) {
   const { size, dpi } = spec;
   if (!size[2] || size[2] === 'px') {
-    return size;
+    return [size[0], size[1]];
   }
   let pixelX;
   let pixelY;

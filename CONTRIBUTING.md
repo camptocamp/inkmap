@@ -9,11 +9,21 @@ $ npm run demo
 
 The app is accessible on http://localhost:8080.
 
+All following checks are mandatory for a contribution to be accepted. Thanks!
+
 ## Linting
 
 Code linting is done using [ESLint](https://eslint.org/). To run it:
 ```bash
 $ npm run lint
+```
+
+## Type checking
+
+The library is written in Javascript with [JSDoc](https://jsdoc.app/) annotations, which allows typechecking with the [Typescript](https://www.typescriptlang.org/) compiler.
+To run typechecking:
+```bash
+$ npm run typecheck
 ```
 
 ## Formatting
