@@ -51,7 +51,16 @@ jobs:
 
       - run: echo "::set-env name=BRANCH_NAME::${GITHUB_HEAD_REF:-master}"
 
+      # Check for write permission
+      - name: Check user permission
+        id: check-write-access
+        uses: scherermichael-oss/action-has-permission@master
+        with:
+          required-permission: write
+
+      # Only if user has write permission
       - name: Deploy
+        if: steps.check-write-access.outputs.has-permission
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
