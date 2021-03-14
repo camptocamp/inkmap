@@ -52,3 +52,17 @@ class Image extends OffscreenCanvas {
 }
 
 self.Image = Image;
+
+/**
+ * This class allows using `document.createElement('canvas')` on the worker.
+ */
+class FakeDocument {
+  createElement(type) {
+    if (type === 'canvas') {
+      return new OffscreenCanvas(1, 1);
+    }
+  }
+}
+
+// @ts-ignore
+self.document = new FakeDocument();
