@@ -12,9 +12,11 @@ class Image extends OffscreenCanvas {
     this.src_ = null;
     this.hintImageSize(1, 1);
     this.loadPromiseResolver = null;
-    this.loadPromise = new Promise(
-      (resolve) => (this.loadPromiseResolver = resolve)
-    );
+    this.loadPromiseRejecter = null;
+    this.loadPromise = new Promise((resolve, reject) => {
+      this.loadPromiseResolver = resolve;
+      this.loadPromiseRejecter = reject;
+    });
   }
 
   // this is a new API, required because we cannot guess an image size
@@ -36,7 +38,8 @@ class Image extends OffscreenCanvas {
           ctx.drawImage(imageData, 0, 0);
           this.loadPromiseResolver();
         });
-      });
+      })
+      .catch(this.loadPromiseRejecter);
   }
   get src() {
     return this.src_;
@@ -46,6 +49,8 @@ class Image extends OffscreenCanvas {
   addEventListener(eventName, callback) {
     if (eventName === 'load') {
       this.loadPromise.then(callback);
+    } else if (eventName === 'error') {
+      this.loadPromise.catch(callback);
     }
   }
   removeEventListener() {}
