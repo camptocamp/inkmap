@@ -18,7 +18,7 @@ export { downloadBlob } from './utils';
  * resolution needs to match the zoom level. This means that even if a `minZoom`
  * is configured, the resolutions array will have a length of `maxZoom + 1`
  * @property {Array<string>} matrixIds matrix IDs. The length of this array needs
- * to match the length of the `resolutions` array. By default, it will be [0, 1, 2, ..., resolutions.length-1]
+ * to match the length of the `resolutions` array. By default, it will be ['0', '1', '2', ..., resolutions.length-1]
  * @property {number} tileSize Tile size.
  * @property {[number, number, number, number]} [extent] Extent for the tile grid.
  */

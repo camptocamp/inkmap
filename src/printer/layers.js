@@ -293,7 +293,11 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
   let { tileGrid, projection } = layerSpec;
   let { resolutions, extent, matrixIds } = tileGrid;
   extent = extent || extentFromProjection(projection);
-  matrixIds = matrixIds || [...Array(resolutions.length).keys()];
+  matrixIds =
+    matrixIds ||
+    Array(resolutions.length)
+      .fill(0)
+      .map((_, i) => `${i}`);
 
   tileGrid = new WMTSTileGrid({
     ...tileGrid,

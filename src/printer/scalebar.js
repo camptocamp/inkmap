@@ -27,7 +27,10 @@ function getScaleBarParams(frameState, spec) {
   const center = frameState.viewState.center;
   const projection = frameState.viewState.projection;
   // use units from spec if provided, default "metric"
-  const units = spec.scaleBar.units ? spec.scaleBar.units : 'metric';
+  const units =
+    typeof spec.scaleBar === 'object' && spec.scaleBar.units
+      ? spec.scaleBar.units
+      : 'metric';
   const pointResolutionUnits =
     units === Units.DEGREES ? ProjUnits.DEGREES : ProjUnits.METERS;
   let pointResolution = getPointResolution(
@@ -134,6 +137,7 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   // use position from spec if provided, default "bottom-left"
   const scaleTotalWidth = scaleWidth + scaleTextWidth;
   const xOffset =
+    typeof spec.scaleBar === 'object' &&
     spec.scaleBar.position === 'bottom-right'
       ? frameState.size[0] - scaleTotalWidth - 20
       : 10;

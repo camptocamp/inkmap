@@ -191,12 +191,12 @@ function registerProjections(definitions) {
 /**
  * Returns the map canvas size in pixels based on size units and dpi given in spec
  * @param {import('../main/index').PrintSpec} spec
- * @return {Array<Number>}
+ * @return {[number, number]}
  */
 function calculateSizeInPixel(spec) {
   const { size, dpi } = spec;
   if (!size[2] || size[2] === 'px') {
-    return size;
+    return [size[0], size[1]];
   }
   let pixelX;
   let pixelY;

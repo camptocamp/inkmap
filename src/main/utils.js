@@ -42,7 +42,9 @@ export const printerReady = new Promise((resolve) => {
   } else {
     resolve(false);
   }
-}).then((useWorker) =>
+});
+
+printerReady.then((useWorker) =>
   console.log(
     `[inkmap] Ready, ${useWorker ? 'using worker' : 'using main thread'}`
   )
