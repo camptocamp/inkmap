@@ -351,18 +351,16 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
         projCode,
         extent
       );
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', requestUrl);
-      let onError = function () {
-        vectorSource.removeLoadedExtent(extent);
-        progress$.next([1, context.canvas, layerSpec.url]);
-        progress$.complete();
-      };
-      xhr.onerror = onError;
-      xhr.onload = function () {
-        if (xhr.status == 200) {
+      fetch(requestUrl)
+        .then((response) => {
+          if (response.status >= 400) {
+            throw new Error();
+          }
+          return response.text();
+        })
+        .then((responseText) => {
           vectorSource.addFeatures(
-            vectorSource.getFormat().readFeatures(xhr.responseText)
+            vectorSource.getFormat().readFeatures(responseText)
           );
           if (vectorSource.getFeatures().length !== 0) {
             renderer.prepareFrame({ ...frameState, time: Date.now() });
@@ -373,10 +371,11 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
           }
           progress$.next([1, context.canvas]);
           progress$.complete();
-        } else {
-          onError();
-        }
-      };
+        })
+        .catch(() => {
+          progress$.next([1, context.canvas, layerSpec.url]);
+          progress$.complete();
+        });
 
       cancel$
         .pipe(
@@ -385,12 +384,9 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
           tap(() => {
             progress$.next([-1, null]);
             progress$.complete();
-            xhr.abort();
           })
         )
         .subscribe();
-
-      xhr.send();
     },
     strategy: bbox,
   });
