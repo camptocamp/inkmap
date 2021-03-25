@@ -2,13 +2,15 @@ import { BehaviorSubject, of } from 'rxjs';
 import { createJob } from '../../../src/printer/job';
 import * as LayersMock from '../../../src/printer/layers';
 import { messageToMain } from '../../../src/printer/exchange';
-import * as UtilsMock from '../../../src/printer/utils';
 import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants';
 import * as olDomMock from 'ol/dom';
 
 jest.mock('../../../src/printer/layers');
 jest.mock('../../../src/printer/exchange');
-jest.mock('../../../src/printer/utils');
+jest.mock('../../../src/printer/utils', () => ({
+  ...jest.requireActual('../../../src/printer/utils'),
+  canvasToBlob: jest.fn(() => mockCanvasToBlob()),
+}));
 jest.mock('ol/dom');
 
 const spec = {
@@ -43,7 +45,7 @@ LayersMock.createLayer = jest.fn(() => {
   return layer$;
 });
 
-UtilsMock.canvasToBlob = jest.fn(() => of({ blob: true }));
+const mockCanvasToBlob = () => of({ blob: true });
 
 olDomMock.createCanvasContext2D = jest.fn(() => {
   return {
