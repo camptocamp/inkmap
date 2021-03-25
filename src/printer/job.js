@@ -28,7 +28,7 @@ let counter = 0;
  * @param {import('../main/index').PrintSpec} spec
  */
 export async function createJob(spec) {
-  registerProjections(spec.projectionDefinition);
+  registerProjections(spec.projectionDefinitions);
   const sizeInPixel = calculateSizeInPixel(spec);
   const frameState = await getFrameState(spec, sizeInPixel);
 
