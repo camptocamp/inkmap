@@ -15,13 +15,12 @@ export function messageToMain(type, message) {
         type: 'window',
       })
       .then((clients) => {
-        if (clients && clients.length) {
-          // clients array is ordered by last focused
-          clients[0].postMessage({
+        clients.forEach((client) => {
+          client.postMessage({
             ...message,
             type,
           });
-        }
+        });
       });
   } else {
     window.dispatchEvent(

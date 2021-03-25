@@ -90,7 +90,7 @@ export { downloadBlob } from './utils';
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
  * @property {boolean | string} northArrow North arrow position.
- * @property {ProjectionDefinition} projectionDefinition Projection definition to be newly registered.
+ * @property {ProjectionDefinition} projectionDefinitions Projection definitions to be newly registered.
  * @property {string} attributions Position where the attributions should be printed
  */
 

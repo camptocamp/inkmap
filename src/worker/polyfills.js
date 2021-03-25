@@ -33,11 +33,12 @@ class Image extends OffscreenCanvas {
     fetch(url)
       .then((response) => response.blob())
       .then((blob) => {
+        return createImageBitmap(blob);
+      })
+      .then((imageData) => {
         const ctx = this.getContext('2d');
-        createImageBitmap(blob).then((imageData) => {
-          ctx.drawImage(imageData, 0, 0);
-          this.loadPromiseResolver();
-        });
+        ctx.drawImage(imageData, 0, 0);
+        return this.loadPromiseResolver();
       })
       .catch(this.loadPromiseRejecter);
   }
@@ -46,9 +47,14 @@ class Image extends OffscreenCanvas {
   }
 
   // this is to sort of comply with the HTMLImage API
+  /**
+   * @param {'load'|'error'} eventName
+   * @param {function(): void} callback
+   */
   addEventListener(eventName, callback) {
     if (eventName === 'load') {
-      this.loadPromise.then(callback);
+      // error can be silenced since we can catch it with the 'error' event
+      this.loadPromise.then(callback).catch(() => {});
     } else if (eventName === 'error') {
       this.loadPromise.catch(callback);
     }

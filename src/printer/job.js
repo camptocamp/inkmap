@@ -1,22 +1,14 @@
 import { createCanvasContext2D } from 'ol/dom';
-import { getForViewAndSize } from 'ol/extent';
-import { fromLonLat, get as getProjection } from 'ol/proj';
-import TileQueue, {
-  getTilePriority as tilePriorityFunction,
-} from 'ol/TileQueue';
 import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 
-import { CM_PER_INCH, MESSAGE_JOB_STATUS } from '../shared/constants';
-import {
-  registerWithExtent,
-  search as searchProjection,
-} from '../shared/projections';
+import { MESSAGE_JOB_STATUS } from '../shared/constants';
+import { registerWithExtent } from '../shared/projections';
 import { messageToMain } from './exchange';
 import { cancel$, createLayer } from './layers';
 import { printNorthArrow } from './north-arrow';
 import { printScaleBar } from './scalebar';
-import { canvasToBlob } from './utils';
+import { calculateSizeInPixel, canvasToBlob, getJobFrameState } from './utils';
 import { printAttributions } from './attributions';
 
 let counter = 0;
@@ -28,9 +20,9 @@ let counter = 0;
  * @param {import('../main/index').PrintSpec} spec
  */
 export async function createJob(spec) {
-  registerProjections(spec.projectionDefinition);
+  registerProjections(spec.projectionDefinitions);
   const sizeInPixel = calculateSizeInPixel(spec);
-  const frameState = await getFrameState(spec, sizeInPixel);
+  const frameState = await getJobFrameState(spec, sizeInPixel);
 
   /**
    * @type {import('../main/index').PrintStatus}
@@ -114,117 +106,12 @@ export async function createJob(spec) {
     .subscribe((status) => messageToMain(MESSAGE_JOB_STATUS, { status }));
 }
 
-/**
- * Returns an OpenLayers frame state for a given job spec
- * @param {import('../main/index').PrintSpec} spec
- * @param {Array} sizeInPixel
- * @return {import('ol/PluggableMap').FrameState}
- */
-async function getFrameState(spec, sizeInPixel) {
-  let projection = getProjection(spec.projection);
-
-  if (!projection && spec.projection.startsWith('EPSG:')) {
-    const splitted = spec.projection.split(':');
-    const { name, proj4def, bbox } = await searchProjection(splitted[1]);
-    registerWithExtent(name, proj4def, bbox);
-    projection = getProjection(spec.projection);
-  }
-
-  const inchPerMeter = 39.3701;
-  const resolution =
-    spec.scale / spec.dpi / inchPerMeter / projection.getMetersPerUnit();
-
-  const viewState = {
-    center: fromLonLat(spec.center, projection),
-    resolution,
-    projection,
-    rotation: 0,
-  };
-
-  const frameState = {
-    animate: false,
-    coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],
-    declutterItems: [],
-    extent: getForViewAndSize(
-      viewState.center,
-      viewState.resolution,
-      viewState.rotation,
-      sizeInPixel
-    ),
-    index: 0,
-    layerIndex: 0,
-    layerStatesArray: [],
-    pixelRatio: 1,
-    pixelToCoordinateTransform: [1, 0, 0, 1, 0, 0],
-    postRenderFunctions: [],
-    size: sizeInPixel,
-    time: Date.now(),
-    usedTiles: {},
-    viewState: viewState,
-    viewHints: [0, 0],
-    wantedTiles: {},
-  };
-
-  frameState.tileQueue = new TileQueue(
-    (tile, tileSourceKey, tileCenter, tileResolution) =>
-      tilePriorityFunction(
-        frameState,
-        tile,
-        tileSourceKey,
-        tileCenter,
-        tileResolution
-      ),
-    () => {}
-  );
-
-  return frameState;
-}
-
 function registerProjections(definitions) {
   if (definitions) {
     for (const projection of definitions) {
       registerWithExtent(projection.name, projection.proj4, projection.bbox);
     }
   }
-}
-
-/**
- * Returns the map canvas size in pixels based on size units and dpi given in spec
- * @param {import('../main/index').PrintSpec} spec
- * @return {[number, number]}
- */
-function calculateSizeInPixel(spec) {
-  const { size, dpi } = spec;
-  if (!size[2] || size[2] === 'px') {
-    return [size[0], size[1]];
-  }
-  let pixelX;
-  let pixelY;
-  const unit = size[2];
-
-  switch (unit) {
-    case 'in':
-      pixelX = dpi * size[0];
-      pixelY = dpi * size[1];
-      break;
-    case 'cm':
-      pixelX = (dpi * size[0]) / CM_PER_INCH;
-      pixelY = (dpi * size[1]) / CM_PER_INCH;
-      break;
-    case 'mm':
-      pixelX = (dpi * size[0]) / (CM_PER_INCH * 10);
-      pixelY = (dpi * size[1]) / (CM_PER_INCH * 10);
-      break;
-    case 'm':
-      pixelX = (dpi * size[0] * 100) / CM_PER_INCH;
-      pixelY = (dpi * size[1] * 100) / CM_PER_INCH;
-      break;
-    default:
-      pixelX = size[0];
-      pixelY = size[1];
-  }
-
-  return [Math.round(pixelX), Math.round(pixelY)];
 }
 
 export function cancelJob(jobId) {

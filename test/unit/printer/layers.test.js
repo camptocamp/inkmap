@@ -14,6 +14,7 @@ import TileWMSSourceMock, {
 import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
 } from '../../../__mocks__/ol/source/XYZ';
+import { setQueuedCount } from '../../../__mocks__/ol/TileQueue';
 
 /** @type {import('ol/PluggableMap').FrameState} */
 const frameState = {
@@ -46,32 +47,6 @@ const frameState = {
   wantedTiles: {},
 };
 
-class TileQueueMock {
-  constructor(tileCount) {
-    this.remaining = tileCount;
-    this.queuedCount = tileCount;
-  }
-  reprioritize() {}
-  loadMoreTiles() {}
-  getTilesLoading() {
-    return this.remaining;
-  }
-  get queuedElements_() {
-    // this will generate an object with one key per tile
-    return new Array(this.queuedCount)
-      .fill(0)
-      .reduce((prev, curr, index) => ({ ...prev, [index]: true }), {});
-  }
-  _setQueuedCount(count, remainingTilesCount) {
-    this.queuedCount = count;
-    this._setRemainingTiles(remainingTilesCount);
-  }
-  _setRemainingTiles(count) {
-    this.remaining = count;
-    jest.runOnlyPendingTimers();
-  }
-}
-
 export class SourceEventMock {
   constructor(target) {
     this.target = target;
@@ -89,15 +64,13 @@ describe('layer creation', () => {
     };
     let layer$;
     let received;
-    let tileQueue;
     let completed;
     const xyzSourceMock = new XYZSourceMock(['testurl']);
     const tileErrorEventMock = new SourceEventMock(xyzSourceMock);
 
     beforeEach(() => {
-      tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
       completed = false;
-      layer$ = createLayer(jobId, spec, { ...frameState, tileQueue });
+      layer$ = createLayer(jobId, spec, frameState);
       layer$.subscribe(
         (status) => (received = status),
         null,
@@ -110,33 +83,33 @@ describe('layer creation', () => {
     });
 
     it('status updates are sent regularly', () => {
-      tileQueue._setQueuedCount(12, 12);
+      setQueuedCount(12, 12);
       expect(received).toEqual([0.4, null, undefined]);
 
-      tileQueue._setQueuedCount(2, 2);
+      setQueuedCount(2, 2);
       expect(received).toEqual([0.9, null, undefined]);
     });
 
     it('when no queued elements left but tiles are remaining, do not complete', () => {
-      tileQueue._setQueuedCount(0, 2);
+      setQueuedCount(0, 2);
       expect(received).toEqual([0.999, null, undefined]);
     });
 
     it('when observable completes, canvas is received', () => {
-      tileQueue._setQueuedCount(0, 0);
+      setQueuedCount(0, 0);
       expect(received).toEqual([1, expect.objectContaining({}), undefined]);
       expect(completed).toBeTruthy();
     });
 
     it('when error occurs during tile loading, error url is received', () => {
       triggerXYZError(tileErrorEventMock);
-      tileQueue._setQueuedCount(2, 2);
+      setQueuedCount(2, 2);
       expect(received).toEqual([0.9, null, 'testurl']);
     });
 
     it('when observable completes with error, canvas and error url are received', () => {
       triggerXYZError(tileErrorEventMock);
-      tileQueue._setQueuedCount(0, 0);
+      setQueuedCount(0, 0);
       expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
       expect(completed).toBeTruthy();
     });
@@ -267,15 +240,13 @@ describe('layer creation', () => {
       };
       let layer$;
       let received;
-      let tileQueue;
       let completed;
       const tileWMSSourceMock = new TileWMSSourceMock(['testurl']);
       const tileErrorEventMock = new SourceEventMock(tileWMSSourceMock);
 
       beforeEach(() => {
-        tileQueue = /** @type {TileQueue} */ new TileQueueMock(20);
         completed = false;
-        layer$ = createLayer(jobId, spec, { ...frameState, tileQueue });
+        layer$ = createLayer(jobId, spec, frameState);
         layer$.subscribe(
           (status) => (received = status),
           null,
@@ -288,33 +259,33 @@ describe('layer creation', () => {
       });
 
       it('status updates are sent regularly', () => {
-        tileQueue._setQueuedCount(12, 12);
+        setQueuedCount(12, 12);
         expect(received).toEqual([0.4, null, undefined]);
 
-        tileQueue._setQueuedCount(2, 2);
+        setQueuedCount(2, 2);
         expect(received).toEqual([0.9, null, undefined]);
       });
 
       it('when no queued elements left but tiles are remaining, do not complete', () => {
-        tileQueue._setQueuedCount(0, 2);
+        setQueuedCount(0, 2);
         expect(received).toEqual([0.999, null, undefined]);
       });
 
       it('when observable completes, canvas is received', () => {
-        tileQueue._setQueuedCount(0, 0);
+        setQueuedCount(0, 0);
         expect(received).toEqual([1, expect.objectContaining({}), undefined]);
         expect(completed).toBeTruthy();
       });
 
       it('when error occurs during tile loading, error url is received', () => {
         triggerTileWMSError(tileErrorEventMock);
-        tileQueue._setQueuedCount(2, 2);
+        setQueuedCount(2, 2);
         expect(received).toEqual([0.9, null, 'testurl']);
       });
 
       it('when observable completes with error, canvas and error url are received', () => {
         triggerTileWMSError(tileErrorEventMock);
-        tileQueue._setQueuedCount(0, 0);
+        setQueuedCount(0, 0);
         expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
         expect(completed).toBeTruthy();
       });
