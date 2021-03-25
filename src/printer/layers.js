@@ -23,7 +23,11 @@ import {
 import { isWorker } from '../worker/utils';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
-import { setFrameState, useContainer, generateGetFeatureUrl } from './utils';
+import {
+  generateGetFeatureUrl,
+  makeLayerFrameState,
+  useContainer,
+} from './utils';
 import OpenLayersParser from 'geostyler-openlayers-parser';
 
 const update$ = interval(500);
@@ -101,24 +105,13 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
     tileLoadErrorUrl = e.target.getUrls()[0];
   });
 
-  frameState = setFrameState(rootFrameState, layer, opacity);
+  frameState = makeLayerFrameState(rootFrameState, layer, opacity);
 
   renderer = layer.getRenderer();
   // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  // this is used to make sure that tile transitions are skipped
-  // TODO: remove this once the reprojected tile transitions are fixed in OL
-  let fakeTime = 0;
-  const frameStateWithTime = {
-    ...frameState,
-    get time() {
-      fakeTime += 10000;
-      return fakeTime;
-    },
-  };
-
-  renderer.renderFrame(frameStateWithTime, context.canvas);
+  renderer.renderFrame(frameState, context.canvas);
   const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
 
   const updatedProgress$ = update$.pipe(
@@ -129,10 +122,10 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
       return frameState.tileQueue.getTilesLoading();
     }, true),
     map(() => {
-      let loadedTilesCount = Object.keys(frameState.tileQueue.queuedElements_)
+      let queuedTilesCount = Object.keys(frameState.tileQueue.queuedElements_)
         .length;
 
-      let progress = 1 - loadedTilesCount / tileCount;
+      let progress = 1 - queuedTilesCount / tileCount;
 
       // this is to make sure all tiles have finished loading before completing layer
       if (progress === 1 && frameState.tileQueue.getTilesLoading() > 0) {
@@ -140,7 +133,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
       }
 
       if (progress === 1) {
-        renderer.renderFrame(frameStateWithTime, context.canvas);
+        renderer.renderFrame(frameState, context.canvas);
         return [1, context.canvas, tileLoadErrorUrl];
       } else {
         return [progress, null, tileLoadErrorUrl];
@@ -261,7 +254,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     image.src = src;
   });
 
-  frameState = setFrameState(rootFrameState, layer, layerSpec.opacity);
+  frameState = makeLayerFrameState(rootFrameState, layer, layerSpec.opacity);
 
   renderer = layer.getRenderer();
   // @ts-ignore
@@ -403,7 +396,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
       .catch((error) => console.log(error));
   }
 
-  frameState = setFrameState(rootFrameState, layer);
+  frameState = makeLayerFrameState(rootFrameState, layer);
   renderer = layer.getRenderer();
   // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
