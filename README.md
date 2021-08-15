@@ -92,6 +92,10 @@ Takes in a job id and completes once the job is cancelled without emitting any v
 
 Takes in a projection definition and registers it with proj4.
 
+#### `getAttributionsText(spec: PrintSpec): string`
+
+Returns the full attributions text of the spec.
+
 #### `PrintSpec` type
 
 A `PrintSpec` object describes the content and aspect of the map to be printed.

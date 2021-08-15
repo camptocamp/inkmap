@@ -45,8 +45,9 @@ export function printAttributions(ctx, spec) {
 }
 
 /**
- * Compute full attributions text.
+ * Returns the full attributions text of a spec
  * @param {import('../main/index').PrintSpec} spec
+ * @return {string}
  */
 export function computeAttributionsText(spec) {
   return (

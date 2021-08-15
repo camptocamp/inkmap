@@ -1,6 +1,5 @@
-import { print } from 'inkmap';
+import { print, getAttributionsText } from 'inkmap';
 import { jsPDF } from 'jspdf';
-import { computeAttributionsText } from '../../src/printer/attributions';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -59,7 +58,7 @@ btn.addEventListener('click', async () => {
   // add attribution
   doc.setFont('courier', 'normal');
   doc.setFontSize(12);
-  doc.text(computeAttributionsText(spec.value), 287, 200, null, null, 'right');
+  doc.text(getAttributionsText(spec.value), 287, 200, null, null, 'right');
 
   // download the result
   doc.save('inkmap.pdf');
