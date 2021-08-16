@@ -62,7 +62,7 @@ export async function createJob(spec) {
             }
           }
           if (spec.northArrow) {
-            printNorthArrow(context, spec.northArrow);
+            printNorthArrow(context, spec.northArrow, spec.dpi);
           }
           if (spec.scaleBar) {
             printScaleBar(context, frameState, spec);

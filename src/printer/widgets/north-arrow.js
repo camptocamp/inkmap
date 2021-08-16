@@ -1,4 +1,10 @@
-const SYMBOL_SIZE = 130; // size of the square containing the whole symbol
+import { applyWidgetPositionTransform } from './position';
+import { CM_PER_INCH } from '../../shared/constants';
+
+// size of the square containing the whole symbol
+const SOURCE_SYMBOL_SIZE_PX = 130;
+const SYMBOL_SIZE_MM = 30;
+
 const FG_STROKE_PATHS = [
   'M 12.940954,-48.296291 A 50,50 0 0 1 49.809735,-4.3577871',
   'M -49.809735,-4.3577863 A 50,50 0 0 1 -12.940952,-48.296291',
@@ -19,26 +25,27 @@ const BG_FILL_PATHS = [
 /**
  * Print a north arrow on top of the canvas
  * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
- * @param {boolean|string} position Position of the arrow; `true` defaults to `'top-right'`
+ * @param {import('../../main/index').WidgetPosition} position Position of the arrow; `true` defaults to `'top-right'`
+ * @param {number} dpi DPI of the printed document
  */
-export function printNorthArrow(ctx, position) {
-  const positionStr = typeof position === 'boolean' ? 'top-right' : position;
-
-  let xTranslate = ctx.canvas.width - SYMBOL_SIZE / 2 - 10;
-  let yTranslate = 10 + SYMBOL_SIZE / 2;
-
-  const splitted = positionStr.split('-');
-
-  if (splitted[0] === 'bottom') {
-    yTranslate = ctx.canvas.height - SYMBOL_SIZE / 2 - 10;
-  }
-
-  if (splitted.length > 1 && splitted[1] === 'left') {
-    xTranslate = 10 + SYMBOL_SIZE / 2;
-  }
+export function printNorthArrow(ctx, position, dpi) {
+  const finalSymbolSizePx = (SYMBOL_SIZE_MM * dpi) / (10 * CM_PER_INCH);
 
   ctx.save();
-  ctx.translate(xTranslate, yTranslate);
+  applyWidgetPositionTransform(
+    ctx,
+    'north-arrow',
+    position,
+    [finalSymbolSizePx, finalSymbolSizePx],
+    dpi
+  );
+
+  // account for the fact that the symbol SVG is centered on 0,0 and has an intrinsic size
+  ctx.translate(finalSymbolSizePx / 2, finalSymbolSizePx / 2);
+  ctx.scale(
+    finalSymbolSizePx / SOURCE_SYMBOL_SIZE_PX,
+    finalSymbolSizePx / SOURCE_SYMBOL_SIZE_PX
+  );
 
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
