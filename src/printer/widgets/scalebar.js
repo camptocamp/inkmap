@@ -4,9 +4,11 @@ import { Units } from 'ol/control/ScaleLine';
 import { applyWidgetPositionTransform } from './position';
 import { CM_PER_INCH } from '../../shared/constants';
 
-const FONT_SIZE_MM = 8;
-const BAR_HEIGHT_MM = 5;
+const FONT_SIZE_MM = 6;
+const BAR_HEIGHT_MM = 3;
 const MIN_BAR_WIDTH_MM = 40;
+const PADDING_UNDER_TEXT_MM = 1;
+const BORDER_SIZE_MM = 1;
 
 /**
  * Determines scale bar size and annotation and prints it to map.
@@ -143,25 +145,26 @@ function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
   const scaleUnit = scaleBarParams.suffix;
 
   const scaleText = `${scaleNumber} ${scaleUnit}`;
-  const fontSizePx = FONT_SIZE_MM * pxToMmRatio;
-  ctx.font = `${fontSizePx}px Arial`;
-  const scaleTextWidthPx = ctx.measureText(scaleText).width;
+  ctx.font = `${FONT_SIZE_MM}px Arial`;
+  const scaleTextWidthMm = ctx.measureText(scaleText).width;
+
+  const totalWidthPx =
+    scaleWidthPx + (scaleTextWidthMm + BORDER_SIZE_MM) * pxToMmRatio;
+  const totalHeightPx =
+    (FONT_SIZE_MM + PADDING_UNDER_TEXT_MM + BAR_HEIGHT_MM + BORDER_SIZE_MM) *
+    pxToMmRatio;
 
   ctx.save();
-
   applyWidgetPositionTransform(
     ctx,
     'scalebar',
     position,
-    [scaleWidthPx + scaleTextWidthPx, fontSizePx],
+    [totalWidthPx, totalHeightPx],
     dpi
   );
 
   // scale the canvas in order to use millimeters for draw instructions
   ctx.scale(pxToMmRatio, pxToMmRatio);
-
-  // set font size again (since we scaled the canvas transforms)
-  ctx.font = `${FONT_SIZE_MM}px Arial`;
 
   const scaleWidthMm = scaleWidthPx / pxToMmRatio;
   const darkColor = '#000000';
@@ -169,16 +172,21 @@ function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
 
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
-  ctx.lineWidth = 1.25;
-  ctx.translate(ctx.lineWidth, ctx.lineWidth); // for border
+  ctx.lineWidth = BORDER_SIZE_MM;
+
+  ctx.translate(BORDER_SIZE_MM * 0.5, BORDER_SIZE_MM * 0.5);
 
   // Scale Text
   ctx.textAlign = 'left';
   ctx.strokeStyle = lightColor;
   ctx.fillStyle = darkColor;
-  ctx.textBaseline = 'hanging';
-  ctx.strokeText(scaleText, scaleWidthMm + 5, 0);
-  ctx.fillText(scaleText, scaleWidthMm + 5, 0);
+  ctx.textBaseline = 'top';
+  ctx.strokeText('0', 0, 0);
+  ctx.fillText('0', 0, 0);
+  ctx.strokeText(scaleText, scaleWidthMm, 0);
+  ctx.fillText(scaleText, scaleWidthMm, 0);
+
+  ctx.translate(FONT_SIZE_MM * 0.3, FONT_SIZE_MM + PADDING_UNDER_TEXT_MM);
 
   // dark bar
   ctx.strokeRect(0, 0, scaleWidthMm, BAR_HEIGHT_MM);
@@ -186,12 +194,17 @@ function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
 
   // light sections
   ctx.fillStyle = lightColor;
-  ctx.fillRect(scaleWidthMm * 0.25, 1, scaleWidthMm * 0.25, BAR_HEIGHT_MM - 2);
+  ctx.fillRect(
+    scaleWidthMm * 0.25,
+    BORDER_SIZE_MM / 2,
+    scaleWidthMm * 0.25,
+    BAR_HEIGHT_MM - BORDER_SIZE_MM
+  );
   ctx.fillRect(
     scaleWidthMm * 0.75,
-    1,
-    scaleWidthMm * 0.25 - 1,
-    BAR_HEIGHT_MM - 2
+    BORDER_SIZE_MM / 2,
+    scaleWidthMm * 0.25 - BORDER_SIZE_MM / 2,
+    BAR_HEIGHT_MM - BORDER_SIZE_MM
   );
 
   ctx.restore();
