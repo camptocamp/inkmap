@@ -23,16 +23,33 @@ $ npm install --save @camptocamp/inkmap
 
 Then import the different methods from the `inkmap` package:
 ```js
-import { print, getJobsStatus } from '@camptocamp/inkmap';
+import { print, downloadBlob } from '@camptocamp/inkmap';
 
 print({
   layers: [ ... ],
   projection: 'EPSG:4326',
   ...
-}).subscribe(progress => ...);
-
-getJobsStatus().subscribe(jobs => ...);
+}).then(downloadBlob);
 ```
+
+### Advanced
+
+**inkmap** offers advanced job monitoring through the use of Observables provided by the [rxjs](https://rxjs.dev/) library.
+
+Observables are different from Promises in that they can emit *multiple values* instead of just one, and are a very good fit for progress reporting.
+
+To use an Observable, simply call its `subscribe()` method with a function as argument. The function will be called anytime a new value is emitted, like so:
+```js
+import { getJobStatus } from '@camptocamp/inkmap';
+
+...
+
+getJobStatus(jobId).subscribe((jobStatus) => {
+  // do something with the status
+});
+```
+
+Note that for *long-lived Observables* (i.e. Observables that never completes) it is important to call `unsubscribe()` when the emitted values are not needed anymore. Open subscriptions to Observables might create memory leaks.
 
 ### Enabling the service worker
 
@@ -54,7 +71,10 @@ module.exports = {
   ...
   plugins: [
      new CopyWebpackPlugin([
-       { from: 'node_modules/@camptocamp/inkmap/dist/inkmap-worker.js', to: '/dist' },
+       {
+         from: 'node_modules/@camptocamp/inkmap/dist/inkmap-worker.js',
+         to: 'dist'
+       },
      ]),
   ],
   ...
@@ -65,28 +85,28 @@ module.exports = {
 
 Important note: all API functions are named exports from the `inkmap` package.
 
-#### `print(jsonSpec: PrintSpec): Observable<PrintStatus>`
+#### `print(jsonSpec: PrintSpec): Promise<Blob>`
 
-Takes in a [`PrintSpec`](#printspec-type) object and returns an observable which emits a [`PrintStatus`](#printstatus-type) object regularly and completes when the print job is finished.
+Takes in a [`PrintSpec`](#printspec-type) object and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which resolves to a Blob containing the final image.
 
-#### `queuePrint(jsonSpec: PrintSpec): Observable<number>`
+#### `queuePrint(jsonSpec: PrintSpec): Promise<number>`
 
-Takes in a [`PrintSpec`](#printspec-type) object and returns an observable which emits a job id (number) and completes immediately.
+Takes in a [`PrintSpec`](#printspec-type) object and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which resolves to a job id (number) immediately.
+
+#### `getJobStatus(id: number): Observable<PrintStatus>`
+
+Takes in a job id and returns an Observable which will regularly emit `PrintStatus` objects, and complete when the final image was generated.
+
+#### `cancelJob(id: number): void`
+
+Takes in a job id, cancel the job and cease all requests immediately.
 
 #### `getJobsStatus(): Observable<PrintStatus[]>`
 
 Returns a long-running observable which emits an array of print job status.
 Once a job is finished it will appear once in the array and then will not be part of subsequent emissions.
 
-> Note: This observable will **never** complete.
-
-#### `getJobStatus(id: number): Observable<PrintStatus>`
-
-Takes in a job id and returns the same observable as the `print()` function.
-
-#### `cancelJob(id: number): void<>`
-
-Takes in a job id and completes once the job is cancelled without emitting any value.
+> Note: This observable will **never** complete. Don't forget to unsubscribe!
 
 #### `registerProjection(definition: ProjectionDefinition): void`
 
