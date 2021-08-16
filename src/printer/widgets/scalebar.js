@@ -2,9 +2,14 @@ import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
 import { Units } from 'ol/control/ScaleLine';
 import { applyWidgetPositionTransform } from './position';
+import { CM_PER_INCH } from '../../shared/constants';
+
+const FONT_SIZE_MM = 8;
+const BAR_HEIGHT_MM = 5;
+const MIN_BAR_WIDTH_MM = 40;
 
 /**
- * Determines scalebar size and annotation and prints it to map.
+ * Determines scale bar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('ol/PluggableMap').FrameState} frameState
  * @param {import('../../main/index').PrintSpec} spec
@@ -12,7 +17,8 @@ import { applyWidgetPositionTransform } from './position';
 export function printScaleBar(ctx, frameState, spec) {
   const scaleBarParams = getScaleBarParams(
     frameState,
-    (typeof spec.scaleBar === 'object' && spec.scaleBar.units) || 'metric'
+    (typeof spec.scaleBar === 'object' && spec.scaleBar.units) || 'metric',
+    spec.dpi
   );
   renderScaleBar(
     ctx,
@@ -24,14 +30,14 @@ export function printScaleBar(ctx, frameState, spec) {
 }
 
 /**
- * Gets width and annotation for graphical scalebar.
+ * Gets width and annotation for graphical scale bar.
  * @param {import('ol/PluggableMap').FrameState} frameState
  * @param {import('../../main/index').ScaleUnits} units
+ * @param {number} dpi
  * @return {import('../../main/index').ScaleBarParams}
  */
-function getScaleBarParams(frameState, units) {
-  // default values like ol.control.ScaleLine
-  const minWidth = 64;
+function getScaleBarParams(frameState, units, dpi) {
+  const minWidthPx = (dpi * MIN_BAR_WIDTH_MM) / (CM_PER_INCH * 10);
   const LEADING_DIGITS = [1, 2, 5];
 
   const center = frameState.viewState.center;
@@ -45,7 +51,7 @@ function getScaleBarParams(frameState, units) {
     pointResolutionUnits
   );
 
-  let nominalCount = minWidth * pointResolution;
+  let nominalCount = minWidthPx * pointResolution;
   let suffix = '';
 
   if (units === Units.DEGREES) {
@@ -102,7 +108,7 @@ function getScaleBarParams(frameState, units) {
     console.error('Invalid units: Please verify your scaleBar object');
   }
 
-  let i = 3 * Math.floor(Math.log(minWidth * pointResolution) / Math.log(10));
+  let i = 3 * Math.floor(Math.log(minWidthPx * pointResolution) / Math.log(10));
   let count, width, decimalCount;
   while (true) {
     decimalCount = Math.floor(i / 3);
@@ -111,7 +117,7 @@ function getScaleBarParams(frameState, units) {
     width = Math.round(count / pointResolution);
     if (isNaN(width)) {
       return;
-    } else if (width >= minWidth) {
+    } else if (width >= minWidthPx) {
       break;
     }
     ++i;
@@ -124,7 +130,7 @@ function getScaleBarParams(frameState, units) {
 }
 
 /**
- * Renders scalebar on canvas.
+ * Renders scale bar on canvas.
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('ol/PluggableMap').FrameState} frameState
  * @param {import('../../main/index').ScaleBarParams} scaleBarParams
@@ -132,18 +138,16 @@ function getScaleBarParams(frameState, units) {
  * @param {number} dpi
  */
 function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
-  const scaleWidth = scaleBarParams.width;
+  const pxToMmRatio = dpi / (CM_PER_INCH * 10);
+
+  const scaleWidthPx = scaleBarParams.width;
   const scaleNumber = scaleBarParams.scalenumber;
   const scaleUnit = scaleBarParams.suffix;
 
   const scaleText = `${scaleNumber} ${scaleUnit}`;
-  const scaleTextWidth = ctx.measureText(scaleText).width;
-
-  const line1 = 6;
-  const fontsize1 = 12;
-  const font1 = `${fontsize1}px Arial`;
-  const oddColor = '#000000';
-  const evenColor = '#FFFFFF';
+  const fontSizePx = FONT_SIZE_MM * pxToMmRatio;
+  ctx.font = `${fontSizePx}px Arial`;
+  const scaleTextWidthPx = ctx.measureText(scaleText).width;
 
   ctx.save();
 
@@ -151,68 +155,46 @@ function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
     ctx,
     'scalebar',
     position,
-    [scaleWidth + scaleTextWidth, fontsize1],
+    [scaleWidthPx + scaleTextWidthPx, fontSizePx],
     dpi
   );
 
-  ctx.globalAlpha = 0.8;
+  // scale the canvas in order to use millimeters for draw instructions
+  ctx.scale(pxToMmRatio, pxToMmRatio);
 
-  // Scale Dimensions
-  const xzero = scaleWidth;
-  const yzero = 0;
-  const xfirst = (scaleWidth * 1) / 4;
-  const xsecond = xfirst + (scaleWidth * 1) / 4;
-  const xthird = xsecond + (scaleWidth * 1) / 4;
-  const xfourth = xthird + (scaleWidth * 1) / 4;
+  // set font size again (since we scaled the canvas transforms)
+  ctx.font = `${FONT_SIZE_MM}px Arial`;
+
+  const scaleWidthMm = scaleWidthPx / pxToMmRatio;
+  const darkColor = '#000000';
+  const lightColor = '#FFFFFF';
+
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 1.25;
+  ctx.translate(ctx.lineWidth, ctx.lineWidth); // for border
 
   // Scale Text
-  ctx.beginPath();
   ctx.textAlign = 'left';
-  ctx.strokeStyle = '#ffffff';
-  ctx.fillStyle = '#000000';
-  ctx.lineWidth = 5;
-  ctx.font = font1;
+  ctx.strokeStyle = lightColor;
+  ctx.fillStyle = darkColor;
+  ctx.textBaseline = 'hanging';
+  ctx.strokeText(scaleText, scaleWidthMm + 5, 0);
+  ctx.fillText(scaleText, scaleWidthMm + 5, 0);
 
-  // Number with units
-  ctx.strokeText(scaleText, xzero + 5, yzero + fontsize1 / 2);
-  ctx.fillText(scaleText, xzero + 5, yzero + fontsize1 / 2);
+  // dark bar
+  ctx.strokeRect(0, 0, scaleWidthMm, BAR_HEIGHT_MM);
+  ctx.fillRect(0, 0, scaleWidthMm, BAR_HEIGHT_MM);
 
-  // Stroke
-  ctx.beginPath();
-  ctx.lineWidth = line1 + 2;
-  ctx.strokeStyle = '#000000';
-  ctx.moveTo(0, yzero);
-  ctx.lineTo(xzero + 1, yzero);
-  ctx.stroke();
-
-  // sections black/white
-  ctx.beginPath();
-  ctx.lineWidth = line1;
-  ctx.strokeStyle = oddColor;
-  ctx.moveTo(0, yzero);
-  ctx.lineTo(xfirst, yzero);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.lineWidth = line1;
-  ctx.strokeStyle = evenColor;
-  ctx.moveTo(xfirst, yzero);
-  ctx.lineTo(xsecond, yzero);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.lineWidth = line1;
-  ctx.strokeStyle = oddColor;
-  ctx.moveTo(xsecond, yzero);
-  ctx.lineTo(xthird, yzero);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.lineWidth = line1;
-  ctx.strokeStyle = evenColor;
-  ctx.moveTo(xthird, yzero);
-  ctx.lineTo(xfourth, yzero);
-  ctx.stroke();
+  // light sections
+  ctx.fillStyle = lightColor;
+  ctx.fillRect(scaleWidthMm * 0.25, 1, scaleWidthMm * 0.25, BAR_HEIGHT_MM - 2);
+  ctx.fillRect(
+    scaleWidthMm * 0.75,
+    1,
+    scaleWidthMm * 0.25 - 1,
+    BAR_HEIGHT_MM - 2
+  );
 
   ctx.restore();
 }
