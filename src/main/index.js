@@ -89,15 +89,15 @@ export { downloadBlob } from './utils';
  * @property {boolean | ScaleBarSpec} scaleBar Indicates whether scalebar should be printed (and optionally its options).
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
- * @property {boolean | string} northArrow North arrow position.
+ * @property {WidgetPosition} northArrow North arrow position; specify `true` for default position (top right).
  * @property {ProjectionDefinition} projectionDefinitions Projection definitions to be newly registered.
- * @property {string} attributions Position where the attributions should be printed
+ * @property {WidgetPosition} attributions Position where the attributions should be printed; specify `true` for default position (bottom right).
  */
 
 /**
  * @typedef {Object} ScaleBarSpec
  * @property {string} [template] Scale text template. The string `{mapScale}` in the template will be replaced the actual value. Default is `Scale: {mapScale}`.
- * @property {string} position Position on the map. Possible values: "bottom-left" (default), "bottom-right".
+ * @property {WidgetPosition} position Position on the map; specify `true` for default position (bottom left).
  * @property {string} units Units for the graphical scalebar. Possible values: "metric" (default), "degrees", "imperial", "nautical", "us".
  */
 
@@ -121,7 +121,12 @@ export { downloadBlob } from './utils';
 /**
  * @typedef {Object} SourceLoadError
  * @property {string} url url of the ol.source that encountered at least one 'tileloaderror' or 'imageloaderror'.
- * /
+ */
+
+/**
+ * @typedef {true|'bottom-left'|'bottom-right'|'top-left'|'top-right'} WidgetPosition
+ * Specifies the position of a widget on the map. `true` means the widget is placed automatically.
+ */
 
 /**
  * Starts generating a map image from a print spec.
