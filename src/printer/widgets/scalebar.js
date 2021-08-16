@@ -104,8 +104,6 @@ function getScaleBarParams(frameState, units, dpi) {
       suffix = 'mi';
       pointResolution /= 1609.3472;
     }
-  } else {
-    console.error('Invalid units: Please verify your scaleBar object');
   }
 
   let i = 3 * Math.floor(Math.log(minWidthPx * pointResolution) / Math.log(10));
