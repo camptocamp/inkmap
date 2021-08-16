@@ -6,10 +6,10 @@ import { MESSAGE_JOB_STATUS } from '../shared/constants';
 import { registerWithExtent } from '../shared/projections';
 import { messageToMain } from './exchange';
 import { cancel$, createLayer } from './layers';
-import { printNorthArrow } from './north-arrow';
-import { printScaleBar } from './scalebar';
+import { printNorthArrow } from './widgets/north-arrow';
+import { printScaleBar } from './widgets/scalebar';
 import { calculateSizeInPixel, canvasToBlob, getJobFrameState } from './utils';
-import { printAttributions } from './attributions';
+import { printAttributions } from './widgets/attributions';
 
 let counter = 0;
 

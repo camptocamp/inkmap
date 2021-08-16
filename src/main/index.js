@@ -192,4 +192,4 @@ export function registerProjection(definition) {
   registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
 
-export { computeAttributionsText as getAttributionsText } from '../printer/attributions';
+export { computeAttributionsText as getAttributionsText } from '../printer/widgets/attributions';
