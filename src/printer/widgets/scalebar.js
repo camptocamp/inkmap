@@ -24,7 +24,6 @@ export function printScaleBar(ctx, frameState, spec) {
   );
   renderScaleBar(
     ctx,
-    frameState,
     scaleBarParams,
     typeof spec.scaleBar === 'object' ? spec.scaleBar.position : spec.scaleBar,
     spec.dpi
@@ -132,12 +131,11 @@ function getScaleBarParams(frameState, units, dpi) {
 /**
  * Renders scale bar on canvas.
  * @param {CanvasRenderingContext2D} ctx
- * @param {import('ol/PluggableMap').FrameState} frameState
  * @param {import('../../main/index').ScaleBarParams} scaleBarParams
  * @param {import('../../main/index').WidgetPosition} position
  * @param {number} dpi
  */
-function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
+function renderScaleBar(ctx, scaleBarParams, position, dpi) {
   const pxToMmRatio = dpi / (CM_PER_INCH * 10);
 
   const scaleWidthPx = scaleBarParams.width;
