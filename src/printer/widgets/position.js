@@ -30,7 +30,7 @@ export function applyWidgetPositionTransform(
   const xPart = explicitPos.split('-')[1];
   const yPart = explicitPos.split('-')[0];
 
-  const offsetPx = (dpi * WIDGET_OFFSET_MM) / (10 * CM_PER_INCH);
+  const offsetPx = Math.round((dpi * WIDGET_OFFSET_MM) / (10 * CM_PER_INCH));
 
   ctx.translate(
     xPart === 'left' ? offsetPx : ctx.canvas.width - offsetPx - widgetSizePx[0],

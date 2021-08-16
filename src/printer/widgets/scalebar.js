@@ -1,6 +1,7 @@
 import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
 import { Units } from 'ol/control/ScaleLine';
+import { applyWidgetPositionTransform } from './position';
 
 /**
  * Determines scalebar size and annotation and prints it to map.
@@ -9,28 +10,32 @@ import { Units } from 'ol/control/ScaleLine';
  * @param {import('../../main/index').PrintSpec} spec
  */
 export function printScaleBar(ctx, frameState, spec) {
-  const scaleBarParams = getScaleBarParams(frameState, spec);
-  renderScaleBar(ctx, frameState, scaleBarParams, spec);
+  const scaleBarParams = getScaleBarParams(
+    frameState,
+    (typeof spec.scaleBar === 'object' && spec.scaleBar.units) || 'metric'
+  );
+  renderScaleBar(
+    ctx,
+    frameState,
+    scaleBarParams,
+    typeof spec.scaleBar === 'object' ? spec.scaleBar.position : spec.scaleBar,
+    spec.dpi
+  );
 }
 
 /**
  * Gets width and annotation for graphical scalebar.
  * @param {import('ol/PluggableMap').FrameState} frameState
- * @param {import('../../main/index').PrintSpec} spec
+ * @param {import('../../main/index').ScaleUnits} units
  * @return {import('../../main/index').ScaleBarParams}
  */
-function getScaleBarParams(frameState, spec) {
+function getScaleBarParams(frameState, units) {
   // default values like ol.control.ScaleLine
   const minWidth = 64;
   const LEADING_DIGITS = [1, 2, 5];
 
   const center = frameState.viewState.center;
   const projection = frameState.viewState.projection;
-  // use units from spec if provided, default "metric"
-  const units =
-    typeof spec.scaleBar === 'object' && spec.scaleBar.units
-      ? spec.scaleBar.units
-      : 'metric';
   const pointResolutionUnits =
     units === Units.DEGREES ? ProjUnits.DEGREES : ProjUnits.METERS;
   let pointResolution = getPointResolution(
@@ -123,9 +128,10 @@ function getScaleBarParams(frameState, spec) {
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('ol/PluggableMap').FrameState} frameState
  * @param {import('../../main/index').ScaleBarParams} scaleBarParams
- * @param {import('../../main/index').PrintSpec} spec
+ * @param {import('../../main/index').WidgetPosition} position
+ * @param {number} dpi
  */
-function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
+function renderScaleBar(ctx, frameState, scaleBarParams, position, dpi) {
   const scaleWidth = scaleBarParams.width;
   const scaleNumber = scaleBarParams.scalenumber;
   const scaleUnit = scaleBarParams.suffix;
@@ -134,26 +140,27 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   const scaleTextWidth = ctx.measureText(scaleText).width;
 
   const line1 = 6;
-  // use position from spec if provided, default "bottom-left"
-  const scaleTotalWidth = scaleWidth + scaleTextWidth;
-  const xOffset =
-    typeof spec.scaleBar === 'object' &&
-    spec.scaleBar.position === 'bottom-right'
-      ? frameState.size[0] - scaleTotalWidth - 20
-      : 10;
-  const yOffset = 10;
   const fontsize1 = 12;
   const font1 = `${fontsize1}px Arial`;
   const oddColor = '#000000';
   const evenColor = '#FFFFFF';
 
   ctx.save();
+
+  applyWidgetPositionTransform(
+    ctx,
+    'scalebar',
+    position,
+    [scaleWidth + scaleTextWidth, fontsize1],
+    dpi
+  );
+
   ctx.globalAlpha = 0.8;
 
   // Scale Dimensions
-  const xzero = scaleWidth + xOffset;
-  const yzero = ctx.canvas.height - yOffset;
-  const xfirst = xOffset + (scaleWidth * 1) / 4;
+  const xzero = scaleWidth;
+  const yzero = 0;
+  const xfirst = (scaleWidth * 1) / 4;
   const xsecond = xfirst + (scaleWidth * 1) / 4;
   const xthird = xsecond + (scaleWidth * 1) / 4;
   const xfourth = xthird + (scaleWidth * 1) / 4;
@@ -174,7 +181,7 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   ctx.beginPath();
   ctx.lineWidth = line1 + 2;
   ctx.strokeStyle = '#000000';
-  ctx.moveTo(xOffset, yzero);
+  ctx.moveTo(0, yzero);
   ctx.lineTo(xzero + 1, yzero);
   ctx.stroke();
 
@@ -182,7 +189,7 @@ function renderScaleBar(ctx, frameState, scaleBarParams, spec) {
   ctx.beginPath();
   ctx.lineWidth = line1;
   ctx.strokeStyle = oddColor;
-  ctx.moveTo(xOffset, yzero);
+  ctx.moveTo(0, yzero);
   ctx.lineTo(xfirst, yzero);
   ctx.stroke();
 
