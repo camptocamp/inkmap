@@ -14,19 +14,17 @@ const BORDER_SIZE_MM = 1;
  * Determines scale bar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('ol/PluggableMap').FrameState} frameState
- * @param {import('../../main/index').PrintSpec} spec
+ * @param {true|import('../../main/index').WidgetPosition} position
+ * @param {number} dpi
+ * @param {import('../../main/index').ScaleUnits} units
  */
-export function printScaleBar(ctx, frameState, spec) {
-  const scaleBarParams = getScaleBarParams(
-    frameState,
-    (typeof spec.scaleBar === 'object' && spec.scaleBar.units) || 'metric',
-    spec.dpi
-  );
+export function printScaleBar(ctx, frameState, position, dpi, units) {
+  const scaleBarParams = getScaleBarParams(frameState, units, dpi);
   renderScaleBar(
     ctx,
     scaleBarParams,
-    typeof spec.scaleBar === 'object' ? spec.scaleBar.position : spec.scaleBar,
-    spec.dpi
+    position === true ? 'bottom-left' : position,
+    dpi
   );
 }
 
@@ -132,7 +130,7 @@ function getScaleBarParams(frameState, units, dpi) {
  * Renders scale bar on canvas.
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('../../main/index').ScaleBarParams} scaleBarParams
- * @param {import('../../main/index').WidgetPosition} position
+ * @param {true|import('../../main/index').WidgetPosition} position
  * @param {number} dpi
  */
 function renderScaleBar(ctx, scaleBarParams, position, dpi) {
@@ -155,8 +153,7 @@ function renderScaleBar(ctx, scaleBarParams, position, dpi) {
   ctx.save();
   applyWidgetPositionTransform(
     ctx,
-    'scalebar',
-    position,
+    position === true ? 'bottom-left' : position,
     [totalWidthPx, totalHeightPx],
     dpi
   );

@@ -25,7 +25,7 @@ const BG_FILL_PATHS = [
 /**
  * Print a north arrow on top of the canvas
  * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
- * @param {import('../../main/index').WidgetPosition} position Position of the arrow; `true` defaults to `'top-right'`
+ * @param {true|import('../../main/index').WidgetPosition} position Position of the arrow; `true` defaults to `'top-right'`
  * @param {number} dpi DPI of the printed document
  */
 export function printNorthArrow(ctx, position, dpi) {
@@ -34,8 +34,7 @@ export function printNorthArrow(ctx, position, dpi) {
   ctx.save();
   applyWidgetPositionTransform(
     ctx,
-    'north-arrow',
-    position,
+    position === true ? 'top-right' : position,
     [finalSymbolSizePx, finalSymbolSizePx],
     dpi
   );

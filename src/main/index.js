@@ -89,14 +89,14 @@ export { downloadBlob } from './utils';
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
  * @property {ProjectionDefinition} projectionDefinitions Projection definitions to be newly registered.
- * @property {WidgetPosition} attributions Position where the attributions should be printed; specify `true` for default position (bottom right).
- * @property {WidgetPosition | ScaleBarSpec} [scaleBar] Scale bar position or specs (for more options). No scale bar if left undefined.
- * @property {WidgetPosition} [northArrow] North arrow position; specify `true` for default position (top right). No north arrow if left undefined.
+ * @property {boolean|WidgetPosition} attributions Position where the attributions should be printed; specify `true` for default position (bottom right).
+ * @property {boolean|WidgetPosition|ScaleBarSpec} [scaleBar] Scale bar position or specs (for more options); specify `true` for default position (bottom-left). No scale bar if left undefined.
+ * @property {boolean|WidgetPosition} [northArrow] North arrow position; specify `true` for default position (top right). No north arrow if left undefined.
  */
 
 /**
  * @typedef {Object} ScaleBarSpec
- * @property {WidgetPosition} position Position on the map; specify `true` for default position (bottom left).
+ * @property {boolean|WidgetPosition} position Position on the map; specify `true` for default position (bottom left).
  * @property {ScaleUnits} units Units for the graphical scale bar. Possible values: "metric" (default), "degrees", "imperial", "nautical", "us".
  */
 
@@ -125,8 +125,8 @@ export { downloadBlob } from './utils';
  */
 
 /**
- * @typedef {true|'bottom-left'|'bottom-right'|'top-left'|'top-right'} WidgetPosition
- * Specifies the position of a widget on the map. `true` means the widget is placed automatically.
+ * @typedef {'bottom-left'|'bottom-right'|'top-left'|'top-right'} WidgetPosition
+ * Specifies the position of a widget on the map.
  */
 
 /**
