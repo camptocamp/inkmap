@@ -1,0 +1,17 @@
+{
+  "layers": [
+    {
+      "type": "XYZ",
+      "url": "/osm-tiles/{z}/{x}/{y}.png"
+    }
+  ],
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 30,
+  "scale": 40000000,
+  "scaleBar": {
+    "position": "top-right",
+    "units": "us"
+  },
+  "projection": "EPSG:3857"
+}

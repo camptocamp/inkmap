@@ -86,20 +86,21 @@ export { downloadBlob } from './utils';
  * @property {[number, number]|[number, number, string]} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
  * @property {[number, number]} center Longitude and latitude of the map center.
  * @property {number} dpi Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print.
- * @property {boolean | ScaleBarSpec} scaleBar Indicates whether scalebar should be printed (and optionally its options).
  * @property {number} scale Scale denominator.
  * @property {string} projection EPSG projection code.
- * @property {boolean | string} northArrow North arrow position.
  * @property {ProjectionDefinition} projectionDefinitions Projection definitions to be newly registered.
- * @property {string} attributions Position where the attributions should be printed
+ * @property {boolean|WidgetPosition} attributions Position where the attributions should be printed; specify `true` for default position (bottom right).
+ * @property {boolean|WidgetPosition|ScaleBarSpec} [scaleBar] Scale bar position or specs (for more options); specify `true` for default position (bottom-left). No scale bar if left undefined.
+ * @property {boolean|WidgetPosition} [northArrow] North arrow position; specify `true` for default position (top right). No north arrow if left undefined.
  */
 
 /**
  * @typedef {Object} ScaleBarSpec
- * @property {string} [template] Scale text template. The string `{mapScale}` in the template will be replaced the actual value. Default is `Scale: {mapScale}`.
- * @property {string} position Position on the map. Possible values: "bottom-left" (default), "bottom-right".
- * @property {string} units Units for the graphical scalebar. Possible values: "metric" (default), "degrees", "imperial", "nautical", "us".
+ * @property {boolean|WidgetPosition} position Position on the map; specify `true` for default position (bottom left).
+ * @property {ScaleUnits} units Units for the graphical scale bar. Possible values: "metric" (default), "degrees", "imperial", "nautical", "us".
  */
+
+/** @typedef {'metric'|'degrees'|'imperial'|'nautical'|'us'} ScaleUnits */
 
 /**
  * @typedef {Object} ScaleBarParams
@@ -121,7 +122,12 @@ export { downloadBlob } from './utils';
 /**
  * @typedef {Object} SourceLoadError
  * @property {string} url url of the ol.source that encountered at least one 'tileloaderror' or 'imageloaderror'.
- * /
+ */
+
+/**
+ * @typedef {'bottom-left'|'bottom-right'|'top-left'|'top-right'} WidgetPosition
+ * Specifies the position of a widget on the map.
+ */
 
 /**
  * Starts generating a map image from a print spec.
@@ -191,3 +197,5 @@ export function cancelJob(jobId) {
 export function registerProjection(definition) {
   registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
+
+export { computeAttributionsText as getAttributionsText } from '../printer/widgets/attributions';
