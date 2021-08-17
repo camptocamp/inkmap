@@ -1,47 +1,44 @@
+import { applyWidgetPositionTransform } from './position';
+import { CM_PER_INCH } from '../../shared/constants';
+
+const FONT_SIZE_MM = 6;
+
 /**
  * Print all attributions from the spec in one single line.
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('../../main/index').PrintSpec} spec
  */
 export function printAttributions(ctx, spec) {
-  const gutter = 10;
-  const fontSize = 12;
-  let x, y;
-
-  switch (spec.attributions) {
-    case 'bottom-left':
-      x = gutter;
-      y = ctx.canvas.height - gutter;
-      ctx.textAlign = 'left';
-      break;
-    case 'top-left':
-      x = gutter;
-      y = gutter + fontSize;
-      ctx.textAlign = 'left';
-      break;
-    case 'bottom-right':
-      x = ctx.canvas.width - gutter;
-      y = ctx.canvas.height - gutter;
-      ctx.textAlign = 'right';
-      break;
-    case 'top-right':
-      x = ctx.canvas.width - gutter;
-      y = gutter + fontSize;
-      ctx.textAlign = 'right';
-      break;
-  }
+  const pxToMmRatio = spec.dpi / (CM_PER_INCH * 10);
 
   ctx.miterLimit = 2;
   ctx.strokeStyle = '#ffffff';
   ctx.fillStyle = '#000000';
-  ctx.lineWidth = 5;
-  ctx.font = `${fontSize}px Arial`;
+  ctx.lineWidth = 1;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.textBaseline = 'top';
+  ctx.font = `${FONT_SIZE_MM}px Arial`;
 
   const text = computeAttributionsText(spec);
 
-  // Number with units
-  ctx.strokeText(text, x, y);
-  ctx.fillText(text, x, y);
+  ctx.save();
+
+  applyWidgetPositionTransform(
+    ctx,
+    /** @type {import('../../main/index').WidgetPosition} */
+    (spec.attributions === true ? 'bottom-right' : spec.attributions),
+    [
+      ctx.measureText(text).width * pxToMmRatio,
+      FONT_SIZE_MM * pxToMmRatio * 0.85,
+    ],
+    spec.dpi
+  );
+
+  ctx.scale(pxToMmRatio, pxToMmRatio);
+
+  ctx.strokeText(text, 0, 0);
+  ctx.fillText(text, 0, 0);
 }
 
 /**
