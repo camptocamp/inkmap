@@ -44,6 +44,13 @@ export { downloadBlob } from './utils';
  */
 
 /**
+ * @typedef {Object} GeoJSONLayer
+ * @property {'GeoJSON'} type
+ * @property {Object} geojson GeoJSON object
+ * @property {string} [attribution] Attribution for the data used in the layer
+ */
+
+/**
  * @typedef {Object} WmtsLayer
  * @property {'WMTS'} type
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible)
@@ -70,7 +77,7 @@ export { downloadBlob } from './utils';
  */
 
 /**
- * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer} Layer
+ * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer|GeoJSONLayer} Layer
  */
 
 /**

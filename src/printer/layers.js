@@ -10,7 +10,7 @@ import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
-import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
+import { BehaviorSubject, interval, merge, Subject, of } from 'rxjs';
 import {
   filter,
   map,
@@ -58,6 +58,8 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
       return createLayerWMTS(jobId, layerSpec, rootFrameState);
     case 'WFS':
       return createLayerWFS(jobId, layerSpec, rootFrameState);
+    case 'GeoJSON':
+      return createLayerGeoJSON(layerSpec, rootFrameState);
   }
 }
 
@@ -310,6 +312,32 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
     rootFrameState,
     layerSpec.opacity
   );
+}
+
+function createLayerGeoJSON(layerSpec, rootFrameState) {
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+
+  const vectorSource = new VectorSource({
+    features: new GeoJSON().readFeatures(layerSpec.geojson),
+  });
+
+  const layer = new VectorLayer({
+    source: vectorSource,
+  });
+
+  let frameState = makeLayerFrameState(rootFrameState, layer);
+  let renderer = layer.getRenderer();
+  // @ts-ignore
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  renderer.prepareFrame({ ...frameState, time: Date.now() });
+  renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+
+  return of([1, context.canvas]);
 }
 
 /**
