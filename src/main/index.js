@@ -47,6 +47,7 @@ export { downloadBlob } from './utils';
  * @typedef {Object} GeoJSONLayer
  * @property {'GeoJSON'} type
  * @property {Object} geojson GeoJSON object
+ * @property {Object} style JSON object in geostyler notation, defining the layer style.
  * @property {string} [attribution] Attribution for the data used in the layer
  */
 

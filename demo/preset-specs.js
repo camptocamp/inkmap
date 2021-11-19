@@ -8,6 +8,31 @@ const OsmAndGeoJSONSpec = {
     {
       type: 'GeoJSON',
       attribution: '',
+      style: {
+        name: 'Demo Style',
+        rules: [
+          {
+            name: 'Rule 1',
+            symbolizers: [
+              {
+                kind: 'Line',
+                color: '#140155',
+                width: 30,
+              },
+              {
+                kind: 'Line',
+                color: '#ffffff',
+                width: 18,
+              },
+              {
+                kind: 'Line',
+                color: '#d80000',
+                width: 6,
+              },
+            ],
+          },
+        ],
+      },
       geojson: {
         type: 'FeatureCollection',
         name: 'france_3857',

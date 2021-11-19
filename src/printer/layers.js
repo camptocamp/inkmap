@@ -10,7 +10,7 @@ import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
-import { BehaviorSubject, interval, merge, Subject, of } from 'rxjs';
+import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
 import {
   filter,
   map,
@@ -334,10 +334,26 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
   // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  renderer.prepareFrame({ ...frameState, time: Date.now() });
-  renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+  // use a behaviour subject for the progress observable
+  const progress$ = new BehaviorSubject([0, null]);
 
-  return of([1, context.canvas]);
+  // when this promise resolves, the layer is ready to be drawn
+  const styleReadyPromise = layerSpec.style
+    ? new OpenLayersParser()
+        .writeStyle(layerSpec.style)
+        .then((olStyle) => layer.setStyle(olStyle))
+        .catch((error) => console.log(error))
+    : Promise.resolve();
+
+  // when ready, draw layer & send a complete progress value
+  styleReadyPromise.then(() => {
+    renderer.prepareFrame({ ...frameState, time: Date.now() });
+    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+    progress$.next([1, context.canvas]);
+    progress$.complete();
+  });
+
+  return progress$;
 }
 
 /**
