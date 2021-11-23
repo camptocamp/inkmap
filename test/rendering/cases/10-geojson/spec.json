@@ -3,6 +3,21 @@
     {
       "type": "GeoJSON",
       "attribution": "",
+      "style": {
+        "name": "Test Style",
+        "rules": [
+          {
+            "name": "Rule 1",
+            "symbolizers": [
+              {
+                "kind": "Line",
+                "color": "black",
+                "width": 5
+              }
+            ]
+          }
+        ]
+      },
       "geojson": {
         "type": "FeatureCollection",
         "name": "france_3857",
