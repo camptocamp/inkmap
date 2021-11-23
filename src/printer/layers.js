@@ -314,6 +314,11 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
   );
 }
 
+/**
+ * @param {import('../main/index').GeoJSONLayer} layerSpec
+ * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
+ */
 function createLayerGeoJSON(layerSpec, rootFrameState) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];

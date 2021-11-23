@@ -139,7 +139,7 @@ A `Layer` object describes a layer in the printed map.
 
 | field | type | description |
 |---|---|---|
-| `type` | `string` | Either `XYZ`, `WMTS`, `WMS` or `WFS`. |
+| `type` | `string` | Either `XYZ`, `WMTS`, `WMS`, `WFS` or `GeoJSON`. |
 | `url` | `string` | URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`. |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
 | `attribution` | `string` | Attribution for the data present in the layer. |
@@ -178,6 +178,15 @@ Additional options for `WFS` layer type.
 | `layer` | `string` | Layer name. |
 | `version` | `string` | Version of WFS protocol used: `1.0.0`, `1.1.0` (default) or `2.0.0`. |
 | `format` | `string` | Format used when querying WFS, `gml` (default) or `geojson`. inkmap determines the GML parser based on the WFS version used. |
+| `style` | `object` | JSON object in geostyler notation, defining the layer style. |
+
+#### `GeoJSON layer` type
+
+Additional options for `GeoJSON` layer type.
+
+| field | type | description |
+|---|---|---|
+| `geojson` | `object` | Feature collection in GeoJSON format; coordinates are expected to be in the print job reference system. |
 | `style` | `object` | JSON object in geostyler notation, defining the layer style. |
 
 #### `projectionDefinition` type
