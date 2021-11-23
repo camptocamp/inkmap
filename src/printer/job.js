@@ -92,7 +92,8 @@ export async function createJob(spec) {
           const rawProgress =
             layerStates.reduce((prev, [progress]) => progress + prev, 0) /
             layerStates.length;
-          const progress = parseFloat(rawProgress.toFixed(4)); // only keep 4 digits precision
+          // only keep 4 digits precision for readability
+          const progress = Math.min(0.999, parseFloat(rawProgress.toFixed(4)));
 
           return of([progress, null, sourceLoadErrors]);
         }
