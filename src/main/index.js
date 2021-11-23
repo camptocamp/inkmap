@@ -89,9 +89,17 @@ export { downloadBlob } from './utils';
  */
 
 /**
+ * @typedef {'m'|'mm'|'cm'|'in'|'px'} RealWorldUnit
+ */
+
+/**
+ * @typedef {[number, number]|[number, number, RealWorldUnit]} SizeWithUnit
+ */
+
+/**
  * @typedef {Object} PrintSpec
  * @property {Layer[]} layers Array of `Layer` objects that will be rendered in the map; last layers will be rendered on top of first layers.
- * @property {[number, number]|[number, number, string]} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
+ * @property {SizeWithUnit} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
  * @property {[number, number]} center Longitude and latitude of the map center.
  * @property {number} dpi Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print.
  * @property {number} scale Scale denominator.

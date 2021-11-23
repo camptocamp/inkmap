@@ -1,4 +1,4 @@
-import { CM_PER_INCH } from '../shared/constants';
+import { pixelToRealWorld } from '../shared/units';
 
 export class PrintableImage {
   /**
@@ -20,28 +20,14 @@ export class PrintableImage {
 
   /**
    * Returns the real world dimensions of the image for a given unit (e.g. `mm`).
-   * @param {string} unit
+   * @param {import("./index").RealWorldUnit} unit
    * @returns {[number, number]}
    */
   getRealWorldDimensions(unit) {
-    let ratio = 1;
-    switch (unit) {
-      case 'in':
-        ratio = 1 / this.dpi_;
-        break;
-      case 'cm':
-        ratio = CM_PER_INCH / this.dpi_;
-        break;
-      case 'mm':
-        ratio = (CM_PER_INCH * 10) / this.dpi_;
-        break;
-      case 'm':
-        ratio = CM_PER_INCH / 100 / this.dpi_;
-        break;
-      default:
-        throw new Error(`Invalid real world unit: ${unit}`);
-    }
-    return [this.image_.width * ratio, this.image_.height * ratio];
+    return [
+      pixelToRealWorld(this.image_.width, unit, this.dpi_),
+      pixelToRealWorld(this.image_.height, unit, this.dpi_),
+    ];
   }
 
   /**
