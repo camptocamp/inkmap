@@ -215,3 +215,5 @@ export function registerProjection(definition) {
 }
 
 export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions';
+
+export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow';
