@@ -1,5 +1,5 @@
 import { applyWidgetPositionTransform } from './position';
-import { CM_PER_INCH } from '../../shared/constants';
+import { CM_PER_INCH } from '../constants';
 
 // size of the square containing the whole symbol
 const SOURCE_SYMBOL_SIZE_PX = 130;

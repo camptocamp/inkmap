@@ -1,4 +1,4 @@
-import { PrintableImage } from '../../../src/main/printable-image';
+import { PrintableImage } from '../../src/main/printable-image';
 
 describe('PrintableImage', () => {
   let printableImage;

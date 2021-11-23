@@ -1,4 +1,4 @@
-import { CM_PER_INCH } from '../../shared/constants';
+import { CM_PER_INCH } from '../constants';
 
 const WIDGET_OFFSET_MM = 4;
 

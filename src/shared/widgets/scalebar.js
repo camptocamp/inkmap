@@ -2,7 +2,7 @@ import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
 import { Units } from 'ol/control/ScaleLine';
 import { applyWidgetPositionTransform } from './position';
-import { CM_PER_INCH } from '../../shared/constants';
+import { CM_PER_INCH } from '../constants';
 
 const FONT_SIZE_MM = 6;
 const BAR_HEIGHT_MM = 3;
