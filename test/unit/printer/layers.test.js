@@ -15,6 +15,7 @@ import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
 } from '../../../__mocks__/ol/source/XYZ';
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue';
+import { waitForPromises } from '../utils';
 
 /** @type {import('ol/PluggableMap').FrameState} */
 const frameState = {
@@ -97,7 +98,7 @@ describe('layer creation', () => {
 
     it('when observable completes, canvas is received', () => {
       setQueuedCount(0, 0);
-      expect(received).toEqual([1, expect.objectContaining({}), undefined]);
+      expect(received).toEqual([1, expect.anything(), undefined]);
       expect(completed).toBeTruthy();
     });
 
@@ -110,7 +111,7 @@ describe('layer creation', () => {
     it('when observable completes with error, canvas and error url are received', () => {
       triggerXYZError(tileErrorEventMock);
       setQueuedCount(0, 0);
-      expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
+      expect(received).toEqual([1, expect.anything(), 'testurl']);
       expect(completed).toBeTruthy();
     });
 
@@ -215,7 +216,7 @@ describe('layer creation', () => {
         triggerLoadEnd();
         jest.runOnlyPendingTimers();
 
-        expect(received).toEqual([1, expect.objectContaining({}), undefined]);
+        expect(received).toEqual([1, expect.anything(), undefined]);
         expect(completed).toBeTruthy();
       });
 
@@ -223,7 +224,7 @@ describe('layer creation', () => {
         triggerLoadError(errorEventMock);
         jest.runOnlyPendingTimers();
 
-        expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
+        expect(received).toEqual([1, expect.anything(), 'testurl']);
         expect(completed).toBeTruthy();
       });
     });
@@ -273,7 +274,7 @@ describe('layer creation', () => {
 
       it('when observable completes, canvas is received', () => {
         setQueuedCount(0, 0);
-        expect(received).toEqual([1, expect.objectContaining({}), undefined]);
+        expect(received).toEqual([1, expect.anything(), undefined]);
         expect(completed).toBeTruthy();
       });
 
@@ -286,7 +287,7 @@ describe('layer creation', () => {
       it('when observable completes with error, canvas and error url are received', () => {
         triggerTileWMSError(tileErrorEventMock);
         setQueuedCount(0, 0);
-        expect(received).toEqual([1, expect.objectContaining({}), 'testurl']);
+        expect(received).toEqual([1, expect.anything(), 'testurl']);
         expect(completed).toBeTruthy();
       });
 
@@ -338,6 +339,48 @@ describe('layer creation', () => {
       expect(url).toEqual(
         'https://my.url/wfs?SERVICE=WFS&version=1.1.0&request=GetFeature&typename=my%3Alayername&srsName=EPSG%3A3857&bbox=-696165.0132013096%2C5090855.383524774%2C3367832.7922398755%2C7122854.286245367%2CEPSG%3A3857&outputFormat=application%2Fjson'
       );
+    });
+  });
+
+  describe('GeoJSON layer creation', () => {
+    const jobId = 1;
+    /** @type {Layer} */
+    const spec = {
+      type: 'GeoJSON',
+      geojson: {
+        type: 'FeatureCollection',
+        name: 'france_3857',
+        crs: {
+          type: 'name',
+          properties: { name: 'urn:ogc:def:crs:EPSG::3857' },
+        },
+        features: [],
+      },
+      style: {},
+    };
+    let layer$;
+    let received;
+    let completed;
+
+    beforeEach(() => {
+      completed = false;
+      layer$ = createLayer(jobId, spec, { ...frameState });
+      layer$.subscribe(
+        (status) => (received = status),
+        console.error,
+        () => (completed = true)
+      );
+    });
+
+    it('initially emit a status with progress 0', () => {
+      expect(received).toEqual([0, null]);
+    });
+
+    it('when style is ready after 10 ms, canvas is received', async () => {
+      jest.advanceTimersByTime(10);
+      await waitForPromises();
+      expect(received).toEqual([1, expect.anything()]);
+      expect(completed).toBeTruthy();
     });
   });
 
