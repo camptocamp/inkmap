@@ -123,7 +123,7 @@ describe('job creation', () => {
 
   describe('with 100 layers', () => {
     beforeEach(() => {
-      const layers = new Array(30).fill(0).map((v, i) => ({
+      const layers = new Array(100).fill(0).map((v, i) => ({
         type: 'XYZ',
         url: `https://my.url-${i}/z/y/x.png`,
       }));

@@ -349,11 +349,6 @@ describe('layer creation', () => {
       type: 'GeoJSON',
       geojson: {
         type: 'FeatureCollection',
-        name: 'france_3857',
-        crs: {
-          type: 'name',
-          properties: { name: 'urn:ogc:def:crs:EPSG::3857' },
-        },
         features: [],
       },
       style: {},
