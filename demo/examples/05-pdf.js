@@ -1,4 +1,4 @@
-import { print, getAttributionsText } from 'inkmap';
+import { print, getAttributionsText, getNorthArrow } from 'inkmap';
 import { jsPDF } from 'jspdf';
 
 const root = document.getElementById('example-05');
@@ -18,7 +18,9 @@ btn.addEventListener('click', async () => {
   const specValue = {
     ...spec.value,
     size: [mapWidth, mapHeight, 'mm'],
-    attributions: null, // do not print the attributions on the map
+    attributions: null, // do not print widgets on the map
+    northArrow: false,
+    scaleBar: false,
   };
 
   // create a job, get a promise that resolves when the job is finished
@@ -30,7 +32,7 @@ btn.addEventListener('click', async () => {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
-    format: 'a4',
+    format: 'a4', // 210 by 297mm
     putOnlyUsedFonts: true,
   });
 
@@ -41,7 +43,7 @@ btn.addEventListener('click', async () => {
   // add a title
   doc.setFont('times', 'bold');
   doc.setFontSize(20);
-  doc.text('A fantastic map.', 148.5, 20, null, null, 'center');
+  doc.text('A fantastic map.', 148.5, 13, null, null, 'center');
 
   // add a creation date
   doc.setFont('courier', 'normal');
@@ -59,6 +61,18 @@ btn.addEventListener('click', async () => {
   doc.setFont('courier', 'normal');
   doc.setFontSize(12);
   doc.text(getAttributionsText(spec.value), 287, 200, null, null, 'right');
+
+  // add north arrow
+  const arrow = getNorthArrow(specValue, [16, 16, 'mm']);
+  const arrowSizeCm = arrow.getRealWorldDimensions('mm');
+  doc.addImage(
+    arrow.getImage(),
+    'PNG',
+    140,
+    21,
+    arrowSizeCm[0],
+    arrowSizeCm[1]
+  );
 
   // download the result
   doc.save('inkmap.pdf');
