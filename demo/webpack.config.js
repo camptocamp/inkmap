@@ -75,7 +75,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      inkmap$: '../../src/main',
+      '@camptocamp/inkmap$': '../../src/main',
     },
   },
 };

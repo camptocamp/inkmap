@@ -1,4 +1,4 @@
-import { downloadBlob, print, registerProjection } from 'inkmap';
+import { downloadBlob, print, registerProjection } from '@camptocamp/inkmap';
 
 const root = document.getElementById('example-06');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');

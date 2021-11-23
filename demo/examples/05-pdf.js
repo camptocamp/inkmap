@@ -1,4 +1,4 @@
-import { print, getAttributionsText, getNorthArrow } from 'inkmap';
+import { print, getAttributionsText, getNorthArrow } from '@camptocamp/inkmap';
 import { jsPDF } from 'jspdf';
 
 const root = document.getElementById('example-05');
