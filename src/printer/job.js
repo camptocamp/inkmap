@@ -68,17 +68,7 @@ export async function createJob(spec) {
             (typeof spec.scaleBar === 'object' && spec.scaleBar.position) ||
             spec.scaleBar
           ) {
-            printScaleBar(
-              context,
-              frameState,
-              /** @type {true|import('../main/index').WidgetPosition} */
-              (typeof spec.scaleBar === 'object'
-                ? spec.scaleBar.position
-                : spec.scaleBar),
-              spec.dpi,
-              (typeof spec.scaleBar === 'object' && spec.scaleBar.units) ||
-                'metric'
-            );
+            printScaleBar(context, spec);
           }
           if (spec.attributions) {
             printAttributions(context, spec);

@@ -1,8 +1,12 @@
-import { getPointResolution, METERS_PER_UNIT } from 'ol/proj';
+import { fromLonLat, getPointResolution, METERS_PER_UNIT } from 'ol/proj';
 import ProjUnits from 'ol/proj/Units';
-import { Units } from 'ol/control/ScaleLine';
 import { applyWidgetPositionTransform } from './position';
-import { CM_PER_INCH } from '../constants';
+import {
+  pixelToRealWorld,
+  realWorldToPixel,
+  scaleToResolution,
+} from '../units';
+import { PrintableImage } from '../../main/printable-image';
 
 const FONT_SIZE_MM = 6;
 const BAR_HEIGHT_MM = 3;
@@ -11,41 +15,95 @@ const PADDING_UNDER_TEXT_MM = 1;
 const BORDER_SIZE_MM = 1;
 
 /**
+ * @typedef {Object} ScaleBarParams
+ * @property {number} widthMm Width of rendered graphical scalebar in mm.
+ * @property {string} scaleIndication Distance used as scale indication, formatted
+ */
+
+/**
+ * Returns a `PrintableImage` containing the scale bar for the given spec.
+ * Note: if the projection in the spec is not yet registered in proj4, this will fail!
+ * @param {import("../../main/index.js").PrintSpec} spec
+ * @param {import("../../main/index.js").SizeWithUnit} [sizeHint] Optional size hint; otherwise the image size will be determined based on the spec
+ * @return {import("../../main/printable-image.js").PrintableImage}
+ */
+export function getPrintableScaleBar(spec, sizeHint) {
+  const canvas = document.createElement('canvas');
+
+  function sizeHintToPx() {
+    if (!sizeHint) return null;
+    const width = sizeHint[0];
+    const unit = sizeHint[2] || 'px';
+    return realWorldToPixel(width, unit, spec.dpi);
+  }
+
+  const ctx = canvas.getContext('2d');
+  const scaleBarParams = getScaleBarParams(spec, sizeHintToPx());
+  const [width, height] = getScaleBarSizePx(scaleBarParams, spec.dpi, ctx);
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const mmToPxRatio = realWorldToPixel(1, 'mm', spec.dpi);
+  ctx.scale(mmToPxRatio, mmToPxRatio);
+  printScaleBarInternal(ctx, scaleBarParams);
+  ctx.restore();
+
+  return new PrintableImage(canvas, spec.dpi);
+}
+
+/**
  * Determines scale bar size and annotation and prints it to map.
  * @param {CanvasRenderingContext2D} ctx
- * @param {import('ol/PluggableMap').FrameState} frameState
- * @param {true|import('../../main/index').WidgetPosition} position
- * @param {number} dpi
- * @param {import('../../main/index').ScaleUnits} units
+ * @param {import("../../main/index.js").PrintSpec} spec
  */
-export function printScaleBar(ctx, frameState, position, dpi, units) {
-  const scaleBarParams = getScaleBarParams(frameState, units, dpi);
-  renderScaleBar(
-    ctx,
+export function printScaleBar(ctx, spec) {
+  const scaleBarParams = getScaleBarParams(spec);
+  const position =
+    typeof spec.scaleBar === 'object' ? spec.scaleBar.position : spec.scaleBar;
+
+  const [totalWidthPx, totalHeightPx] = getScaleBarSizePx(
     scaleBarParams,
-    position === true ? 'bottom-left' : position,
-    dpi
+    spec.dpi,
+    ctx
   );
+
+  ctx.save();
+  applyWidgetPositionTransform(
+    ctx,
+    typeof position === 'boolean' ? 'bottom-left' : position,
+    [totalWidthPx, totalHeightPx],
+    spec.dpi
+  );
+
+  // scale the canvas in order to use millimeters for draw instructions
+  const mmToPxRatio = realWorldToPixel(1, 'mm', spec.dpi);
+  ctx.scale(mmToPxRatio, mmToPxRatio);
+  printScaleBarInternal(ctx, scaleBarParams);
+  ctx.restore();
 }
 
 /**
  * Gets width and annotation for graphical scale bar.
- * @param {import('ol/PluggableMap').FrameState} frameState
- * @param {import('../../main/index').ScaleUnits} units
- * @param {number} dpi
- * @return {import('../../main/index').ScaleBarParams}
+ * @param {import("../../main/index.js").PrintSpec} spec
+ * @param {number} [sizeHint] Size hint in px (optional)
+ * @return {ScaleBarParams}
  */
-function getScaleBarParams(frameState, units, dpi) {
-  const minWidthPx = (dpi * MIN_BAR_WIDTH_MM) / (CM_PER_INCH * 10);
+function getScaleBarParams(spec, sizeHint) {
+  const minWidthPx = sizeHint
+    ? sizeHint
+    : realWorldToPixel(MIN_BAR_WIDTH_MM, 'mm', spec.dpi);
   const LEADING_DIGITS = [1, 2, 5];
 
-  const center = frameState.viewState.center;
-  const projection = frameState.viewState.projection;
+  const units =
+    (typeof spec.scaleBar === 'object' && spec.scaleBar.units) || 'metric';
+  const center = fromLonLat(spec.center, spec.projection);
+  const resolution = scaleToResolution(spec.projection, spec.scale, spec.dpi);
   const pointResolutionUnits =
-    units === Units.DEGREES ? ProjUnits.DEGREES : ProjUnits.METERS;
+    units === 'degrees' ? ProjUnits.DEGREES : ProjUnits.METERS;
   let pointResolution = getPointResolution(
-    projection,
-    frameState.viewState.resolution,
+    spec.projection,
+    resolution,
     center,
     pointResolutionUnits
   );
@@ -53,7 +111,7 @@ function getScaleBarParams(frameState, units, dpi) {
   let nominalCount = minWidthPx * pointResolution;
   let suffix = '';
 
-  if (units === Units.DEGREES) {
+  if (units === 'degrees') {
     const metersPerDegree = METERS_PER_UNIT[ProjUnits.DEGREES];
     nominalCount *= metersPerDegree;
     if (nominalCount < metersPerDegree / 60) {
@@ -65,7 +123,7 @@ function getScaleBarParams(frameState, units, dpi) {
     } else {
       suffix = '\u00b0'; // degrees
     }
-  } else if (units === Units.IMPERIAL) {
+  } else if (units === 'imperial') {
     if (nominalCount < 0.9144) {
       suffix = 'in';
       pointResolution /= 0.0254;
@@ -76,10 +134,10 @@ function getScaleBarParams(frameState, units, dpi) {
       suffix = 'mi';
       pointResolution /= 1609.344;
     }
-  } else if (units === Units.NAUTICAL) {
+  } else if (units === 'nautical') {
     pointResolution /= 1852;
     suffix = 'nm';
-  } else if (units === Units.METRIC) {
+  } else if (units === 'metric') {
     if (nominalCount < 0.001) {
       suffix = 'μm';
       pointResolution *= 1000000;
@@ -92,7 +150,7 @@ function getScaleBarParams(frameState, units, dpi) {
       suffix = 'km';
       pointResolution /= 1000;
     }
-  } else if (units === Units.US) {
+  } else if (units === 'us') {
     if (nominalCount < 0.9144) {
       suffix = 'in';
       pointResolution *= 39.37;
@@ -120,54 +178,50 @@ function getScaleBarParams(frameState, units, dpi) {
     ++i;
   }
   return {
-    width: width,
-    scalenumber: count,
-    suffix: suffix,
+    widthMm: pixelToRealWorld(width, 'mm', spec.dpi),
+    scaleIndication: `${count} ${suffix}`,
   };
 }
 
 /**
- * Renders scale bar on canvas.
- * @param {CanvasRenderingContext2D} ctx
- * @param {import('../../main/index').ScaleBarParams} scaleBarParams
- * @param {true|import('../../main/index').WidgetPosition} position
+ * @param {ScaleBarParams} scaleBarParams
  * @param {number} dpi
+ * @param {CanvasRenderingContext2D} ctx
+ * @return {[number,number]}
  */
-function renderScaleBar(ctx, scaleBarParams, position, dpi) {
-  const pxToMmRatio = dpi / (CM_PER_INCH * 10);
-
-  const scaleWidthPx = scaleBarParams.width;
-  const scaleNumber = scaleBarParams.scalenumber;
-  const scaleUnit = scaleBarParams.suffix;
-
-  const scaleText = `${scaleNumber} ${scaleUnit}`;
+function getScaleBarSizePx(scaleBarParams, dpi, ctx) {
   ctx.font = `${FONT_SIZE_MM}px Arial`;
-  const scaleTextWidthMm = ctx.measureText(scaleText).width;
+  const scaleTextWidthMm = ctx.measureText(scaleBarParams.scaleIndication)
+    .width;
+  return [
+    realWorldToPixel(
+      scaleBarParams.widthMm + scaleTextWidthMm + BORDER_SIZE_MM,
+      'mm',
+      dpi
+    ),
+    realWorldToPixel(
+      FONT_SIZE_MM + PADDING_UNDER_TEXT_MM + BAR_HEIGHT_MM + BORDER_SIZE_MM,
+      'mm',
+      dpi
+    ),
+  ];
+}
 
-  const totalWidthPx =
-    scaleWidthPx + (scaleTextWidthMm + BORDER_SIZE_MM) * pxToMmRatio;
-  const totalHeightPx =
-    (FONT_SIZE_MM + PADDING_UNDER_TEXT_MM + BAR_HEIGHT_MM + BORDER_SIZE_MM) *
-    pxToMmRatio;
-
-  ctx.save();
-  applyWidgetPositionTransform(
-    ctx,
-    position === true ? 'bottom-left' : position,
-    [totalWidthPx, totalHeightPx],
-    dpi
-  );
-
-  // scale the canvas in order to use millimeters for draw instructions
-  ctx.scale(pxToMmRatio, pxToMmRatio);
-
-  const scaleWidthMm = scaleWidthPx / pxToMmRatio;
+/**
+ * Print a scale bar on a canvas
+ * Apply scale/translation to the context to make sure the scale bar is printed correctly
+ * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
+ * @param {ScaleBarParams} scaleBarParams
+ */
+function printScaleBarInternal(ctx, scaleBarParams) {
+  const scaleWidthMm = scaleBarParams.widthMm;
   const darkColor = '#000000';
   const lightColor = '#FFFFFF';
 
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   ctx.lineWidth = BORDER_SIZE_MM;
+  ctx.font = `${FONT_SIZE_MM}px Arial`;
 
   ctx.translate(BORDER_SIZE_MM * 0.5, BORDER_SIZE_MM * 0.5);
 
@@ -178,8 +232,8 @@ function renderScaleBar(ctx, scaleBarParams, position, dpi) {
   ctx.textBaseline = 'top';
   ctx.strokeText('0', 0, 0);
   ctx.fillText('0', 0, 0);
-  ctx.strokeText(scaleText, scaleWidthMm, 0);
-  ctx.fillText(scaleText, scaleWidthMm, 0);
+  ctx.strokeText(scaleBarParams.scaleIndication, scaleWidthMm, 0);
+  ctx.fillText(scaleBarParams.scaleIndication, scaleWidthMm, 0);
 
   ctx.translate(FONT_SIZE_MM * 0.3, FONT_SIZE_MM + PADDING_UNDER_TEXT_MM);
 
@@ -201,6 +255,4 @@ function renderScaleBar(ctx, scaleBarParams, position, dpi) {
     scaleWidthMm * 0.25 - BORDER_SIZE_MM / 2,
     BAR_HEIGHT_MM - BORDER_SIZE_MM
   );
-
-  ctx.restore();
 }

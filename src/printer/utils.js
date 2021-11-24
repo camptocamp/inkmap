@@ -11,6 +11,7 @@ import TileQueue, {
   getTilePriority as tilePriorityFunction,
 } from 'ol/TileQueue';
 import { CM_PER_INCH } from '../shared/constants';
+import { scaleToResolution } from '../shared/units';
 
 /**
  * Transforms a canvas to a Blob through an observable
@@ -47,9 +48,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
     projection = getProjection(spec.projection);
   }
 
-  const inchPerMeter = 39.3701;
-  const resolution =
-    spec.scale / spec.dpi / inchPerMeter / projection.getMetersPerUnit();
+  const resolution = scaleToResolution(spec.projection, spec.scale, spec.dpi);
 
   const viewState = {
     center: fromLonLat(spec.center, projection),
@@ -77,7 +76,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
     size: sizeInPixel,
     time: Date.now(),
     usedTiles: {},
-    viewState: viewState,
+    viewState,
     viewHints: [0, 0],
     wantedTiles: {},
     tileQueue: null, // tile queue is created for each layer

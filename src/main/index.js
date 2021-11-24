@@ -119,13 +119,6 @@ export { downloadBlob } from './utils';
 /** @typedef {'metric'|'degrees'|'imperial'|'nautical'|'us'} ScaleUnits */
 
 /**
- * @typedef {Object} ScaleBarParams
- * @property {number} width Width of rendered graphical scalebar in px.
- * @property {number} scalenumber Distance value for rendered graphical scalebar.
- * @property {string} suffix Unit suffix for rendered graphical scalebar.
- */
-
-/**
  * @typedef {Object} PrintStatus
  * @property {number} id Job id.
  * @property {PrintSpec} spec Job initial spec.
@@ -217,3 +210,4 @@ export function registerProjection(definition) {
 export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions';
 
 export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow';
+export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar';
