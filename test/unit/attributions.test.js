@@ -1,4 +1,4 @@
-import { computeAttributionsText } from '../../../src/printer/widgets/attributions';
+import { computeAttributionsText } from '../../src/shared/widgets/attributions';
 
 describe('attributions', () => {
   describe('computeAttribution', () => {

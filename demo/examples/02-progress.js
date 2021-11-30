@@ -1,4 +1,4 @@
-import { downloadBlob, getJobStatus, queuePrint } from 'inkmap';
+import { downloadBlob, getJobStatus, queuePrint } from '@camptocamp/inkmap';
 
 const root = document.getElementById('example-02');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');

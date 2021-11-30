@@ -1,5 +1,6 @@
-import { print, getAttributionsText } from 'inkmap';
+import { print, getAttributionsText, getNorthArrow } from '@camptocamp/inkmap';
 import { jsPDF } from 'jspdf';
+import { getScaleBar } from '../../src/main';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -18,7 +19,9 @@ btn.addEventListener('click', async () => {
   const specValue = {
     ...spec.value,
     size: [mapWidth, mapHeight, 'mm'],
-    attributions: null, // do not print the attributions on the map
+    attributions: null, // do not print widgets on the map
+    northArrow: false,
+    scaleBar: false,
   };
 
   // create a job, get a promise that resolves when the job is finished
@@ -30,7 +33,7 @@ btn.addEventListener('click', async () => {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
-    format: 'a4',
+    format: 'a4', // 210 by 297mm
     putOnlyUsedFonts: true,
   });
 
@@ -41,7 +44,31 @@ btn.addEventListener('click', async () => {
   // add a title
   doc.setFont('times', 'bold');
   doc.setFontSize(20);
-  doc.text('A fantastic map.', 148.5, 20, null, null, 'center');
+  doc.text('A fantastic map.', 148.5, 13, null, null, 'center');
+
+  // add north arrow
+  const arrow = getNorthArrow(specValue, [16, 'mm']);
+  const arrowSizeMm = arrow.getRealWorldDimensions('mm');
+  doc.addImage(
+    arrow.getImage(),
+    'PNG',
+    140,
+    21,
+    arrowSizeMm[0],
+    arrowSizeMm[1]
+  );
+
+  // add scalebar next to the north arrow
+  const scalebar = getScaleBar(specValue, [30, 'mm']);
+  const scalebarSizeMm = scalebar.getRealWorldDimensions('mm');
+  doc.addImage(
+    scalebar.getImage(),
+    'PNG',
+    287 - scalebarSizeMm[0],
+    37 - scalebarSizeMm[1],
+    scalebarSizeMm[0],
+    scalebarSizeMm[1]
+  );
 
   // add a creation date
   doc.setFont('courier', 'normal');

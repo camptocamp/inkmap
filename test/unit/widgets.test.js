@@ -1,5 +1,5 @@
-import { applyWidgetPositionTransform } from '../../../src/printer/widgets/position';
-import { CM_PER_INCH } from '../../../src/shared/constants';
+import { applyWidgetPositionTransform } from '../../src/shared/widgets/position';
+import { CM_PER_INCH } from '../../src/shared/constants';
 
 describe('widgets', () => {
   describe('position utils', () => {

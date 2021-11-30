@@ -1,4 +1,4 @@
-import { downloadBlob, print } from 'inkmap';
+import { downloadBlob, print } from '@camptocamp/inkmap';
 
 const root = document.getElementById('example-01');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');

@@ -6,10 +6,10 @@ import { MESSAGE_JOB_STATUS } from '../shared/constants';
 import { registerWithExtent } from '../shared/projections';
 import { messageToMain } from './exchange';
 import { cancel$, createLayer } from './layers';
-import { printNorthArrow } from './widgets/north-arrow';
-import { printScaleBar } from './widgets/scalebar';
 import { calculateSizeInPixel, canvasToBlob, getJobFrameState } from './utils';
-import { printAttributions } from './widgets/attributions';
+import { printAttributions } from '../shared/widgets/attributions';
+import { printNorthArrow } from '../shared/widgets/north-arrow';
+import { printScaleBar } from '../shared/widgets/scalebar';
 
 let counter = 0;
 
@@ -68,17 +68,7 @@ export async function createJob(spec) {
             (typeof spec.scaleBar === 'object' && spec.scaleBar.position) ||
             spec.scaleBar
           ) {
-            printScaleBar(
-              context,
-              frameState,
-              /** @type {true|import('../main/index').WidgetPosition} */
-              (typeof spec.scaleBar === 'object'
-                ? spec.scaleBar.position
-                : spec.scaleBar),
-              spec.dpi,
-              (typeof spec.scaleBar === 'object' && spec.scaleBar.units) ||
-                'metric'
-            );
+            printScaleBar(context, spec);
           }
           if (spec.attributions) {
             printAttributions(context, spec);

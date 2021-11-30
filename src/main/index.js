@@ -89,9 +89,21 @@ export { downloadBlob } from './utils';
  */
 
 /**
+ * @typedef {'m'|'mm'|'cm'|'in'|'px'} RealWorldUnit
+ */
+
+/**
+ * @typedef {[number]|[number, RealWorldUnit]} LengthWithUnit
+ */
+
+/**
+ * @typedef {[number, number]|[number, number, RealWorldUnit]} SizeWithUnit
+ */
+
+/**
  * @typedef {Object} PrintSpec
  * @property {Layer[]} layers Array of `Layer` objects that will be rendered in the map; last layers will be rendered on top of first layers.
- * @property {[number, number]|[number, number, string]} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
+ * @property {SizeWithUnit} size Width and height in pixels, or in the specified unit in 3rd place; valid units are `px`, `mm`, `cm`, `m` and `in`.
  * @property {[number, number]} center Longitude and latitude of the map center.
  * @property {number} dpi Dot-per-inch, usually 96 for a computer screen and 300 for a detailed print.
  * @property {number} scale Scale denominator.
@@ -109,13 +121,6 @@ export { downloadBlob } from './utils';
  */
 
 /** @typedef {'metric'|'degrees'|'imperial'|'nautical'|'us'} ScaleUnits */
-
-/**
- * @typedef {Object} ScaleBarParams
- * @property {number} width Width of rendered graphical scalebar in px.
- * @property {number} scalenumber Distance value for rendered graphical scalebar.
- * @property {string} suffix Unit suffix for rendered graphical scalebar.
- */
 
 /**
  * @typedef {Object} PrintStatus
@@ -206,4 +211,7 @@ export function registerProjection(definition) {
   registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
 
-export { computeAttributionsText as getAttributionsText } from '../printer/widgets/attributions';
+export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions';
+
+export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow';
+export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar';

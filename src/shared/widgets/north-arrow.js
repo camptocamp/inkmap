@@ -1,5 +1,6 @@
 import { applyWidgetPositionTransform } from './position';
-import { CM_PER_INCH } from '../../shared/constants';
+import { PrintableImage } from '../../main/printable-image';
+import { realWorldToPixel } from '../units';
 
 // size of the square containing the whole symbol
 const SOURCE_SYMBOL_SIZE_PX = 130;
@@ -23,13 +24,42 @@ const BG_FILL_PATHS = [
 ];
 
 /**
+ * Returns a `PrintableImage` containing the north arrow for the given spec.
+ * @param {import("../../main/index.js").PrintSpec} spec
+ * @param {import("../../main/index.js").LengthWithUnit} [sizeHint] Optional size hint; otherwise the image size will be determined based on the spec
+ * @return {import("../../main/printable-image.js").PrintableImage}
+ */
+export function getPrintableNorthArrow(spec, sizeHint) {
+  const canvas = document.createElement('canvas');
+
+  function sizeHintToPx() {
+    const smallest = sizeHint[0];
+    const unit = sizeHint[1] || 'px';
+    return realWorldToPixel(smallest, unit, spec.dpi);
+  }
+
+  const sizePx = sizeHint ? sizeHintToPx() : getNorthArrowSizePx(spec.dpi);
+  canvas.width = sizePx;
+  canvas.height = sizePx;
+  const ctx = canvas.getContext('2d');
+
+  // put the arrow in the center of the canvas, scale it to use all the canvas
+  ctx.translate(sizePx / 2, sizePx / 2);
+  ctx.scale(sizePx / SOURCE_SYMBOL_SIZE_PX, sizePx / SOURCE_SYMBOL_SIZE_PX);
+
+  printNorthArrowInternal(ctx);
+
+  return new PrintableImage(canvas, spec.dpi);
+}
+
+/**
  * Print a north arrow on top of the canvas
  * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
  * @param {true|import('../../main/index').WidgetPosition} position Position of the arrow; `true` defaults to `'top-right'`
  * @param {number} dpi DPI of the printed document
  */
 export function printNorthArrow(ctx, position, dpi) {
-  const finalSymbolSizePx = (SYMBOL_SIZE_MM * dpi) / (10 * CM_PER_INCH);
+  const finalSymbolSizePx = getNorthArrowSizePx(dpi);
 
   ctx.save();
   applyWidgetPositionTransform(
@@ -46,6 +76,21 @@ export function printNorthArrow(ctx, position, dpi) {
     finalSymbolSizePx / SOURCE_SYMBOL_SIZE_PX
   );
 
+  printNorthArrowInternal(ctx);
+
+  ctx.restore();
+}
+
+function getNorthArrowSizePx(dpi) {
+  return realWorldToPixel(SYMBOL_SIZE_MM, 'mm', dpi);
+}
+
+/**
+ * Print a north arrow on a canvas
+ * Apply scale/translation to the context to make sure the arrow is printed correctly
+ * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
+ */
+function printNorthArrowInternal(ctx) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
@@ -68,6 +113,4 @@ export function printNorthArrow(ctx, position, dpi) {
   FG_FILL_PATHS.forEach((path) => {
     ctx.fill(new Path2D(path));
   });
-
-  ctx.restore();
 }

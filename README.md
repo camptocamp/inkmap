@@ -116,6 +116,18 @@ Takes in a projection definition and registers it with proj4.
 
 Returns the full attributions text of the spec.
 
+#### `getNorthArrow(spec: PrintSpec, sizeHint?: [number, string]): PrintableImage`
+
+Returns a `PrintableImage` containing the north arrow for the given spec. The image will be square and have the same DPI as the spec.
+A `sizeHint` (e.g. `[3, 'cm']`) can be provided to request a larger or smaller arrow. Supported size units are the same as in the `PrintSpec` type. 
+
+#### `getScaleBar(spec: PrintSpec, minimumWidth?: [number, string]): PrintableImage`
+
+Returns a `PrintableImage` containing the scale bar for the given spec. The image will have the same DPI as the spec.
+A `minimumWidth` (e.g. `[80, 'mm']`) can be provided to request a smaller or larger scale bar. Supported size units are the same as in the `PrintSpec` type.
+
+> Note that for this scale bar to be relevant in a printed document, its real-world size **has** to be respected.
+
 #### `PrintSpec` type
 
 A `PrintSpec` object describes the content and aspect of the map to be printed.
@@ -209,6 +221,16 @@ A `PrintStatus` object describes the status of a print job.
 | `progress` | `number` | Job progress, from 0 to 1. |
 | `status` | `string` | Either `'pending'`, `'ongoing'`, `'finished'` or `'canceled'`. |
 | `resultImageUrl` | `string` | An URL used to access the print result (PNG image). This will only be available once the job status is `'finished'`.|
+
+#### `PrintableImage` class
+
+A `PrintableImage` is essentially a wrapper around a native image or canvas, with added information about its real world size.
+
+| method | return type | description |
+|---|---|---|
+| `getImage()` | `HTMLImageElement` or `HTMLCanvasElement` | Returns the native image to be drawn or printed. |
+| `getRealWorldDimensions(units: string)` | `[number, number]` | Returns the real world dimensions of the image for a given unit (e.g. `mm`). |
+| `getDpi()` | `number` | Returns the image DPI. |
 
 ## Architecture
 
