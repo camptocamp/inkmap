@@ -1,5 +1,6 @@
 import { print, getAttributionsText, getNorthArrow } from '@camptocamp/inkmap';
 import { jsPDF } from 'jspdf';
+import { getScaleBar } from '../../src/main';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -45,6 +46,30 @@ btn.addEventListener('click', async () => {
   doc.setFontSize(20);
   doc.text('A fantastic map.', 148.5, 13, null, null, 'center');
 
+  // add north arrow
+  const arrow = getNorthArrow(specValue, [16, 16, 'mm']);
+  const arrowSizeMm = arrow.getRealWorldDimensions('mm');
+  doc.addImage(
+    arrow.getImage(),
+    'PNG',
+    140,
+    21,
+    arrowSizeMm[0],
+    arrowSizeMm[1]
+  );
+
+  // add scalebar next to the north arrow
+  const scalebar = getScaleBar(specValue, [30, 0, 'mm']);
+  const scalebarSizeMm = scalebar.getRealWorldDimensions('mm');
+  doc.addImage(
+    scalebar.getImage(),
+    'PNG',
+    287 - scalebarSizeMm[0],
+    37 - scalebarSizeMm[1],
+    scalebarSizeMm[0],
+    scalebarSizeMm[1]
+  );
+
   // add a creation date
   doc.setFont('courier', 'normal');
   doc.setFontSize(12);
@@ -61,18 +86,6 @@ btn.addEventListener('click', async () => {
   doc.setFont('courier', 'normal');
   doc.setFontSize(12);
   doc.text(getAttributionsText(spec.value), 287, 200, null, null, 'right');
-
-  // add north arrow
-  const arrow = getNorthArrow(specValue, [16, 16, 'mm']);
-  const arrowSizeCm = arrow.getRealWorldDimensions('mm');
-  doc.addImage(
-    arrow.getImage(),
-    'PNG',
-    140,
-    21,
-    arrowSizeCm[0],
-    arrowSizeCm[1]
-  );
 
   // download the result
   doc.save('inkmap.pdf');
