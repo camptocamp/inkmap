@@ -47,7 +47,7 @@ btn.addEventListener('click', async () => {
   doc.text('A fantastic map.', 148.5, 13, null, null, 'center');
 
   // add north arrow
-  const arrow = getNorthArrow(specValue, [16, 16, 'mm']);
+  const arrow = getNorthArrow(specValue, [16, 'mm']);
   const arrowSizeMm = arrow.getRealWorldDimensions('mm');
   doc.addImage(
     arrow.getImage(),
@@ -59,7 +59,7 @@ btn.addEventListener('click', async () => {
   );
 
   // add scalebar next to the north arrow
-  const scalebar = getScaleBar(specValue, [30, 0, 'mm']);
+  const scalebar = getScaleBar(specValue, [30, 'mm']);
   const scalebarSizeMm = scalebar.getRealWorldDimensions('mm');
   doc.addImage(
     scalebar.getImage(),

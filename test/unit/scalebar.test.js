@@ -21,7 +21,7 @@ describe('scalebar utils', () => {
     });
     describe('with size hint (bigger than default)', () => {
       it('returns an image with an auto-generated width (above 10cm) and height of 1.1cm', () => {
-        const image = getPrintableScaleBar(spec, [100, 0, 'mm']);
+        const image = getPrintableScaleBar(spec, [100, 'mm']);
         expect(image.getDpi()).toBe(spec.dpi);
         expect(image.getImage().width).toBe(688);
         expect(image.getImage().height).toBe(55);
@@ -30,7 +30,7 @@ describe('scalebar utils', () => {
     });
     describe('with size hint (smaller than default)', () => {
       it('returns an image with an auto-generated width (above 15cm) and height of 1.1cm', () => {
-        const image = getPrintableScaleBar(spec, [15, 0, 'mm']);
+        const image = getPrintableScaleBar(spec, [15, 'mm']);
         expect(image.getDpi()).toBe(spec.dpi);
         expect(image.getImage().width).toBe(161);
         expect(image.getImage().height).toBe(55);

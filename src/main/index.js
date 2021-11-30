@@ -93,6 +93,10 @@ export { downloadBlob } from './utils';
  */
 
 /**
+ * @typedef {[number]|[number, RealWorldUnit]} LengthWithUnit
+ */
+
+/**
  * @typedef {[number, number]|[number, number, RealWorldUnit]} SizeWithUnit
  */
 

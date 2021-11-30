@@ -26,15 +26,15 @@ const BG_FILL_PATHS = [
 /**
  * Returns a `PrintableImage` containing the north arrow for the given spec.
  * @param {import("../../main/index.js").PrintSpec} spec
- * @param {import("../../main/index.js").SizeWithUnit} [sizeHint] Optional size hint; otherwise the image size will be determined based on the spec
+ * @param {import("../../main/index.js").LengthWithUnit} [sizeHint] Optional size hint; otherwise the image size will be determined based on the spec
  * @return {import("../../main/printable-image.js").PrintableImage}
  */
 export function getPrintableNorthArrow(spec, sizeHint) {
   const canvas = document.createElement('canvas');
 
   function sizeHintToPx() {
-    const smallest = Math.min(sizeHint[0], sizeHint[1]);
-    const unit = sizeHint[2] || 'px';
+    const smallest = sizeHint[0];
+    const unit = sizeHint[1] || 'px';
     return realWorldToPixel(smallest, unit, spec.dpi);
   }
 

@@ -24,7 +24,7 @@ const BORDER_SIZE_MM = 1;
  * Returns a `PrintableImage` containing the scale bar for the given spec.
  * Note: if the projection in the spec is not yet registered in proj4, this will fail!
  * @param {import("../../main/index.js").PrintSpec} spec
- * @param {import("../../main/index.js").SizeWithUnit} [sizeHint] Optional size hint; otherwise the image size will be determined based on the spec
+ * @param {import("../../main/index.js").LengthWithUnit} [sizeHint] Optional size hint; otherwise the image size will be determined based on the spec
  * @return {import("../../main/printable-image.js").PrintableImage}
  */
 export function getPrintableScaleBar(spec, sizeHint) {
@@ -33,7 +33,7 @@ export function getPrintableScaleBar(spec, sizeHint) {
   function sizeHintToPx() {
     if (!sizeHint) return null;
     const width = sizeHint[0];
-    const unit = sizeHint[2] || 'px';
+    const unit = sizeHint[1] || 'px';
     return realWorldToPixel(width, unit, spec.dpi);
   }
 
