@@ -21,27 +21,28 @@ export function downloadBlob(imageBlob, filename) {
  * @type {Promise<boolean>}
  */
 export const printerReady = new Promise((resolve) => {
-  if (hasOffscreenCanvasSupport()) {
-    navigator.serviceWorker.register('inkmap-worker.js').then(
-      () => {
-        // this will wait for the current window to be claimed by the worker
-        setTimeout(() => {
-          // a worker still may not be available, i.e. after a force refresh
-          // use the library on the main thread in this case
-          if (!navigator.serviceWorker.controller) resolve(false);
-          resolve(true);
-        }, 100);
-      },
-      () => {
-        console.log(
-          '[inkmap] Service worker was not found. See https://github.com/camptocamp/inkmap for using multi-threading'
-        );
-        resolve(false);
-      }
-    );
-  } else {
-    resolve(false);
-  }
+//   if (hasOffscreenCanvasSupport()) {
+//     navigator.serviceWorker.register('inkmap-worker.js').then(
+//       () => {
+//         // this will wait for the current window to be claimed by the worker
+//         setTimeout(() => {
+//           // a worker still may not be available, i.e. after a force refresh
+//           // use the library on the main thread in this case
+//           if (!navigator.serviceWorker.controller) resolve(false);
+//           resolve(true);
+//         }, 100);
+//       },
+//       () => {
+//         console.log(
+//           '[inkmap] Service worker was not found. See https://github.com/camptocamp/inkmap for using multi-threading'
+//         );
+//         resolve(false);
+//       }
+//     );
+//   } else {
+//     resolve(false);
+//   }
+  resolve(false)
 });
 
 printerReady.then((useWorker) =>
