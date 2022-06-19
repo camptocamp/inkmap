@@ -339,7 +339,7 @@ const OsmWmsSpec = {
       url: 'https://ows.mundialis.de/services/service',
       layer: 'OSM-WMS',
       tiled: true,
-      attribution: '© OpenStreetMap (www.openstreetmap.org), Terrestris GmbH',
+      attribution: '© OpenStreetMap (www.openstreetmap.org), terrestris GmbH',
     },
   ],
   size: [400, 240, 'mm'],
@@ -640,6 +640,56 @@ const CustomProjection = {
   attributions: 'bottom-right',
 };
 
+const LegendSpec = {
+  layers: [
+    {
+      type: 'WMS',
+      url: 'https://ows.terrestris.de/osm/service',
+      layer: 'OSM-WMS',
+      tiled: true,
+      legend: true,
+      attribution: '© OpenStreetMap (www.openstreetmap.org), terrestris GmbH',
+    },
+    {
+      type: "WFS",
+      url: "https://ows-demo.terrestris.de/geoserver/osm/wfs?maxFeatures=50",
+      layer: "osm:osm-fuel",
+      format: "geojson",
+      version: "1.1.0",
+      legend: true,
+      style: {
+        name: "WFS Style",
+        rules: [
+          {
+            name: "Simple symbol",
+            symbolizers: [
+              {
+                kind: "Mark",
+                wellKnownName: "x",
+                opacity: 0.7,
+                radius: 10,
+                color: '#ff0000'
+              }
+            ]
+          }
+        ]
+      }
+    },
+    OsmAndGeoJSONSpec.layers[1]
+  ],
+  size: [400, 300, 'mm'],
+  center: [3, 46.5],
+  dpi: 72,
+  scale: 7000000,
+  scaleBar: {
+    position: 'bottom-left',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+  attributions: 'bottom-right',
+};
+
 export const ErrorSpec = {
   layers: [
     {
@@ -647,7 +697,7 @@ export const ErrorSpec = {
       url: 'https://ows.mundialis.de/services/service',
       layer: 'TOPO-OSM-WMS',
       tiled: true,
-      attribution: '© OpenStreetMap, Natural Earth, Terrestris GmbH',
+      attribution: '© OpenStreetMap, Natural Earth, terrestris GmbH',
     },
     {
       type: 'WMS',
@@ -688,6 +738,7 @@ const PresetSpecs = {
   'WFS layer example': WfsSpec,
   'Custom local projection (WMS)': CustomProjection,
   'Spec with invalid sources': ErrorSpec,
+  'Spec with legends': LegendSpec
 };
 
 export default PresetSpecs;

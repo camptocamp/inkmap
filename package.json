@@ -36,6 +36,7 @@
   "homepage": "https://github.com/camptocamp/inkmap#readme",
   "dependencies": {
     "@babel/runtime": "^7.12.5",
+    "geostyler-legend": "^2.2.0",
     "geostyler-openlayers-parser": "^2.1.0",
     "ol": "^6.5.0",
     "proj4": "^2.6.3",
@@ -50,6 +51,7 @@
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^6.15.0",
     "html-webpack-plugin": "^4.5.0",
+    "isomorphic-fetch": "^3.0.0",
     "jest": "^26.6.1",
     "jest-canvas-mock": "^2.3.1",
     "jspdf": "^2.2.0",
