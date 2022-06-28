@@ -15,7 +15,7 @@ export default async function getLegends(spec) {
   const vectorLayerStyles = vectorLayers.map((layer) => layer.style);
   const remoteLegends = [];
 
-  wmsLayers.forEach(layer => {
+  wmsLayers.forEach((layer) => {
     const url = new URL(layer.url);
     url.searchParams.set('REQUEST', 'GetLegendGraphic');
     url.searchParams.set('SERVICE', 'WMS');
@@ -33,7 +33,7 @@ export default async function getLegends(spec) {
 
     remoteLegends.push({
       url: url.toString(),
-      title: layer.layer
+      title: layer.layer,
     });
   });
 
@@ -43,12 +43,12 @@ export default async function getLegends(spec) {
     overflow: 'auto',
     styles: vectorLayerStyles,
     remoteLegends: remoteLegends,
-    size: [595, 842]
+    size: [595, 842],
   });
 
-  const div = document.createElement("div");
+  const div = document.createElement('div');
   const svgParent = await renderer.render(div);
   let svgString = svgParent.node().outerHTML;
-  const blob = new Blob([svgString], {type: 'image/svg+xml'});
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
   return blob;
 }

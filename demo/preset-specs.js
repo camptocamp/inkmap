@@ -651,31 +651,31 @@ const LegendSpec = {
       attribution: '© OpenStreetMap (www.openstreetmap.org), terrestris GmbH',
     },
     {
-      type: "WFS",
-      url: "https://ows-demo.terrestris.de/geoserver/osm/wfs?maxFeatures=50",
-      layer: "osm:osm-fuel",
-      format: "geojson",
-      version: "1.1.0",
+      type: 'WFS',
+      url: 'https://ows-demo.terrestris.de/geoserver/osm/wfs?maxFeatures=50',
+      layer: 'osm:osm-fuel',
+      format: 'geojson',
+      version: '1.1.0',
       legend: true,
       style: {
-        name: "WFS Style",
+        name: 'WFS Style',
         rules: [
           {
-            name: "Simple symbol",
+            name: 'Simple symbol',
             symbolizers: [
               {
-                kind: "Mark",
-                wellKnownName: "x",
+                kind: 'Mark',
+                wellKnownName: 'x',
                 opacity: 0.7,
                 radius: 10,
-                color: '#ff0000'
-              }
-            ]
-          }
-        ]
-      }
+                color: '#ff0000',
+              },
+            ],
+          },
+        ],
+      },
     },
-    OsmAndGeoJSONSpec.layers[1]
+    OsmAndGeoJSONSpec.layers[1],
   ],
   size: [400, 300, 'mm'],
   center: [3, 46.5],
@@ -738,7 +738,7 @@ const PresetSpecs = {
   'WFS layer example': WfsSpec,
   'Custom local projection (WMS)': CustomProjection,
   'Spec with invalid sources': ErrorSpec,
-  'Spec with legends': LegendSpec
+  'Spec with legends': LegendSpec,
 };
 
 export default PresetSpecs;

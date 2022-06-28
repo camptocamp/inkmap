@@ -2,16 +2,20 @@ import { downloadBlob, getJobStatus, queuePrint } from '@camptocamp/inkmap';
 import { createLegends } from '../../src/main';
 
 const root = document.getElementById('example-08');
-const mapBtn = /** @type {CustomButton} */ root.querySelector("custom-button.map-btn")
-const legendBtn = /** @type {CustomButton} */ root.querySelector("custom-button.legend-btn")
-root.querySelector("custom-button.legend-btn")
+const mapBtn = /** @type {CustomButton} */ root.querySelector(
+  'custom-button.map-btn'
+);
+const legendBtn = /** @type {CustomButton} */ root.querySelector(
+  'custom-button.legend-btn'
+);
+root.querySelector('custom-button.legend-btn');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
 const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
 
 // make sure the spec is valid to allow printing
 spec.onValidityCheck((valid) => {
   mapBtn.enabled = valid;
-  legendBtn.enabled = valid
+  legendBtn.enabled = valid;
 });
 
 mapBtn.addEventListener('click', async () => {
@@ -35,7 +39,6 @@ mapBtn.addEventListener('click', async () => {
       downloadBlob(printStatus.imageBlob, 'inkmap.png');
     }
   });
-
 });
 
 legendBtn.addEventListener('click', async () => {
