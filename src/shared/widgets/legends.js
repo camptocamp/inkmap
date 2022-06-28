@@ -6,10 +6,13 @@ import LegendRenderer from 'geostyler-legend/dist/LegendRenderer/LegendRenderer'
  * @param {import("../../main/index.js").PrintSpec} spec
  */
 export default async function getLegends(spec) {
-  const wmsLayers = spec.layers.filter(layer => layer.type === 'WMS');
-  const vectorLayers = spec.layers.filter(layer => layer.type === 'WFS' ||
-    layer.type === 'GeoJSON');
-  const vectorLayerStyles = vectorLayers.map(layer => layer.style);
+  const wmsLayers = /** @type {Array<import("../../main/index.js").WmsLayer>} */ (spec.layers.filter(
+    (layer) => layer.type === 'WMS'
+  ));
+  const vectorLayers = /** @type {Array<import("../../main/index.js").WfsLayer|import("../../main/index.js").GeoJSONLayer>} */ (spec.layers.filter(
+    (layer) => layer.type === 'WFS' || layer.type === 'GeoJSON'
+  ));
+  const vectorLayerStyles = vectorLayers.map((layer) => layer.style);
   const remoteLegends = [];
 
   wmsLayers.forEach(layer => {
@@ -19,10 +22,13 @@ export default async function getLegends(spec) {
     url.searchParams.set('VERSION', layer.version || '1.3.0');
     url.searchParams.set('LAYER', layer.layer);
     url.searchParams.set('FORMAT', 'image/png');
-    url.searchParams.set('DPI', spec.dpi || (layer.version === '1.1.1' ? 72 : 91));
-  
+    url.searchParams.set(
+      'DPI',
+      (spec.dpi || (layer.version === '1.1.1' ? 72 : 91)).toString()
+    );
+
     if (spec.scale) {
-      url.searchParams.set('SCALE', spec.scale);
+      url.searchParams.set('SCALE', spec.scale.toString());
     }
 
     remoteLegends.push({

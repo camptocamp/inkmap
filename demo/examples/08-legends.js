@@ -39,6 +39,6 @@ mapBtn.addEventListener('click', async () => {
 });
 
 legendBtn.addEventListener('click', async () => {
-  const blob = await createLegends(spec);
+  const blob = await createLegends(spec.value);
   downloadBlob(blob, 'legend.svg');
 });

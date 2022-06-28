@@ -187,11 +187,12 @@ export function queuePrint(printSpec) {
  * @return {Promise<Blob>} Promise resolving to the final legend image blob.
  */
 export function createLegends(printSpec) {
-  const spec = printSpec.value ? printSpec.value : printSpec;
-  if (spec.layers.find(el => el.legend)) {
-    return getLegends(spec);
+  if (printSpec.layers.find((el) => el.legend)) {
+    return getLegends(printSpec);
   } else {
-    console.warn('The given spec did not include any layer with a configured legend');
+    console.warn(
+      'The given spec did not include any layer with a configured legend'
+    );
   }
 }
 
