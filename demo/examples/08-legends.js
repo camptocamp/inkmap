@@ -10,7 +10,7 @@ const legendBtn = /** @type {CustomButton} */ root.querySelector(
 );
 root.querySelector('custom-button.legend-btn');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
-const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
+const spec = /** @type {PrintSpecEditor} */ root.querySelector('print-spec');
 
 // make sure the spec is valid to allow printing
 spec.onValidityCheck((valid) => {

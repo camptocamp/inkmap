@@ -3,7 +3,7 @@ import { downloadBlob, getJobStatus, queuePrint } from '@camptocamp/inkmap';
 const root = document.getElementById('example-02');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
-const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
+const spec = /** @type {PrintSpecEditor} */ root.querySelector('print-spec');
 
 // make sure the spec is valid to allow printing
 spec.onValidityCheck((valid) => (btn.enabled = valid));

@@ -2,7 +2,7 @@ import PresetSpecs from '../preset-specs';
 
 const PresetSpecsNames = Object.keys(PresetSpecs);
 
-class PrintSpec extends HTMLElement {
+class PrintSpecEditor extends HTMLElement {
   constructor() {
     super();
 
@@ -167,4 +167,4 @@ class PrintSpec extends HTMLElement {
   }
 }
 
-customElements.define('print-spec', PrintSpec);
+customElements.define('print-spec', PrintSpecEditor);
