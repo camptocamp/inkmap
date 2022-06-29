@@ -4,7 +4,7 @@ import { getScaleBar } from '../../src/main';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
-const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
+const spec = /** @type {PrintSpecEditor} */ root.querySelector('print-spec');
 
 // make sure the spec is valid to allow printing
 spec.onValidityCheck((valid) => (btn.enabled = valid));

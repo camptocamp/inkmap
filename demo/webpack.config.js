@@ -23,6 +23,9 @@ const example06 = fs.readFileSync(
 const example07 = fs.readFileSync(
   path.resolve(__dirname, 'examples/07-errors.js')
 );
+const example08 = fs.readFileSync(
+  path.resolve(__dirname, 'examples/08-legends.js')
+);
 
 module.exports = {
   mode: 'development',
@@ -51,6 +54,7 @@ module.exports = {
         example05,
         example06,
         example07,
+        example08,
       },
       inject: false,
     }),
