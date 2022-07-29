@@ -374,8 +374,59 @@
         </div>
         <p id="errors" class="text-danger"></p>
       </div>
-    </div>
 
+      <div class="mt-5" id="example-08">
+        <h2>Printing legends</h2>
+        <p>
+          This examples shows how to print legends for vector and rasterlayers
+          by providing the configuration option <code>legend</code> on a layer
+          with a value of <code>true</code>. Currently this supports WMS, WMTS,
+          GeoJSON and WFS layers.
+        </p>
+        <p>
+          The print will generate a separate image containing all the legends at
+          once.
+        </p>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              href=".example-08-result"
+              >Result</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href=".example-08-source"
+              >Source</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content mt-2">
+          <div class="tab-pane example-08-result show active">
+            <div class="row align-items-start">
+              <print-spec
+                class="col-8"
+                expanded="false"
+                select="Spec with legends"
+              ></print-spec>
+              <div class="col-3">
+                <custom-button class="map-btn"> Generate map </custom-button>
+                <custom-progress></custom-progress>
+                <custom-button class="legend-btn">
+                  Generate legend
+                </custom-button>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane example-08-source">
+            <pre
+              class="rounded small"
+            ><code class="js"><%- example08 %></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>

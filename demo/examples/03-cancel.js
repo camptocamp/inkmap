@@ -8,7 +8,7 @@ import {
 const root = document.getElementById('example-03');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
-const spec = /** @type {PrintSpec} */ root.querySelector('print-spec');
+const spec = /** @type {PrintSpecEditor} */ root.querySelector('print-spec');
 const btnCancel = /** @type {Button} */ root.querySelector('.cancel-btn');
 
 // make sure the spec is valid to allow printing

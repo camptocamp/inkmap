@@ -128,6 +128,10 @@ A `minimumWidth` (e.g. `[80, 'mm']`) can be provided to request a smaller or lar
 
 > Note that for this scale bar to be relevant in a printed document, its real-world size **has** to be respected.
 
+#### `createLegend(jsonSpec: PrintSpec): Promise<Blob>`
+
+Takes in a [`PrintSpec`](#printspec-type) object and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which resolves to a Blob containing the final legend image.
+
 #### `PrintSpec` type
 
 A `PrintSpec` object describes the content and aspect of the map to be printed.

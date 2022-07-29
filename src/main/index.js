@@ -9,6 +9,7 @@ import {
   getJobStatusObservable,
   newJob$,
 } from './jobs';
+import getLegends from '../shared/widgets/legends';
 
 export { downloadBlob } from './utils';
 
@@ -32,6 +33,7 @@ export { downloadBlob } from './utils';
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
  * @property {string} [attribution] Attribution for the data used in the layer
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
 
 /**
@@ -41,6 +43,7 @@ export { downloadBlob } from './utils';
  *   Note: tile grids are expected to have their x=0,y=0 point at the top left corner; for tile grids where it is at the bottom left corner, use the `{-y}` placeholder.
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {string} [attribution] Attribution for the data used in the layer
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
 
 /**
@@ -49,6 +52,7 @@ export { downloadBlob } from './utils';
  * @property {Object} geojson Feature collection in GeoJSON format; coordinates are expected to be in the print job reference system
  * @property {Object} style JSON object in geostyler notation, defining the layer style.
  * @property {string} [attribution] Attribution for the data used in the layer
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
 
 /**
@@ -64,6 +68,7 @@ export { downloadBlob } from './utils';
  * @property {string} matrixSet Matrix set.
  * @property {TileGrid} tileGrid Tile grid.
  * @property {string} [attribution] Attribution for the data used in the layer
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
 
 /**
@@ -75,6 +80,7 @@ export { downloadBlob } from './utils';
  * @property {string} format Format used when querying WFS, `gml` (default) or `geojson`. inkmap determines the GML parser based on the WFS version used.
  * @property {Object} style JSON object in geostyler notation, defining the layer style.
  * @property {string} [attribution] Attribution for the data used in the layer
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
 
 /**
@@ -173,6 +179,21 @@ export function queuePrint(printSpec) {
       map((job) => job.id)
     )
     .toPromise();
+}
+
+/**
+ * Starts generating a legend image from a print spec.
+ * @param {PrintSpec} printSpec
+ * @return {Promise<Blob>} Promise resolving to the final legend image blob.
+ */
+export function createLegends(printSpec) {
+  if (printSpec.layers.find((el) => el.legend)) {
+    return getLegends(printSpec);
+  } else {
+    console.warn(
+      'The given spec did not include any layer with a configured legend'
+    );
+  }
 }
 
 /**
