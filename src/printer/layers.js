@@ -180,18 +180,16 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
 export function getWMSParams(layerSpec) {
   return layerSpec.tiled
     ? {
-      ...{
         LAYERS: layerSpec.layer,
         VERSION: layerSpec.version || '1.3.0',
         TILED: true,
-      }, ...layerSpec.customParams
-    }
+        ...layerSpec.customParams,
+      }
     : {
-      ...{
         LAYERS: layerSpec.layer,
         VERSION: layerSpec.version || '1.3.0',
-      }, ...layerSpec.customParams
-    };
+        ...layerSpec.customParams,
+      };
 }
 
 /**
