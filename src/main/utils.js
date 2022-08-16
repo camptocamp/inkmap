@@ -42,7 +42,6 @@ export const printerReady = new Promise((resolve) => {
   } else {
     resolve(false);
   }
-  resolve(false)
 });
 
 printerReady.then((useWorker) =>
