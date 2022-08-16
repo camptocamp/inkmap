@@ -155,13 +155,12 @@ describe('layer creation', () => {
             type: 'WMS',
             url: 'https://my.url/wms',
             layer: 'SOME_LAYER',
-            customParams:{token:"test"},
-            
+            customParams: { token: 'test' },
           })
         ).toEqual({
-          LAYERS: 'SOME_LAYER',          
+          LAYERS: 'SOME_LAYER',
           VERSION: '1.3.0',
-          token:"test",
+          token: 'test',
         });
       });
     });
