@@ -149,6 +149,20 @@ describe('layer creation', () => {
           VERSION: '1.1.1',
         });
       });
+      it('returns the correct params (with token) as customParams', () => {
+        expect(
+          getWMSParams({
+            type: 'WMS',
+            url: 'https://my.url/wms',
+            layer: 'SOME_LAYER',
+            customParams: { token: 'test' },
+          })
+        ).toEqual({
+          LAYERS: 'SOME_LAYER',
+          VERSION: '1.3.0',
+          token: 'test',
+        });
+      });
     });
 
     describe('tiled WMS layer parameter construction', () => {

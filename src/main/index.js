@@ -34,6 +34,7 @@ export { downloadBlob } from './utils';
  * @property {boolean} [tiled=false] Whether the WMS layer should be requested as tiles.
  * @property {string} [attribution] Attribution for the data used in the layer
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.
+ * @property {Object} [customParams] Custom parameters added to GetMap requests
  */
 
 /**

@@ -183,10 +183,12 @@ export function getWMSParams(layerSpec) {
         LAYERS: layerSpec.layer,
         VERSION: layerSpec.version || '1.3.0',
         TILED: true,
+        ...layerSpec.customParams,
       }
     : {
         LAYERS: layerSpec.layer,
         VERSION: layerSpec.version || '1.3.0',
+        ...layerSpec.customParams,
       };
 }
 
