@@ -159,6 +159,7 @@ A `Layer` object describes a layer in the printed map.
 | `url` | `string` | URL or URL template for the layer; for XYZ layers, a URL can contain the following tokens: `{a-d}` for randomly choosing a letter, `{x}`, `{y}` and `{z}`. |
 | `opacity` | `number` | Opacity, from 0 (hidden) to 1 (visible). |
 | `attribution` | `string` | Attribution for the data present in the layer. |
+| `legend` | `boolean` | Include this layer in the map legend. Defaults is false. |
 
 #### `WMS layer` type
 
@@ -169,6 +170,7 @@ Additional options for `WMS` layer type.
 | `layer` | `string` | Layer name. |
 | `version` | `string` | Version of WMS protocol used: `1.1.1` or `1.3.0` (default). |
 | `tiled` | `boolean` | Indicates whether the WMS layer should be requested as tiles. Defaults to `false`. |
+| `customParams` | `Object` | Additional params used in all GetMap requests (optional). |
 
 #### `WMTS layer` type
 
