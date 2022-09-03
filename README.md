@@ -1,7 +1,7 @@
 <div style="text-align: center"><strong>inkmap</strong>, a library for generating high resolution maps in the browser</div>
 
 
-##### [Live demo here!](https://camptocamp.github.io/inkmap/master/)
+##### [Live demo here!](https://camptocamp.github.io/inkmap/main/)
 
 ## Introduction
 

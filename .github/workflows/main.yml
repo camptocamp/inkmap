@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     types: [opened, synchronize]
 
@@ -54,7 +54,7 @@ jobs:
       - name: Build demo
         run: npm run build:demo
 
-      - run: echo "::set-env name=BRANCH_NAME::${GITHUB_HEAD_REF:-master}"
+      - run: echo "::set-env name=BRANCH_NAME::${GITHUB_HEAD_REF:-main}"
 
       # Check for write permission
       - name: Check user permission
