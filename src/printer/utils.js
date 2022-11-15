@@ -1,6 +1,5 @@
 import { isWorker } from '../worker/utils';
 import { from, Observable } from 'rxjs';
-import sourceState from 'ol/source/State';
 import { fromLonLat, get as getProjection } from 'ol/proj';
 import {
   registerWithExtent,
@@ -12,6 +11,13 @@ import TileQueue, {
 } from 'ol/TileQueue';
 import { CM_PER_INCH } from '../shared/constants';
 import { scaleToResolution } from '../shared/units';
+
+const sourceState = {
+  UNDEFINED: 'undefined',
+  LOADING: 'loading',
+  READY: 'ready',
+  ERROR: 'error'
+};
 
 /**
  * Transforms a canvas to a Blob through an observable
