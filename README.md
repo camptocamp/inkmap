@@ -226,7 +226,17 @@ A `PrintStatus` object describes the status of a print job.
 | `id` | `number` | Job id. |
 | `progress` | `number` | Job progress, from 0 to 1. |
 | `status` | `string` | Either `'pending'`, `'ongoing'`, `'finished'` or `'canceled'`. |
-| `resultImageUrl` | `string` | An URL used to access the print result (PNG image). This will only be available once the job status is `'finished'`.|
+| `imageBlob` | `Blob | null` | Blob containing the final image. This will be null until the job status is `'finished'`. |
+| `spec` | `PrintSpec` | The spec used for this job. |
+| `sourceLoadErrors` | `SourceLoadError[]` | Array of `SourceLoadError` objects. |
+
+#### `SourceLoadError` type
+
+A `SourceLoadError` object contains the URL for tile sources which produced errors while loading data.
+
+| field | type | description |
+|---|---|---|
+| `url` | `string` | URL of the ol.source that encountered at least one 'tileloaderror' or 'imageloaderror'. |
 
 #### `PrintableImage` class
 
