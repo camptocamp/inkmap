@@ -18,8 +18,9 @@ let counter = 0;
  * Note: this will broadcast the job status updates to the main thread
  * until the job is over.
  * @param {import('../main/index').PrintSpec} spec
+ * @param {string} jobContext
  */
-export async function createJob(spec) {
+export async function createJob(spec, jobContext) {
   registerProjections(spec.projectionDefinitions);
   const sizeInPixel = calculateSizeInPixel(spec);
   const frameState = await getJobFrameState(spec, sizeInPixel);
@@ -33,6 +34,7 @@ export async function createJob(spec) {
     status: 'pending',
     progress: 0,
     sourceLoadErrors: [],
+    jobContext,
   };
 
   const context = createCanvasContext2D(sizeInPixel[0], sizeInPixel[1]);

@@ -44,6 +44,17 @@ export const printerReady = new Promise((resolve) => {
   }
 });
 
+/** Pseudorandom UUIDv4 generator. Source: https://stackoverflow.com/a/2117523 */
+export function uuidv4() {
+  return `${1e7}-${1e3}-${4e3}-${8e3}-${1e11}`.replace(/[018]/g, (c) => {
+    const int = parseInt(c);
+    return (
+      int ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (int / 4)))
+    ).toString(16);
+  });
+}
+
 printerReady.then((useWorker) =>
   console.log(
     `[inkmap] Ready, ${useWorker ? 'using worker' : 'using main thread'}`

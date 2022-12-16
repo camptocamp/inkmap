@@ -1,4 +1,4 @@
-import { map, switchMap, take, takeWhile } from 'rxjs/operators';
+import { filter, map, switchMap, take, takeWhile } from 'rxjs/operators';
 
 import '../printer';
 import { MESSAGE_JOB_CANCEL, MESSAGE_JOB_REQUEST } from '../shared/constants';
@@ -10,6 +10,7 @@ import {
   newJob$,
 } from './jobs';
 import getLegends from '../shared/widgets/legends';
+import { uuidv4 } from './utils';
 
 export { downloadBlob } from './utils';
 
@@ -137,6 +138,7 @@ export { downloadBlob } from './utils';
  * @property {'pending' | 'ongoing' | 'finished' | 'canceled'} status Job status.
  * @property {Blob} [imageBlob] Finished image blob.
  * @property {SourceLoadError[]} [sourceLoadErrors] Array of `SourceLoadError` objects.
+ * @property {string} jobContext Internal id of the job.
  */
 
 /**
@@ -155,9 +157,11 @@ export { downloadBlob } from './utils';
  * @return {Promise<Blob>} Promise resolving to the final image blob.
  */
 export function print(printSpec) {
-  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
+  const jobContext = uuidv4();
+  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec, jobContext });
   return newJob$
     .pipe(
+      filter((job) => job.jobContext === jobContext),
       take(1),
       switchMap((job) => getJobStatusObservable(job.id)),
       takeWhile((job) => job.progress < 1, true),
@@ -173,9 +177,11 @@ export function print(printSpec) {
  * @return {Promise<number>} Promise resolving to the print job id.
  */
 export function queuePrint(printSpec) {
-  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
+  const jobContext = uuidv4();
+  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec, jobContext });
   return newJob$
     .pipe(
+      filter((job) => job.jobContext === jobContext),
       take(1),
       map((job) => job.id)
     )
