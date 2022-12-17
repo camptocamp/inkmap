@@ -19,7 +19,7 @@ jobs:
       - name: Install Node & NPM
         uses: actions/setup-node@v2
         with:
-          node-version: '15' # includes NPM 7
+          node-version: 'lts/*'
 
       - name: Cache node modules
         uses: actions/cache@v1
