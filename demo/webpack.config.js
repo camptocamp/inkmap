@@ -61,7 +61,7 @@ module.exports = {
   ],
   devtool: 'source-map',
   devServer: {
-    contentBase: __dirname,
+    static: { directory: __dirname },
   },
   module: {
     rules: [

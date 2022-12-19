@@ -6,12 +6,16 @@ import LegendRenderer from 'geostyler-legend/dist/LegendRenderer/LegendRenderer'
  * @param {import("../../main/index.js").PrintSpec} spec
  */
 export default async function getLegends(spec) {
-  const wmsLayers = /** @type {Array<import("../../main/index.js").WmsLayer>} */ (spec.layers.filter(
-    (layer) => layer.type === 'WMS'
-  ));
-  const vectorLayers = /** @type {Array<import("../../main/index.js").WfsLayer|import("../../main/index.js").GeoJSONLayer>} */ (spec.layers.filter(
-    (layer) => layer.type === 'WFS' || layer.type === 'GeoJSON'
-  ));
+  const wmsLayers =
+    /** @type {Array<import("../../main/index.js").WmsLayer>} */ (
+      spec.layers.filter((layer) => layer.type === 'WMS')
+    );
+  const vectorLayers =
+    /** @type {Array<import("../../main/index.js").WfsLayer|import("../../main/index.js").GeoJSONLayer>} */ (
+      spec.layers.filter(
+        (layer) => layer.type === 'WFS' || layer.type === 'GeoJSON'
+      )
+    );
   const vectorLayerStyles = vectorLayers.map((layer) => layer.style);
   const remoteLegends = [];
 

@@ -191,8 +191,9 @@ function getScaleBarParams(spec, sizeHint) {
  */
 function getScaleBarSizePx(scaleBarParams, dpi, ctx) {
   ctx.font = `${FONT_SIZE_MM}px Arial`;
-  const scaleTextWidthMm = ctx.measureText(scaleBarParams.scaleIndication)
-    .width;
+  const scaleTextWidthMm = ctx.measureText(
+    scaleBarParams.scaleIndication
+  ).width;
   return [
     realWorldToPixel(
       scaleBarParams.widthMm + scaleTextWidthMm + BORDER_SIZE_MM,
