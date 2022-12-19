@@ -26,8 +26,7 @@ describe('PrintableImage', () => {
     it('returns an array of real world dimensions', () => {
       expect(printableImage.getRealWorldDimensions('mm')).toEqual([12.7, 6.35]);
       expect(printableImage.getRealWorldDimensions('m')).toEqual([
-        0.0127,
-        0.00635,
+        0.0127, 0.00635,
       ]);
       expect(printableImage.getRealWorldDimensions('in')).toEqual([0.5, 0.25]);
     });

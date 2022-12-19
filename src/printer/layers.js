@@ -124,8 +124,9 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
       return frameState.tileQueue.getTilesLoading();
     }, true),
     map(() => {
-      let queuedTilesCount = Object.keys(frameState.tileQueue.queuedElements_)
-        .length;
+      let queuedTilesCount = Object.keys(
+        frameState.tileQueue.queuedElements_
+      ).length;
 
       let progress = 1 - queuedTilesCount / tileCount;
 

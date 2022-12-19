@@ -1,5 +1,7 @@
 import LayerMock from './base';
 
 export default class VectorLayerMock extends LayerMock {
-  setStyle() { return this; }
+  _style = undefined
+  setStyle(style) { this._style = style }
+  getStyle() { return this._style; }
 }
