@@ -1,3 +1,7 @@
 export function waitForPromises() {
-  return new Promise((resolve) => setImmediate(resolve));
+  jest.useRealTimers();
+  return new Promise((resolve) => {
+    process.nextTick(resolve);
+    jest.useFakeTimers();
+  });
 }
