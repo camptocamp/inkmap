@@ -1,13 +1,13 @@
-import { map, switchMap, take, takeWhile } from 'rxjs/operators';
+import { map, switchMap, takeWhile } from 'rxjs/operators';
 
 import '../printer';
 import { MESSAGE_JOB_CANCEL, MESSAGE_JOB_REQUEST } from '../shared/constants';
 import { registerWithExtent } from '../shared/projections';
 import { messageToPrinter } from './exchange';
 import {
+  createNewJob,
   getJobsStatusObservable,
   getJobStatusObservable,
-  newJob$,
 } from './jobs';
 import getLegends from '../shared/widgets/legends';
 
@@ -156,10 +156,9 @@ export { downloadBlob } from './utils';
  */
 export function print(printSpec) {
   messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
-  return newJob$
+  return createNewJob(printSpec)
     .pipe(
-      take(1),
-      switchMap((job) => getJobStatusObservable(job.id)),
+      switchMap((jobId) => getJobStatusObservable(jobId)),
       takeWhile((job) => job.progress < 1, true),
       map((job) => job.imageBlob)
     )
@@ -173,13 +172,7 @@ export function print(printSpec) {
  * @return {Promise<number>} Promise resolving to the print job id.
  */
 export function queuePrint(printSpec) {
-  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
-  return newJob$
-    .pipe(
-      take(1),
-      map((job) => job.id)
-    )
-    .toPromise();
+  return createNewJob(printSpec).toPromise();
 }
 
 /**

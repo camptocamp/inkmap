@@ -37,11 +37,14 @@ export async function createJob(spec) {
 
   const context = createCanvasContext2D(sizeInPixel[0], sizeInPixel[1]);
 
-  combineLatest(
-    spec.layers.map((layer) => {
-      return createLayer(job.id, layer, frameState);
-    })
-  )
+  const layerStates$ = spec.layers.length
+    ? combineLatest(
+        spec.layers.map((layer) => {
+          return createLayer(job.id, layer, frameState);
+        })
+      )
+    : of([]);
+  layerStates$
     .pipe(
       switchMap((layerStates) => {
         const allReady = layerStates.every(([progress]) => progress === 1);

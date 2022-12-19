@@ -6,10 +6,11 @@ import {
   shareReplay,
   startWith,
   switchMap,
+  take,
 } from 'rxjs/operators';
 import { from } from 'rxjs';
-import { messageToMain$ } from './exchange';
-import { MESSAGE_JOB_STATUS } from '../shared/constants';
+import { messageToMain$, messageToPrinter } from './exchange';
+import { MESSAGE_JOB_REQUEST, MESSAGE_JOB_STATUS } from '../shared/constants';
 
 export const jobs$ = messageToMain$.pipe(
   filter((message) => message.type === MESSAGE_JOB_STATUS),
@@ -49,5 +50,17 @@ export function getJobStatusObservable(jobId) {
   return jobs$.pipe(
     map((jobs) => jobs.find((job) => job.id === jobId)),
     filter((job) => !!job)
+  );
+}
+
+/**
+ * @param {import('.').PrintSpec} printSpec
+ * @return {import('rxjs').Observable<number>} Observable emitting the print job id and completing afterwards
+ */
+export function createNewJob(printSpec) {
+  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
+  return newJob$.pipe(
+    take(1),
+    map((job) => job.id)
   );
 }
