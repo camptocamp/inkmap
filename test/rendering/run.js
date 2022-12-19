@@ -180,26 +180,42 @@ async function runTests() {
   await closeBrowser();
 }
 
-const server = new webpackDevServer(webpack(config), {
-  port: serverPort,
-  quiet: true,
-  contentBase: [
-    path.resolve(__dirname, 'testbench'),
-    path.resolve(__dirname, 'data'),
-  ],
-  publicPath: '/',
-  liveReload: false,
-});
+const server = new webpackDevServer(
+  {
+    port: serverPort,
+    host: 'localhost',
+    liveReload: false,
+    hot: false,
+    static: [
+      {
+        directory: path.resolve(__dirname, 'testbench'),
+      },
+      {
+        directory: path.resolve(__dirname, 'data'),
+      },
+    ],
+    devMiddleware: {
+      publicPath: '/',
+    },
+  },
+  webpack({
+    ...config,
+    infrastructureLogging: {
+      level: 'warn',
+    },
+    stats: 'errors-warnings',
+  })
+);
 
 console.log('Starting webpack-dev-server...');
-server.listen(serverPort, 'localhost', function (err) {
+server.startCallback(function (err) {
   if (err) {
     console.log(err);
   } else {
     console.log('Dev server started on http://localhost:' + serverPort);
 
     runTests().then(() => {
-      server.close();
+      server.stop();
       if (failed) {
         console.log(
           'One or several rendering tests failed - check the logs above.'
