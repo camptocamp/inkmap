@@ -58,8 +58,10 @@ export function getJobStatusObservable(jobId) {
  * @return {import('rxjs').Observable<number>} Observable emitting the print job id and completing afterwards
  */
 export function createNewJob(printSpec) {
+  const specJson = JSON.stringify(printSpec);
   messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
   return newJob$.pipe(
+    filter((job) => JSON.stringify(job.spec) === specJson),
     take(1),
     map((job) => job.id)
   );
