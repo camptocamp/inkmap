@@ -11,6 +11,7 @@ import {
 import { from } from 'rxjs';
 import { messageToMain$, messageToPrinter } from './exchange';
 import { MESSAGE_JOB_REQUEST, MESSAGE_JOB_STATUS } from '../shared/constants';
+import isEqual from 'lodash/isEqual';
 
 export const jobs$ = messageToMain$.pipe(
   filter((message) => message.type === MESSAGE_JOB_STATUS),
@@ -58,10 +59,9 @@ export function getJobStatusObservable(jobId) {
  * @return {import('rxjs').Observable<number>} Observable emitting the print job id and completing afterwards
  */
 export function createNewJob(printSpec) {
-  const specJson = JSON.stringify(printSpec);
   messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
   return newJob$.pipe(
-    filter((job) => JSON.stringify(job.spec) === specJson),
+    filter((job) => isEqual(job.spec, printSpec)),
     take(1),
     map((job) => job.id)
   );
