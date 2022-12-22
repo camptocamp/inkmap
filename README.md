@@ -128,9 +128,17 @@ A `minimumWidth` (e.g. `[80, 'mm']`) can be provided to request a smaller or lar
 
 > Note that for this scale bar to be relevant in a printed document, its real-world size **has** to be respected.
 
-#### `createLegend(jsonSpec: PrintSpec): Promise<Blob>`
+#### `getLegend(jsonSpec: PrintSpec): Promise<PrintableImage>`
 
-Takes in a [`PrintSpec`](#printspec-type) object and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which resolves to a Blob containing the final legend image.
+Takes in a [`PrintSpec`](#printspec-type) object and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which resolves to a Blob containing a `PrintableImage`.
+This is typically useful for adding the legend to a PDF document.
+
+#### `getLegendAsSvg(jsonSpec: PrintSpec): Promise<Blob>`
+
+Takes in a [`PrintSpec`](#printspec-type) object and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which resolves to a Blob containing an SVG image.
+This can be used for instance to add the legend to an HTML page.
+
+> Note: this used to be called `createLegends`; **this function is deprecated** and will be removed in a future release.
 
 #### `PrintSpec` type
 
