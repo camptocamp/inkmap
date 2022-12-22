@@ -39,10 +39,10 @@
   "homepage": "https://github.com/camptocamp/inkmap#readme",
   "dependencies": {
     "@babel/runtime": "^7.12.5",
-    "geostyler-legend": "^2.2.0",
-    "geostyler-openlayers-parser": "^2.5.0",
+    "geostyler-legend": "~4.0.0",
+    "geostyler-openlayers-parser": "~4.0.0",
     "lodash": "^4.17.21",
-    "ol": "^6.5.0",
+    "ol": "~7.2.1",
     "proj4": "^2.6.3",
     "rxjs": "^6.6.3"
   },
