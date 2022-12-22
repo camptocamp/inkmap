@@ -8,7 +8,6 @@ const mapBtn = /** @type {CustomButton} */ root.querySelector(
 const legendBtn = /** @type {CustomButton} */ root.querySelector(
   'custom-button.legend-btn'
 );
-root.querySelector('custom-button.legend-btn');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');
 const spec = /** @type {PrintSpecEditor} */ root.querySelector('print-spec');
 

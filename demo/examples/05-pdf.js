@@ -1,6 +1,11 @@
-import { print, getAttributionsText, getNorthArrow } from '@camptocamp/inkmap';
+import {
+  print,
+  getAttributionsText,
+  getNorthArrow,
+  getLegend,
+  getScaleBar,
+} from '@camptocamp/inkmap';
 import { jsPDF } from 'jspdf';
-import { getScaleBar } from '../../src/main';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');
@@ -86,6 +91,22 @@ btn.addEventListener('click', async () => {
   doc.setFont('courier', 'normal');
   doc.setFontSize(12);
   doc.text(getAttributionsText(spec.value), 287, 200, null, null, 'right');
+
+  // add legend on second page
+  doc.addPage('a4', 'portrait');
+  doc.setFont('times', 'bold');
+  doc.setFontSize(16);
+  doc.text('Legend', 10, 10);
+  const legend = await getLegend(specValue);
+  const legendSizeMm = legend.getRealWorldDimensions('mm');
+  doc.addImage(
+    legend.getImage(),
+    'PNG',
+    10,
+    18,
+    legendSizeMm[0],
+    legendSizeMm[1]
+  );
 
   // download the result
   doc.save('inkmap.pdf');
