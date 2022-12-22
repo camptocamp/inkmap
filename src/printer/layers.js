@@ -45,7 +45,7 @@ export const cancel$ = new Subject();
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
  * @param {import('../main/index').Layer} layerSpec
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 export function createLayer(jobId, layerSpec, rootFrameState) {
@@ -66,7 +66,7 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
 /**
  * @param {number} jobId
  * @param {import('ol/source/TileImage').default} source
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @param {number} [opacity=1]
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -158,7 +158,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').XyzLayer} layerSpec
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerXYZ(jobId, layerSpec, rootFrameState) {
@@ -196,7 +196,7 @@ export function getWMSParams(layerSpec) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').WmsLayer} layerSpec
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWMS(jobId, layerSpec, rootFrameState) {
@@ -284,7 +284,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').WmtsLayer} layerSpec
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWMTS(jobId, layerSpec, rootFrameState) {
@@ -319,7 +319,7 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
 
 /**
  * @param {import('../main/index').GeoJSONLayer} layerSpec
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerGeoJSON(layerSpec, rootFrameState) {
@@ -349,7 +349,7 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
   const styleReadyPromise = layerSpec.style
     ? new OpenLayersParser()
         .writeStyle(layerSpec.style)
-        .then((olStyle) => layer.setStyle(olStyle))
+        .then(({ output: olStyle }) => layer.setStyle(olStyle))
         .catch((error) => console.log(error))
     : Promise.resolve();
 
@@ -367,7 +367,7 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
 /**
  * @param {number} jobId
  * @param {import('../main/index').WfsLayer} layerSpec
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWFS(jobId, layerSpec, rootFrameState) {
@@ -444,7 +444,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
     const parser = new OpenLayersParser();
     parser
       .writeStyle(layerSpec.style)
-      .then((olStyle) => layer.setStyle(olStyle))
+      .then(({ output: olStyle }) => layer.setStyle(olStyle))
       .catch((error) => console.log(error));
   }
 
