@@ -1,11 +1,7 @@
 import LegendRenderer from 'geostyler-legend/dist/LegendRenderer/LegendRenderer';
+import { PrintableImage } from '../../main/printable-image';
 
-/**
- * Create and download a separate image containing legends for all layers
- * that have a legend configured by the given spec.
- * @param {import("../../main/index.js").PrintSpec} spec
- */
-export default async function getLegends(spec) {
+function getLegendRenderer(spec) {
   const wmsLayers =
     /** @type {Array<import("../../main/index.js").WmsLayer>} */ (
       spec.layers.filter((layer) => layer.type === 'WMS')
@@ -41,7 +37,7 @@ export default async function getLegends(spec) {
     });
   });
 
-  const renderer = new LegendRenderer({
+  return new LegendRenderer({
     maxColumnWidth: 290,
     maxColumnHeight: 840,
     overflow: 'auto',
@@ -49,8 +45,31 @@ export default async function getLegends(spec) {
     remoteLegends: remoteLegends,
     size: [595, 842],
   });
+}
 
+/**
+ * Returns an SVG fragment containing legends for all layers
+ * that have a legend configured by the given spec.
+ * @param {import("../../main/index.js").PrintSpec} spec
+ * @return {Promise<Blob>}
+ */
+export async function getLegendAsSvg(spec) {
+  const renderer = getLegendRenderer(spec);
   const svgParent = await renderer.renderAsImage('svg');
   let svgString = svgParent.outerHTML;
   return new Blob([svgString], { type: 'image/svg+xml' });
+}
+
+/**
+ * Returns a `PrintableImage` containing legends for all layers
+ * that have a legend configured by the given spec.
+ * @param {import("../../main/index.js").PrintSpec} spec
+ * @return {Promise<PrintableImage>}
+ */
+export async function getPrintableLegend(spec) {
+  const renderer = getLegendRenderer(spec);
+  const canvas = /** @type {HTMLCanvasElement} */ (
+    await renderer.renderAsImage('png')
+  );
+  return new PrintableImage(canvas, spec.dpi);
 }

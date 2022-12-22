@@ -9,8 +9,7 @@ import {
   getJobsStatusObservable,
   getJobStatusObservable,
 } from './jobs';
-import getLegends from '../shared/widgets/legends';
-
+import { getLegendAsSvg } from '../shared/widgets/legends';
 export { downloadBlob } from './utils';
 
 /**
@@ -176,21 +175,6 @@ export function queuePrint(printSpec) {
 }
 
 /**
- * Starts generating a legend image from a print spec.
- * @param {PrintSpec} printSpec
- * @return {Promise<Blob>} Promise resolving to the final legend image blob.
- */
-export function createLegends(printSpec) {
-  if (printSpec.layers.find((el) => el.legend)) {
-    return getLegends(printSpec);
-  } else {
-    console.warn(
-      'The given spec did not include any layer with a configured legend'
-    );
-  }
-}
-
-/**
  * Returns a long-running observable which emits an array of print job status.
  * This observable will never complete.
  * @return {import('rxjs').Observable<PrintStatus[]>} Observable emitting jobs status array.
@@ -226,7 +210,19 @@ export function registerProjection(definition) {
   registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
 
+/**
+ * Starts generating a legend image from a print spec.
+ * @deprecated use getLegendAsSvg instead
+ * @param {PrintSpec} printSpec
+ * @return {Promise<Blob>} Promise resolving to the final legend image blob.
+ */
+export const createLegends = getLegendAsSvg;
+
 export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions';
 
 export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow';
 export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar';
+export {
+  getLegendAsSvg,
+  getPrintableLegend as getLegend,
+} from '../shared/widgets/legends';

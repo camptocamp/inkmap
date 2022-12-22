@@ -1,5 +1,5 @@
 import { downloadBlob, getJobStatus, queuePrint } from '@camptocamp/inkmap';
-import { createLegends } from '../../src/main';
+import { getLegendAsSvg } from '../../src/main';
 
 const root = document.getElementById('example-08');
 const mapBtn = /** @type {CustomButton} */ root.querySelector(
@@ -42,6 +42,6 @@ mapBtn.addEventListener('click', async () => {
 });
 
 legendBtn.addEventListener('click', async () => {
-  const blob = await createLegends(spec.value);
+  const blob = await getLegendAsSvg(spec.value);
   downloadBlob(blob, 'legend.svg');
 });
