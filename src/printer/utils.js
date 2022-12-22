@@ -33,7 +33,7 @@ export function canvasToBlob(canvas) {
 /**
  * Returns an OpenLayers frame state for a given job spec
  * This frame state will be used as a basis for all layers
- * @param {import('../main/index').PrintSpec} spec
+ * @param {import('../main/index.js').PrintSpec} spec
  * @param {Array} sizeInPixel
  * @return {Promise<import('ol/Map').FrameState>}
  */
@@ -54,12 +54,15 @@ export async function getJobFrameState(spec, sizeInPixel) {
     resolution,
     projection,
     rotation: 0,
+    zoom: 1,
   };
 
   return {
     animate: false,
     coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],
-    declutterItems: [],
+    declutterTree: [],
+    mapId: '',
+    renderTargets: {},
     extent: getForViewAndSize(
       viewState.center,
       viewState.resolution,
@@ -84,7 +87,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
 
 /**
  * Returns the map canvas size in pixels based on size units and dpi given in spec
- * @param {import('../main/index').PrintSpec} spec
+ * @param {import('../main/index.js').PrintSpec} spec
  * @return {[number, number]}
  */
 export function calculateSizeInPixel(spec) {

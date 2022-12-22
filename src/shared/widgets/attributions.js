@@ -6,7 +6,7 @@ const FONT_SIZE_MM = 6;
 /**
  * Print all attributions from the spec in one single line.
  * @param {CanvasRenderingContext2D} ctx
- * @param {import('../../main/index').PrintSpec} spec
+ * @param {import('../../main/index.js').PrintSpec} spec
  */
 export function printAttributions(ctx, spec) {
   const pxToMmRatio = spec.dpi / (CM_PER_INCH * 10);
@@ -26,7 +26,7 @@ export function printAttributions(ctx, spec) {
 
   applyWidgetPositionTransform(
     ctx,
-    /** @type {import('../../main/index').WidgetPosition} */
+    /** @type {import('../../main/index.js').WidgetPosition} */
     (spec.attributions === true ? 'bottom-right' : spec.attributions),
     [
       ctx.measureText(text).width * pxToMmRatio,
@@ -43,7 +43,7 @@ export function printAttributions(ctx, spec) {
 
 /**
  * Returns the full attributions text of a spec
- * @param {import('../../main/index').PrintSpec} spec
+ * @param {import('../../main/index.js').PrintSpec} spec
  * @return {string}
  */
 export function computeAttributionsText(spec) {

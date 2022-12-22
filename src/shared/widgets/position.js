@@ -5,7 +5,7 @@ const WIDGET_OFFSET_MM = 4;
 /**
  * Applies transforms to match the given widget position and dpi
  * @param {CanvasRenderingContext2D} ctx
- * @param {import('../../main/index').WidgetPosition} position
+ * @param {import('../../main/index.js').WidgetPosition} position
  * @param {[number, number]} widgetSizePx
  * @param {number} dpi
  */

@@ -21,7 +21,7 @@ export { downloadBlob } from './utils';
  * @property {Array<string>} matrixIds matrix IDs. The length of this array needs
  * to match the length of the `resolutions` array. By default, it will be ['0', '1', '2', ..., resolutions.length-1]
  * @property {number} tileSize Tile size.
- * @property {[number, number, number, number]} [extent] Extent for the tile grid.
+ * @property {number[]} [extent] Extent for the tile grid.
  */
 
 /**
@@ -61,7 +61,7 @@ export { downloadBlob } from './utils';
  * @property {'WMTS'} type
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible)
  * @property {string} url A URL for the service.
- * @property {string} requestEncoding Request encoding; valid values are `KVP`, `REST`.
+ * @property {'KVP' | 'REST'} requestEncoding Request encoding; valid values are `KVP`, `REST`.
  * @property {string} format Image format. Only used when `requestEncoding` is `'KVP'`. eg `image/png`
  * @property {string} layer Layer name as advertised in the WMTS capabilities.
  * @property {string} style Style name as advertised in the WMTS capabilities.

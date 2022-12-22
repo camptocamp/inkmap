@@ -55,7 +55,7 @@ export function getPrintableNorthArrow(spec, sizeHint) {
 /**
  * Print a north arrow on top of the canvas
  * @param {CanvasRenderingContext2D} ctx Rendering context of the canvas
- * @param {true|import('../../main/index').WidgetPosition} position Position of the arrow; `true` defaults to `'top-right'`
+ * @param {true|import('../../main/index.js').WidgetPosition} position Position of the arrow; `true` defaults to `'top-right'`
  * @param {number} dpi DPI of the printed document
  */
 export function printNorthArrow(ctx, position, dpi) {

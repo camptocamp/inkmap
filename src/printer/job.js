@@ -17,7 +17,7 @@ let counter = 0;
  * Add a new job in the queue
  * Note: this will broadcast the job status updates to the main thread
  * until the job is over.
- * @param {import('../main/index').PrintSpec} spec
+ * @param {import('../main/index.js').PrintSpec} spec
  */
 export async function createJob(spec) {
   registerProjections(spec.projectionDefinitions);
@@ -25,7 +25,7 @@ export async function createJob(spec) {
   const frameState = await getJobFrameState(spec, sizeInPixel);
 
   /**
-   * @type {import('../main/index').PrintStatus}
+   * @type {import('../main/index.js').PrintStatus}
    */
   const job = {
     id: counter++,

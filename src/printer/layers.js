@@ -44,7 +44,7 @@ export const cancel$ = new Subject();
  * Returns an observable emitting the printing status for this layer
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
- * @param {import('../main/index').Layer} layerSpec
+ * @param {import('../main/index.js').Layer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -114,7 +114,9 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
   renderer.useContainer = useContainer.bind(renderer, context);
 
   renderer.renderFrame(frameState, context.canvas);
-  const tileCount = Object.keys(frameState.tileQueue.queuedElements_).length;
+  const tileCount = Object.keys(
+    /** @type {any} */ (frameState.tileQueue).queuedElements_
+  ).length;
 
   const updatedProgress$ = update$.pipe(
     startWith(true),
@@ -157,7 +159,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
 
 /**
  * @param {number} jobId
- * @param {import('../main/index').XyzLayer} layerSpec
+ * @param {import('../main/index.js').XyzLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -175,7 +177,7 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {import('../main/index').WmsLayer} layerSpec
+ * @param {import('../main/index.js').WmsLayer} layerSpec
  * @return {Object.<string, string|boolean>}
  */
 export function getWMSParams(layerSpec) {
@@ -195,7 +197,7 @@ export function getWMSParams(layerSpec) {
 
 /**
  * @param {number} jobId
- * @param {import('../main/index').WmsLayer} layerSpec
+ * @param {import('../main/index.js').WmsLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -222,6 +224,8 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
   let frameState;
   let layer;
   let renderer;
+
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
   const progress$ = new BehaviorSubject([0, null, undefined]);
 
   const source = new ImageWMS({
@@ -283,7 +287,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
 
 /**
  * @param {number} jobId
- * @param {import('../main/index').WmtsLayer} layerSpec
+ * @param {import('../main/index.js').WmtsLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -297,7 +301,7 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
       .fill(0)
       .map((_, i) => `${i}`);
 
-  tileGrid = new WMTSTileGrid({
+  const olTileGrid = new WMTSTileGrid({
     ...tileGrid,
     extent,
     matrixIds,
@@ -307,7 +311,7 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
     jobId,
     new WMTS({
       ...layerSpec,
-      tileGrid,
+      tileGrid: olTileGrid,
       projection,
       transition: 0,
       crossOrigin: 'anonymous',
@@ -318,7 +322,7 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
 }
 
 /**
- * @param {import('../main/index').GeoJSONLayer} layerSpec
+ * @param {import('../main/index.js').GeoJSONLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -342,7 +346,7 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
   // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  // use a behaviour subject for the progress observable
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
   const progress$ = new BehaviorSubject([0, null]);
 
   // when this promise resolves, the layer is ready to be drawn
@@ -366,7 +370,7 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
 
 /**
  * @param {number} jobId
- * @param {import('../main/index').WfsLayer} layerSpec
+ * @param {import('../main/index.js').WfsLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
@@ -382,6 +386,8 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
   const version = layerSpec.version || '1.1.0';
   const format =
     layerSpec.format === 'geojson' ? new GeoJSON() : new WFS({ version });
+
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
   const progress$ = new BehaviorSubject([0, null]);
 
   let vectorSource = new VectorSource({
@@ -404,9 +410,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
           return response.text();
         })
         .then((responseText) => {
-          vectorSource.addFeatures(
-            vectorSource.getFormat().readFeatures(responseText)
-          );
+          vectorSource.addFeatures(format.readFeatures(responseText));
           if (vectorSource.getFeatures().length !== 0) {
             renderer.prepareFrame({ ...frameState, time: Date.now() });
             renderer.renderFrame(
