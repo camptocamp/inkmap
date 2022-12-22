@@ -17,7 +17,7 @@ import XYZSourceMock, {
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue';
 import { waitForPromises } from '../utils';
 
-/** @type {import('ol/PluggableMap').FrameState} */
+/** @type {import('ol/Map').FrameState} */
 const frameState = {
   animate: false,
   coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],

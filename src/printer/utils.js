@@ -1,6 +1,5 @@
 import { isWorker } from '../worker/utils';
 import { from, Observable } from 'rxjs';
-import sourceState from 'ol/source/State';
 import { fromLonLat, get as getProjection } from 'ol/proj';
 import {
   registerWithExtent,
@@ -34,9 +33,9 @@ export function canvasToBlob(canvas) {
 /**
  * Returns an OpenLayers frame state for a given job spec
  * This frame state will be used as a basis for all layers
- * @param {import('../main/index').PrintSpec} spec
+ * @param {import('../main/index.js').PrintSpec} spec
  * @param {Array} sizeInPixel
- * @return {import('ol/PluggableMap').FrameState}
+ * @return {Promise<import('ol/Map').FrameState>}
  */
 export async function getJobFrameState(spec, sizeInPixel) {
   let projection = getProjection(spec.projection);
@@ -55,12 +54,15 @@ export async function getJobFrameState(spec, sizeInPixel) {
     resolution,
     projection,
     rotation: 0,
+    zoom: 1,
   };
 
   return {
     animate: false,
     coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],
-    declutterItems: [],
+    declutterTree: [],
+    mapId: '',
+    renderTargets: {},
     extent: getForViewAndSize(
       viewState.center,
       viewState.resolution,
@@ -85,7 +87,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
 
 /**
  * Returns the map canvas size in pixels based on size units and dpi given in spec
- * @param {import('../main/index').PrintSpec} spec
+ * @param {import('../main/index.js').PrintSpec} spec
  * @return {[number, number]}
  */
 export function calculateSizeInPixel(spec) {
@@ -124,10 +126,10 @@ export function calculateSizeInPixel(spec) {
 
 /**
  * Adapt a generic OL frame state to work with a specific layer
- * @param {import('ol/PluggableMap').FrameState} rootFrameState
+ * @param {import('ol/Map').FrameState} rootFrameState
  * @param {import('ol/layer/Layer').default} layer
  * @param {number} [opacity] Opacity (0 to 1), 1 if not defined
- * @return {import('ol/PluggableMap').FrameState}
+ * @return {import('ol/Map').FrameState}
  */
 export function makeLayerFrameState(rootFrameState, layer, opacity) {
   let fakeTime = 0;
@@ -142,7 +144,7 @@ export function makeLayerFrameState(rootFrameState, layer, opacity) {
         minResolution: 0,
         minZoom: null,
         opacity: opacity !== undefined ? opacity : 1,
-        sourceState,
+        sourceState: '',
         visible: true,
         zIndex: 0,
       },
@@ -190,7 +192,7 @@ export function useContainer(context) {
  * @param {string} layerName
  * @param {string} format
  * @param {string} projCode
- * @param {[number, number, number, number]} extent
+ * @param {number[]} extent
  */
 export function generateGetFeatureUrl(
   baseUrl,

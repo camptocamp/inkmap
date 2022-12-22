@@ -1,5 +1,4 @@
 import { fromLonLat, getPointResolution, METERS_PER_UNIT } from 'ol/proj';
-import ProjUnits from 'ol/proj/Units';
 import { applyWidgetPositionTransform } from './position';
 import {
   pixelToRealWorld,
@@ -99,8 +98,8 @@ function getScaleBarParams(spec, sizeHint) {
     (typeof spec.scaleBar === 'object' && spec.scaleBar.units) || 'metric';
   const center = fromLonLat(spec.center, spec.projection);
   const resolution = scaleToResolution(spec.projection, spec.scale, spec.dpi);
-  const pointResolutionUnits =
-    units === 'degrees' ? ProjUnits.DEGREES : ProjUnits.METERS;
+  /** @type {import('ol/proj/Units').Units} */
+  const pointResolutionUnits = units === 'degrees' ? units : 'm';
   let pointResolution = getPointResolution(
     spec.projection,
     resolution,
@@ -112,7 +111,7 @@ function getScaleBarParams(spec, sizeHint) {
   let suffix = '';
 
   if (units === 'degrees') {
-    const metersPerDegree = METERS_PER_UNIT[ProjUnits.DEGREES];
+    const metersPerDegree = METERS_PER_UNIT[units];
     nominalCount *= metersPerDegree;
     if (nominalCount < metersPerDegree / 60) {
       suffix = '\u2033'; // seconds

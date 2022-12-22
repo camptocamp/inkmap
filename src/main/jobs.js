@@ -55,7 +55,7 @@ export function getJobStatusObservable(jobId) {
 }
 
 /**
- * @param {import('.').PrintSpec} printSpec
+ * @param {import("./index.js").PrintSpec} printSpec
  * @return {import('rxjs').Observable<number>} Observable emitting the print job id and completing afterwards
  */
 export function createNewJob(printSpec) {

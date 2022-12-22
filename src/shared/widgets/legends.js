@@ -50,9 +50,7 @@ export default async function getLegends(spec) {
     size: [595, 842],
   });
 
-  const div = document.createElement('div');
-  const svgParent = await renderer.render(div);
-  let svgString = svgParent.node().outerHTML;
-  const blob = new Blob([svgString], { type: 'image/svg+xml' });
-  return blob;
+  const svgParent = await renderer.renderAsImage('svg');
+  let svgString = svgParent.outerHTML;
+  return new Blob([svgString], { type: 'image/svg+xml' });
 }
