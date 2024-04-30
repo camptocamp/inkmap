@@ -1,6 +1,8 @@
 import TileLayer from 'ol/layer/Tile';
 import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
+import BingMaps from 'ol/source/BingMaps';
+import { quadKey } from 'ol/source/BingMaps';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
 import WFS from 'ol/format/WFS';
@@ -60,6 +62,9 @@ export async function createLayer(jobId, layerSpec, rootFrameState) {
       return createLayerWFS(jobId, layerSpec, rootFrameState);
     case 'GeoJSON':
       return createLayerGeoJSON(layerSpec, rootFrameState);
+    case 'BingMaps':
+      // @ts-ignore
+      return await createLayerBingMaps(jobId, layerSpec, rootFrameState);
   }
 }
 
@@ -460,4 +465,149 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
   return progress$;
+}
+
+/**
+ * @param {number} jobId
+ * @param {import('../main/index.js').BingMapsLayer} layerSpec
+ * @param {import('ol/Map').FrameState} rootFrameState
+ * @return Promise<Observable<LayerPrintStatus>>
+ */
+async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
+  let source = new BingMaps({
+    key: layerSpec.apiKey,
+    imagerySet: layerSpec.imagerySet,
+    culture: layerSpec.culture,
+  });
+
+  let culture = layerSpec.culture !== undefined ? layerSpec.culture : 'en-us';
+
+  // BingMaps doesn't store the URL, so we need to do a fetch by ourselves to get it and pass it to the Object
+  await fetch(
+    'https://dev.virtualearth.net/REST/v1/Imagery/Metadata/' +
+    layerSpec.imagerySet +
+    '?uriScheme=https&include=ImageryProviders&key=' +
+    layerSpec.apiKey +
+    '&c=' +
+    culture
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('ERROR HTTP, statut ' + response.status);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      var url = data.resourceSets[0].resources[0].imageUrl;
+
+      url = url.replace('{subdomain}', 't{0-3}');
+      if (url.includes('{culture}')) {
+        url = url.replace('{culture}', culture);
+      } else if (url.includes('en-US')) {
+        url = url.replace('en-US', culture);
+      }
+      url = url + '&coord={z}/{x}/{y}';
+      source.setUrl(url);
+    })
+    .catch((error) => {
+      console.error('ERROR : ', error);
+      return error;
+    });
+
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+  let frameState;
+  let layer;
+  let renderer;
+  let tileLoadErrorUrl;
+  layer = new TileLayer({
+    source,
+  });
+  source.setTileLoadFunction(function (tile, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (tile).getImage();
+
+    function getCoords(str) {
+      str = str.split('&coord=');
+      return str[str.length - 1];
+    }
+
+    let coords = getCoords(src);
+
+    let tabCoords = coords.split('/');
+    let resQuadKey = quadKey([tabCoords[0], tabCoords[1], tabCoords[2]]);
+
+    src = src.replace('{quadkey}', resQuadKey);
+    src = src.replace('&coord=' + coords, '');
+
+    if (isWorker()) {
+      const tileSize = layer
+        .getSource()
+        .getTilePixelSize(
+          0,
+          rootFrameState.pixelRatio,
+          rootFrameState.viewState.projection
+        );
+      // @ts-ignore
+      image.hintImageSize(tileSize[0], tileSize[1]);
+    }
+    image.src = src;
+  });
+
+  layer.getSource().on('tileloaderror', function (e) {
+    tileLoadErrorUrl = e.target.getUrls()[0];
+  });
+
+  frameState = makeLayerFrameState(rootFrameState, layer, 1);
+
+  renderer = layer.getRenderer();
+
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  renderer.renderFrame(frameState, context.canvas);
+
+  const tileCount = Object.keys(
+    /** @type {any} */ (frameState.tileQueue).queuedElements_
+  ).length;
+
+  const updatedProgress$ = update$.pipe(
+    startWith(true),
+    takeWhile(() => {
+      frameState.tileQueue.reprioritize();
+      frameState.tileQueue.loadMoreTiles(12, 4);
+      return frameState.tileQueue.getTilesLoading();
+    }, true),
+    map(() => {
+      let queuedTilesCount = Object.keys(
+        frameState.tileQueue.queuedElements_
+      ).length;
+
+      let progress = 1 - queuedTilesCount / tileCount;
+
+      // this is to make sure all tiles have finished loading before completing layer
+      if (progress === 1 && frameState.tileQueue.getTilesLoading() > 0) {
+        progress -= 0.001;
+      }
+
+      if (progress === 1) {
+        renderer.renderFrame(frameState, context.canvas);
+        return [1, context.canvas, tileLoadErrorUrl];
+      } else {
+        return [progress, null, tileLoadErrorUrl];
+      }
+    }),
+    throttleTime(500, undefined, { leading: true, trailing: true })
+  );
+
+  const canceledProgress$ = cancel$.pipe(
+    filter((canceledJobId) => canceledJobId === jobId),
+    map(() => [-1, null, undefined])
+  );
+
+  return merge(updatedProgress$, canceledProgress$).pipe(
+    takeWhile(([progress]) => progress !== -1 && progress !== 1, true)
+  );
 }
