@@ -46,9 +46,9 @@ export const cancel$ = new Subject();
  * if not canceled, and complete.
  * @param {import('../main/index.js').Layer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
- * @return {import('rxjs').Observable<LayerPrintStatus>}
+ * @return {Promise<import('rxjs').Observable<LayerPrintStatus>>}
  */
-export function createLayer(jobId, layerSpec, rootFrameState) {
+export async function createLayer(jobId, layerSpec, rootFrameState) {
   switch (layerSpec.type) {
     case 'XYZ':
       return createLayerXYZ(jobId, layerSpec, rootFrameState);
