@@ -21,7 +21,6 @@ export function downloadBlob(imageBlob, filename) {
  * @type {Promise<boolean>}
  */
 export const printerReady = new Promise((resolve) => {
-  /*
   if (hasOffscreenCanvasSupport()) {
     navigator.serviceWorker.register('inkmap-worker.js').then(
       () => {
@@ -43,11 +42,6 @@ export const printerReady = new Promise((resolve) => {
   } else {
     resolve(false);
   }
-  */
-  console.log(
-    '[inkmap] Service worker disabled to fit with OpenLayers versions and to add Layers like BingMaps.'
-  );
-  resolve(false);
 });
 
 printerReady.then((useWorker) =>

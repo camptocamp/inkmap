@@ -485,11 +485,11 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
   // BingMaps doesn't store the URL, so we need to do a fetch by ourselves to get it and pass it to the Object
   await fetch(
     'https://dev.virtualearth.net/REST/v1/Imagery/Metadata/' +
-    layerSpec.imagerySet +
-    '?uriScheme=https&include=ImageryProviders&key=' +
-    layerSpec.apiKey +
-    '&c=' +
-    culture
+      layerSpec.imagerySet +
+      '?uriScheme=https&include=ImageryProviders&key=' +
+      layerSpec.apiKey +
+      '&c=' +
+      culture
   )
     .then((response) => {
       if (!response.ok) {
