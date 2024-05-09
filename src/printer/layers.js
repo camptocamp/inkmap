@@ -8,6 +8,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
 import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
+import ImageArcGISRest from 'ol/source/ImageArcGISRest';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
@@ -60,6 +61,8 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
       return createLayerWFS(jobId, layerSpec, rootFrameState);
     case 'GeoJSON':
       return createLayerGeoJSON(layerSpec, rootFrameState);
+    case 'ImageArcGISRest':
+      return createLayerImageArcGISRest(jobId, layerSpec, rootFrameState);
   }
 }
 
@@ -457,6 +460,80 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
   // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
+  renderer.prepareFrame({ ...frameState, time: Date.now() });
+
+  return progress$;
+}
+
+/**
+ * @param {number} jobId
+ * @param {import('../main/index.js').ImageArcGISRest} layerSpec
+ * @param {import('ol/Map').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
+ */
+function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+  let frameState;
+  let layer;
+  let renderer;
+
+  const source = new ImageArcGISRest({
+    ...layerSpec,
+    crossOrigin: 'anonymous',
+  });
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
+  const progress$ = new BehaviorSubject([0, null, undefined]);
+
+  layer = new ImageLayer({
+    source: source,
+  });
+  source.setImageLoadFunction(function (layerImage, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (layerImage).getImage();
+
+    if (isWorker()) {
+      // @ts-ignore
+      image.hintImageSize(width, height);
+    }
+
+    const blankSrc =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    cancel$
+      .pipe(
+        filter((canceledJobId) => canceledJobId === jobId),
+        take(1),
+        tap(() => {
+          progress$.next([-1, null, undefined]);
+          progress$.complete();
+          image.src = blankSrc;
+        })
+      )
+      .subscribe();
+
+    image.src = src;
+  });
+
+  frameState = makeLayerFrameState(rootFrameState, layer, layerSpec.opacity);
+
+  renderer = layer.getRenderer();
+  // @ts-ignore
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  layer.getSource().once('imageloaderror', function (e) {
+    const imageLoadErrorUrl = e.target.getUrl();
+    progress$.next([1, context.canvas, imageLoadErrorUrl]);
+    progress$.complete();
+  });
+  layer.getSource().once('imageloadend', () => {
+    renderer.prepareFrame({ ...frameState, time: Date.now() });
+    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+    progress$.next([1, context.canvas, undefined]);
+    progress$.complete();
+  });
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
   return progress$;
