@@ -6,14 +6,12 @@
       "ratio": 1,
       "params": {
         "LAYERS": "SHOW:0"
-      },
-      "attribution": "© test ABCD"
+      }
     }
   ],
   "size": [256, 256],
   "center": [12, 48],
   "dpi": 50,
   "scale": 40000000,
-  "projection": "EPSG:3857",
-  "attributions": "bottom-right"
+  "projection": "EPSG:3857"
 }
