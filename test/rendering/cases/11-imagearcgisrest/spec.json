@@ -1,0 +1,17 @@
+{
+  "layers": [
+    {
+      "type": "ImageArcGISRest",
+      "url": "https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer",
+      "ratio": 1,
+      "params": {
+        "LAYERS": "SHOW:0"
+      }
+    }
+  ],
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 50,
+  "scale": 40000000,
+  "projection": "EPSG:3857"
+}
