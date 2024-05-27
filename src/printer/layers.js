@@ -516,7 +516,16 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
       console.error('ERROR : ', error);
       return error;
     });
-  
+
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+  let frameState;
+  let layer;
+  let renderer;
+
   let tileLoadErrorUrl;
   layer = new TileLayer({
     source,
@@ -605,13 +614,15 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
   return merge(updatedProgress$, canceledProgress$).pipe(
     takeWhile(([progress]) => progress !== -1 && progress !== 1, true)
   );
+}
+
+/**
+ * @param {number} jobId
  * @param {import('../main/index.js').ImageArcGISRest} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
-            
 function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
-
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
@@ -620,6 +631,7 @@ function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
   let frameState;
   let layer;
   let renderer;
+
   const source = new ImageArcGISRest({
     ...layerSpec,
     crossOrigin: 'anonymous',
