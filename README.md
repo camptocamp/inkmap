@@ -207,6 +207,17 @@ Additional options for `GeoJSON` layer type.
 | `geojson` | `object` | Feature collection in GeoJSON format; coordinates are expected to be in the print job reference system. |
 | `style` | `object` | JSON object in geostyler notation, defining the layer style. |
 
+#### `ImageArcGISRest layer` type
+
+Additional options for `ImageArcGISRest` layer type.
+
+| field | type | description |
+|---|---|---|
+| `hidpi` | `boolean` | Use the ol/Map#pixelRatio value when requesting the image from the remote server. |
+| `interpolate` | `boolean` | Use interpolated values when resampling.  Set to false to use the nearest neighbor instead. |
+| `tiled` | `boolean` | Indicates whether the WMS layer should be requested as tiles. Defaults to `false`. |
+| `params` | `object` | ArcGIS Rest parameters. This field is optional. |
+
 #### `projectionDefinition` type
 
 A `projectionDefinition` object describes a projection to be registered in proj4.

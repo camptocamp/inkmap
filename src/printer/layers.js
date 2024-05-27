@@ -10,6 +10,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
 import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
+import ImageArcGISRest from 'ol/source/ImageArcGISRest';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
 import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
@@ -65,6 +66,8 @@ export async function createLayer(jobId, layerSpec, rootFrameState) {
     case 'BingMaps':
       // @ts-ignore
       return await createLayerBingMaps(jobId, layerSpec, rootFrameState);
+    case 'ImageArcGISRest':
+      return createLayerImageArcGISRest(jobId, layerSpec, rootFrameState);
   }
 }
 
@@ -513,15 +516,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
       console.error('ERROR : ', error);
       return error;
     });
-
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
-  let frameState;
-  let layer;
-  let renderer;
+  
   let tileLoadErrorUrl;
   layer = new TileLayer({
     source,
@@ -610,4 +605,75 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
   return merge(updatedProgress$, canceledProgress$).pipe(
     takeWhile(([progress]) => progress !== -1 && progress !== 1, true)
   );
+ * @param {import('../main/index.js').ImageArcGISRest} layerSpec
+ * @param {import('ol/Map').FrameState} rootFrameState
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
+ */
+            
+function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
+
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+  let frameState;
+  let layer;
+  let renderer;
+  const source = new ImageArcGISRest({
+    ...layerSpec,
+    crossOrigin: 'anonymous',
+  });
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
+  const progress$ = new BehaviorSubject([0, null, undefined]);
+
+  layer = new ImageLayer({
+    source: source,
+  });
+  source.setImageLoadFunction(function (layerImage, src) {
+    /** @type {HTMLImageElement} */
+    const image = /** @type {any} */ (layerImage).getImage();
+
+    if (isWorker()) {
+      // @ts-ignore
+      image.hintImageSize(width, height);
+    }
+
+    const blankSrc =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    cancel$
+      .pipe(
+        filter((canceledJobId) => canceledJobId === jobId),
+        take(1),
+        tap(() => {
+          progress$.next([-1, null, undefined]);
+          progress$.complete();
+          image.src = blankSrc;
+        })
+      )
+      .subscribe();
+
+    image.src = src;
+  });
+
+  frameState = makeLayerFrameState(rootFrameState, layer, layerSpec.opacity);
+
+  renderer = layer.getRenderer();
+  // @ts-ignore
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  layer.getSource().once('imageloaderror', function (e) {
+    const imageLoadErrorUrl = e.target.getUrl();
+    progress$.next([1, context.canvas, imageLoadErrorUrl]);
+    progress$.complete();
+  });
+  layer.getSource().once('imageloadend', () => {
+    renderer.prepareFrame({ ...frameState, time: Date.now() });
+    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+    progress$.next([1, context.canvas, undefined]);
+    progress$.complete();
+  });
+  renderer.prepareFrame({ ...frameState, time: Date.now() });
+
+  return progress$;
 }
