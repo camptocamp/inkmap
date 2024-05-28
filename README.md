@@ -218,6 +218,19 @@ Additional options for `ImageArcGISRest` layer type.
 | `tiled` | `boolean` | Indicates whether the WMS layer should be requested as tiles. Defaults to `false`. |
 | `params` | `object` | ArcGIS Rest parameters. This field is optional. |
 
+#### `BingMaps layer` type
+
+Options for `BingMaps` layer type. (Doesn't work with URL)
+
+| field | type | description |
+|---|---|---|
+| `type` | `string` | BingMaps |
+| `imagerySet` | `string` | Indicates which set to use `Road`, ... |
+| `apiKey` | `string` | Api Key of BingMaps (can be generated here : https://www.bingmapsportal.com/). |
+| `attributions` | `string` | Attribution for the data present in the layer. |
+| `culture` | `string` | Culture code. Defaults is `en-us`. |
+| `legend` | `boolean` | Include this layer in the map legend. Defaults is false. |
+
 #### `projectionDefinition` type
 
 A `projectionDefinition` object describes a projection to be registered in proj4.
