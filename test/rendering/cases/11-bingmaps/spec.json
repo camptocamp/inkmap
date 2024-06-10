@@ -1,0 +1,17 @@
+{
+  "layers": [
+    {
+      "type": "BingMaps",
+      "imagerySet": "Road",
+      "apiKey": "Ah8PrPyeVcPxqDQ2koXgrl_l6ZAZC4xcEnv1xIhEL6SvaC9q26tKbAtYlGDYZqmG",
+      "attribution": "© Microsoft Corporation"
+    }
+  ],
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 50,
+  "scale": 40000000,
+  "projection": "EPSG:3857",
+  "northArrow": "top-right",
+  "attributions": "bottom-right"
+}

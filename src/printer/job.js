@@ -39,9 +39,11 @@ export async function createJob(spec) {
 
   const layerStates$ = spec.layers.length
     ? combineLatest(
-        spec.layers.map((layer) => {
-          return createLayer(job.id, layer, frameState);
-        })
+        await Promise.all(
+          spec.layers.map((layer) => {
+            return createLayer(job.id, layer, frameState);
+          })
+        )
       )
     : of([]);
   layerStates$

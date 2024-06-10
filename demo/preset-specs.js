@@ -1,3 +1,25 @@
+const BingMapsJSONSpec = {
+  layers: [
+    {
+      type: 'BingMaps',
+      imagerySet: 'Road',
+      apiKey: '{can be generated here : https://www.bingmapsportal.com/}',
+      attribution: '© Microsoft Corporation',
+    },
+  ],
+  size: [400, 240, 'mm'],
+  center: [3, 46.5],
+  dpi: 120,
+  scale: 7000000,
+  scaleBar: {
+    position: 'bottom-left',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+  attributions: 'bottom-right',
+};
+
 const OsmAndGeoJSONSpec = {
   layers: [
     {
@@ -698,6 +720,7 @@ const PresetSpecs = {
   'Europe in OpenStreetMap (WMS, tiled)': OsmWmsSpec,
   'France in OpenStreetMap and GeoJSON': OsmAndGeoJSONSpec,
   'France in IGN orthophotos (WMTS)': IgnOrthoWmtsSpec,
+  'France in BingMaps road (BingMaps)': BingMapsJSONSpec,
   'Volcanoes Terrain model (WMS)': AuvergneTerrainSpec,
   'Mars Perseverance Rover Landing Site': MarsRoverLandingSpec,
   'Bayonne, 1935 (WMTS)': BayonneWmtsSpec,

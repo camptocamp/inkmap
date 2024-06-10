@@ -60,6 +60,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
   return {
     animate: false,
     coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],
+    // @ts-ignore
     declutterTree: [],
     mapId: '',
     renderTargets: {},

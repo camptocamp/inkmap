@@ -16,6 +16,7 @@ import XYZSourceMock, {
 } from '../../../__mocks__/ol/source/XYZ';
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue';
 import { waitForPromises } from '../utils';
+import { defer } from 'rxjs';
 
 /** @type {import('ol/Map').FrameState} */
 const frameState = {
@@ -67,9 +68,9 @@ describe('layer creation', () => {
     const xyzSourceMock = new XYZSourceMock(['testurl']);
     const tileErrorEventMock = new SourceEventMock(xyzSourceMock);
 
-    beforeEach(() => {
+    beforeEach(async () => {
       completed = false;
-      layer$ = createLayer(jobId, spec, frameState);
+      layer$ = await createLayer(jobId, spec, frameState);
       layer$.subscribe(
         (status) => (received = status),
         null,
@@ -210,9 +211,9 @@ describe('layer creation', () => {
       const imageWMSSourceMock = new ImageWMSSourceMock('testurl');
       const errorEventMock = new SourceEventMock(imageWMSSourceMock);
 
-      beforeEach(() => {
+      beforeEach(async () => {
         completed = false;
-        layer$ = createLayer(jobId, spec, frameState);
+        layer$ = await createLayer(jobId, spec, frameState);
         layer$.subscribe(
           (status) => (received = status),
           null,
@@ -257,9 +258,9 @@ describe('layer creation', () => {
       const tileWMSSourceMock = new TileWMSSourceMock(['testurl']);
       const tileErrorEventMock = new SourceEventMock(tileWMSSourceMock);
 
-      beforeEach(() => {
+      beforeEach(async () => {
         completed = false;
-        layer$ = createLayer(jobId, spec, frameState);
+        layer$ = await createLayer(jobId, spec, frameState);
         layer$.subscribe(
           (status) => (received = status),
           null,
@@ -325,9 +326,9 @@ describe('layer creation', () => {
     let received;
     let completed;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       completed = false;
-      layer$ = createLayer(jobId, spec, { ...frameState });
+      layer$ = await createLayer(jobId, spec, frameState);
       layer$.subscribe(
         (status) => (received = status),
         null,
@@ -369,9 +370,9 @@ describe('layer creation', () => {
     let received;
     let completed;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       completed = false;
-      layer$ = createLayer(jobId, spec, { ...frameState });
+      layer$ = await createLayer(jobId, spec, { ...frameState });
       layer$.subscribe(
         (status) => (received = status),
         console.error,
