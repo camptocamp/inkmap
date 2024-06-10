@@ -477,101 +477,113 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
  * @return Promise<Observable<LayerPrintStatus>>
  */
 async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
-  let source = new BingMaps({
-    key: layerSpec.apiKey,
-    imagerySet: layerSpec.imagerySet,
-    culture: layerSpec.culture,
-  });
-
-  let culture = layerSpec.culture !== undefined ? layerSpec.culture : 'en-us';
-
-  // BingMaps doesn't store the URL, so we need to do a fetch by ourselves to get it and pass it to the Object
-  await fetch(
-    'https://dev.virtualearth.net/REST/v1/Imagery/Metadata/' +
-      layerSpec.imagerySet +
-      '?uriScheme=https&include=ImageryProviders&key=' +
-      layerSpec.apiKey +
-      '&c=' +
-      culture
-  )
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('ERROR HTTP, statut ' + response.status);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      var url = data.resourceSets[0].resources[0].imageUrl;
-
-      url = url.replace('{subdomain}', 't{0-3}');
-      if (url.includes('{culture}')) {
-        url = url.replace('{culture}', culture);
-      } else if (url.includes('en-US')) {
-        url = url.replace('en-US', culture);
-      }
-      url = url + '&coord={z}/{x}/{y}';
-      source.setUrl(url);
-    })
-    .catch((error) => {
-      console.error('ERROR : ', error);
-      return error;
+  async function createLayerBingMapsInternal() {
+    let source = new BingMaps({
+      key: layerSpec.apiKey,
+      imagerySet: layerSpec.imagerySet,
+      culture: layerSpec.culture,
     });
 
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
-  let frameState;
-  let layer;
-  let renderer;
+    let culture = layerSpec.culture !== undefined ? layerSpec.culture : 'en-us';
 
-  let tileLoadErrorUrl;
-  layer = new TileLayer({
-    source,
-  });
-  source.setTileLoadFunction(function (tile, src) {
-    /** @type {HTMLImageElement} */
-    const image = /** @type {any} */ (tile).getImage();
+    // BingMaps doesn't store the URL, so we need to do a fetch by ourselves to get it and pass it to the Object
+    await fetch(
+      'https://dev.virtualearth.net/REST/v1/Imagery/Metadata/' +
+        layerSpec.imagerySet +
+        '?uriScheme=https&include=ImageryProviders&key=' +
+        layerSpec.apiKey +
+        '&c=' +
+        culture
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('ERROR HTTP, statut ' + response.status);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        var url = data.resourceSets[0].resources[0].imageUrl;
 
-    function getCoords(str) {
-      str = str.split('&coord=');
-      return str[str.length - 1];
-    }
+        url = url.replace('{subdomain}', 't{0-3}');
+        if (url.includes('{culture}')) {
+          url = url.replace('{culture}', culture);
+        } else if (url.includes('en-US')) {
+          url = url.replace('en-US', culture);
+        }
+        url = url + '&coord={z}/{x}/{y}';
+        source.setUrl(url);
+      })
+      .catch((error) => {
+        console.error('ERROR : ', error);
+        return error;
+      });
 
-    let coords = getCoords(src);
+    const width = rootFrameState.size[0];
+    const height = rootFrameState.size[1];
+    const context = createCanvasContext2D(width, height);
+    // @ts-ignore
+    context.canvas.style = {};
+    let frameState;
+    let layer;
+    let renderer;
 
-    let tabCoords = coords.split('/');
-    let resQuadKey = quadKey([tabCoords[0], tabCoords[1], tabCoords[2]]);
+    let tileLoadErrorUrl;
+    layer = new TileLayer({
+      source,
+    });
+    source.setTileLoadFunction(function (tile, src) {
+      /** @type {HTMLImageElement} */
+      const image = /** @type {any} */ (tile).getImage();
 
-    src = src.replace('{quadkey}', resQuadKey);
-    src = src.replace('&coord=' + coords, '');
+      function getCoords(str) {
+        str = str.split('&coord=');
+        return str[str.length - 1];
+      }
 
-    if (isWorker()) {
-      const tileSize = layer
-        .getSource()
-        .getTilePixelSize(
-          0,
-          rootFrameState.pixelRatio,
-          rootFrameState.viewState.projection
-        );
-      // @ts-ignore
-      image.hintImageSize(tileSize[0], tileSize[1]);
-    }
-    image.src = src;
-  });
+      let coords = getCoords(src);
 
-  layer.getSource().on('tileloaderror', function (e) {
-    tileLoadErrorUrl = e.target.getUrls()[0];
-  });
+      let tabCoords = coords.split('/');
+      let resQuadKey = quadKey([tabCoords[0], tabCoords[1], tabCoords[2]]);
 
-  frameState = makeLayerFrameState(rootFrameState, layer, 1);
+      src = src.replace('{quadkey}', resQuadKey);
+      src = src.replace('&coord=' + coords, '');
 
-  renderer = layer.getRenderer();
+      if (isWorker()) {
+        const tileSize = layer
+          .getSource()
+          .getTilePixelSize(
+            0,
+            rootFrameState.pixelRatio,
+            rootFrameState.viewState.projection
+          );
+        // @ts-ignore
+        image.hintImageSize(tileSize[0], tileSize[1]);
+      }
+      image.src = src;
+    });
 
-  renderer.useContainer = useContainer.bind(renderer, context);
+    layer.getSource().on('tileloaderror', function (e) {
+      tileLoadErrorUrl = e.target.getUrls()[0];
+    });
 
-  renderer.renderFrame(frameState, context.canvas);
+    frameState = makeLayerFrameState(rootFrameState, layer, 1);
+
+    renderer = layer.getRenderer();
+
+    renderer.useContainer = useContainer.bind(renderer, context);
+
+    renderer.renderFrame(frameState, context.canvas);
+
+    return {
+      frameState,
+      renderer,
+      context,
+      tileLoadErrorUrl,
+    };
+  }
+
+  const { frameState, renderer, context, tileLoadErrorUrl } =
+    await createLayerBingMapsInternal();
 
   const tileCount = Object.keys(
     /** @type {any} */ (frameState.tileQueue).queuedElements_
@@ -579,6 +591,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
 
   const updatedProgress$ = update$.pipe(
     startWith(true),
+    // @ts-ignore
     takeWhile(() => {
       frameState.tileQueue.reprioritize();
       frameState.tileQueue.loadMoreTiles(12, 4);
@@ -586,6 +599,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
     }, true),
     map(() => {
       let queuedTilesCount = Object.keys(
+        // @ts-ignore
         frameState.tileQueue.queuedElements_
       ).length;
 
