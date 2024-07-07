@@ -213,6 +213,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
         url: layerSpec.url,
         params: getWMSParams(layerSpec),
         transition: 0,
+        projection: layerSpec.projection ? layerSpec.projection : undefined,
       }),
       rootFrameState,
       layerSpec.opacity
@@ -236,6 +237,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     url: layerSpec.url,
     params: getWMSParams(layerSpec),
     ratio: 1,
+    projection: layerSpec.projection ? layerSpec.projection : undefined,
   });
   layer = new ImageLayer({
     source,
