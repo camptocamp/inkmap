@@ -35,6 +35,7 @@ export { downloadBlob } from './utils';
  * @property {string} [attribution] Attribution for the data used in the layer
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  * @property {Object} [customParams] Custom parameters added to GetMap requests
+ * @property {string} [projection] Projection string if defined else undefined
  */
 
 /**
