@@ -47,6 +47,7 @@ export const cancel$ = new Subject();
  * Returns an observable emitting the printing status for this layer
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
+ * @param {number} jobId
  * @param {import('../main/index.js').Layer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {Promise<import('rxjs').Observable<LayerPrintStatus>>}
