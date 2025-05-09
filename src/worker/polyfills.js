@@ -77,3 +77,11 @@ class FakeDocument {
 
 // @ts-ignore
 self.document = new FakeDocument();
+
+class FakeHTMLVideoElement {
+  constructor() {}
+}
+
+self.HTMLImageElement = Image;
+self.HTMLCanvasElement = OffscreenCanvas;
+self.HTMLVideoElement = FakeHTMLVideoElement;

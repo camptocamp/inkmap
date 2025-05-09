@@ -48,6 +48,16 @@ export { downloadBlob } from './utils';
  */
 
 /**
+ * @typedef {Object} BingMapsLayer
+ * @property {'BingMaps'} type
+ * @property {string} imagerySet imagerySet name.
+ * @property {string} apiKey apiKey of BingMaps (can be generated here : https://www.bingmapsportal.com/).
+ * @property {string} culture Culture code (en-us as default).
+ * @property {string} [attribution] Attribution for the data used in the layer
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
+ */
+
+/**
  * @typedef {Object} GeoJSONLayer
  * @property {'GeoJSON'} type
  * @property {Object} geojson Feature collection in GeoJSON format; coordinates are expected to be in the print job reference system
@@ -114,7 +124,7 @@ export { downloadBlob } from './utils';
  */
 
 /**
- * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer|GeoJSONLayer|ImageArcGISRest|VectorTileLayer} Layer
+ * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer|GeoJSONLayer|ImageArcGISRest|VectorTileLayer|BingMapsLayer} Layer
  */
 
 /**
