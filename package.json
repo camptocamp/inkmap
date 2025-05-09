@@ -43,6 +43,7 @@
     "geostyler-openlayers-parser": "~4.0.0",
     "lodash": "^4.17.21",
     "ol": "~7.2.1",
+    "ol-mapbox-style": "^12.3.3",
     "proj4": "^2.6.3",
     "rxjs": "^6.6.3"
   },

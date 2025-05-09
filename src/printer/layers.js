@@ -3,6 +3,8 @@ import WMTS from 'ol/source/WMTS';
 import XYZ from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
+import MVT from 'ol/format/MVT';
+
 import WFS from 'ol/format/WFS';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
@@ -30,6 +32,9 @@ import {
   useContainer,
 } from './utils';
 import OpenLayersParser from 'geostyler-openlayers-parser';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
+import { stylefunction } from 'ol-mapbox-style';
 
 const update$ = interval(500);
 export const cancel$ = new Subject();
@@ -63,6 +68,8 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
       return createLayerGeoJSON(layerSpec, rootFrameState);
     case 'ImageArcGISRest':
       return createLayerImageArcGISRest(jobId, layerSpec, rootFrameState);
+    case 'VectorTile':
+      return createLayerVectorTile(jobId, layerSpec, rootFrameState);
   }
 }
 
@@ -537,4 +544,375 @@ function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
   return progress$;
+}
+
+/**
+ * Creates a vector tile layer and handles its rendering process
+ * @param {number} jobId - Unique identifier for the print job
+ * @param {import('../main/index.js').VectorTileLayer} layerSpec - Vector tile layer configuration
+ * @param {import('ol/Map').FrameState} rootFrameState - Frame state from the root map
+ * @return {import('rxjs').Observable<LayerPrintStatus>} Observable emitting layer print status
+ */
+function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
+  // Create a canvas with dimensions from the frame state
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+
+  // Create progress tracking subject that emits [progress, canvas, errorUrl]
+  const progress$ = new BehaviorSubject([0, null, undefined]);
+  let tileLoadErrorUrl;
+
+  try {
+    // Use URL exactly as provided in config - no special handling needed
+    const source = new VectorTileSource({
+      format: new MVT(), // Mapbox Vector Tile format
+      url: layerSpec.url, // URL with tile template placeholders {z}/{x}/{y}.pbf
+      // @ts-ignore - crossOrigin is valid but not in typedefs
+      crossOrigin: 'anonymous',
+      maxZoom: layerSpec.maxZoom || 14,
+      minZoom: layerSpec.minZoom || 0,
+      projection: rootFrameState.viewState.projection,
+    });
+
+    // Custom tile loading function to handle vector tiles
+    source.setTileLoadFunction((tile, url) => {
+      // Use fetch with proper headers for vector tiles
+      fetch(url, {
+        headers: {
+          Accept: 'application/x-protobuf',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            // Handle HTTP errors by setting tile to error state
+            tile.setState(3); // TileState.ERROR
+            throw new Error(`HTTP error ${response.status}`);
+          }
+          return response.arrayBuffer();
+        })
+        .then((data) => {
+          if (data !== undefined && data.byteLength > 0) {
+            try {
+              // @ts-ignore - VectorTile specific properties
+              const format = tile.getFormat();
+              // @ts-ignore
+              const tileCoord = tile.getTileCoord();
+              const extent = source.getTileGrid().getTileCoordExtent(tileCoord);
+
+              // Parse features from binary data using MVT parser
+              const features = format.readFeatures(data, {
+                extent: extent,
+                featureProjection: rootFrameState.viewState.projection,
+              });
+
+              // Set parsed features on the tile and mark as loaded
+              // @ts-ignore
+              tile.setFeatures(features);
+              tile.setState(2); // TileState.LOADED
+            } catch (err) {
+              // Handle parsing errors
+              tileLoadErrorUrl = url;
+              tile.setState(3); // TileState.ERROR
+            }
+          } else {
+            // Empty tiles are normal for areas without data
+            // @ts-ignore - Set empty features array but mark as loaded
+            tile.setFeatures([]);
+            tile.setState(2); // TileState.LOADED
+          }
+        })
+        .catch(() => {
+          // Record the URL that caused the error for reporting
+          tileLoadErrorUrl = url;
+          tile.setState(3); // TileState.ERROR
+        });
+    });
+
+    // Create the vector tile layer
+    const layer = new VectorTileLayer({
+      source,
+      declutter: layerSpec.declutter !== false, // Enable decluttering by default
+      // @ts-ignore - renderMode is valid but not in typedefs
+      renderMode: layerSpec.renderMode || 'hybrid', // 'hybrid' mode for better performance
+      opacity: layerSpec.opacity || 1,
+    });
+
+    // Set up frame state and renderer
+    const frameState = makeLayerFrameState(rootFrameState, layer);
+    const renderer = layer.getRenderer();
+    // @ts-ignore
+    renderer.useContainer = useContainer.bind(renderer, context);
+
+    // Track tile load errors
+    source.on('tileloaderror', (/* e */) => {
+      tileLoadErrorUrl = layerSpec.url;
+    });
+
+    // Fetch and apply style to the vector tiles
+    const applyStyle = () => {
+      return fetch(layerSpec.styleUrl)
+        .then((r) => {
+          if (!r.ok) {
+            throw new Error(
+              `Failed to fetch style: ${r.status} ${r.statusText}`
+            );
+          }
+          return r.json();
+        })
+        .then((glStyle) => {
+          // Calculate sprite URLs for style icons based on device pixel ratio
+          const pixelRatio = rootFrameState.pixelRatio || 1;
+          const spriteUrl = glStyle.sprite
+            ? glStyle.sprite + (pixelRatio > 1 ? '@2x' : '') + '.json'
+            : null;
+          const spriteImageUrl = glStyle.sprite
+            ? glStyle.sprite + (pixelRatio > 1 ? '@2x' : '') + '.png'
+            : null;
+
+          // Ensure the style has a source that matches our URL
+          let targetSourceName = null;
+          if (glStyle.sources) {
+            // Try to find either an exact URL match or any vector source
+            for (const [name, source] of Object.entries(glStyle.sources)) {
+              if (source.type === 'vector') {
+                if (source.url === layerSpec.url) {
+                  targetSourceName = name;
+                  break;
+                } else if (!targetSourceName) {
+                  // Keep as backup if no exact match
+                  targetSourceName = name;
+                }
+              }
+            }
+
+            // If no matching source found, add one with a default name
+            if (!targetSourceName) {
+              targetSourceName = 'vectorTileSource';
+              glStyle.sources[targetSourceName] = {
+                type: 'vector',
+                url: layerSpec.url,
+              };
+            }
+
+            // Make sure our target source has the correct URL
+            if (glStyle.sources[targetSourceName].url !== layerSpec.url) {
+              glStyle.sources[targetSourceName].url = layerSpec.url;
+            }
+          }
+
+          // Fetch sprite data if available
+          return Promise.all([
+            glStyle,
+            spriteUrl
+              ? fetch(spriteUrl)
+                  .then((r) => (r.ok ? r.json() : {}))
+                  .catch(() => ({})) // Return empty object on error
+              : Promise.resolve({}),
+            targetSourceName,
+            spriteImageUrl,
+          ]);
+        })
+        .then(([glStyle, spriteData, targetSourceName, spriteImageUrl]) => {
+          // Define a font replacement function for text rendering
+          const fontReplacer = (font) =>
+            font[0]
+              .replace('Noto Sans', 'serif')
+              .replace('Roboto', 'sans-serif');
+
+          let styleApplied = false;
+
+          // Try multiple approaches to ensure style gets applied
+
+          // 1. Try with the identified target source first
+          if (targetSourceName && !styleApplied) {
+            try {
+              stylefunction(
+                layer,
+                glStyle,
+                targetSourceName,
+                undefined,
+                spriteData,
+                spriteImageUrl,
+                // @ts-ignore
+                layerSpec.fontCallback || fontReplacer
+              );
+              styleApplied = true;
+            } catch (_) {
+              // Failed with target source, will try alternatives
+            }
+          }
+
+          // 2. If that didn't work, try each source in the style
+          if (!styleApplied && glStyle.sources) {
+            for (const sourceName of Object.keys(glStyle.sources)) {
+              if (styleApplied) break;
+
+              try {
+                stylefunction(
+                  layer,
+                  glStyle,
+                  sourceName,
+                  undefined,
+                  spriteData,
+                  spriteImageUrl,
+                  // @ts-ignore
+                  layerSpec.fontCallback || fontReplacer
+                );
+                styleApplied = true;
+              } catch (_) {
+                // Continue trying other sources
+              }
+            }
+          }
+
+          // 3. If still nothing worked, try with no specific source
+          if (!styleApplied) {
+            try {
+              stylefunction(
+                layer,
+                glStyle,
+                undefined,
+                undefined,
+                spriteData,
+                spriteImageUrl,
+                // @ts-ignore
+                layerSpec.fontCallback || fontReplacer
+              );
+              styleApplied = true;
+            } catch (_) {
+              // All style application attempts failed
+            }
+          }
+
+          return styleApplied;
+        });
+    };
+
+    // Handle cancellation
+    cancel$
+      .pipe(
+        filter((canceledJobId) => canceledJobId === jobId),
+        take(1)
+      )
+      .subscribe(() => {
+        progress$.next([-1, null, undefined]);
+        progress$.complete();
+      });
+
+    // Apply style and monitor loading
+    applyStyle()
+      .then(() => {
+        // Default number of tiles to track for progress reporting
+        let tileCount = 20;
+
+        // Force initial rendering passes to trigger tile loading
+        for (let i = 0; i < 3; i++) {
+          renderer.prepareFrame(frameState);
+          renderer.renderFrame(frameState, context.canvas);
+
+          // Load more tiles explicitly - necessary to start vector tile loading
+          frameState.tileQueue.reprioritize();
+          frameState.tileQueue.loadMoreTiles(24, 12);
+        }
+
+        // Give tiles more time to start loading
+        setTimeout(() => {
+          startMonitoring();
+        }, 200); // Longer timeout to ensure loading starts
+
+        // Monitor tile loading with aggressive tile loading strategy
+        function startMonitoring() {
+          const updateSub = update$
+            .pipe(
+              startWith(true),
+              // @ts-ignore
+              takeWhile((value, index) => {
+                // Force loading for multiple iterations to ensure tiles start loading
+                if (index < 5) {
+                  // Aggressive tile loading for initial iterations
+                  frameState.tileQueue.reprioritize();
+                  frameState.tileQueue.loadMoreTiles(24, 12);
+                  return true;
+                }
+
+                // Get current loading status
+                const tilesLoading = frameState.tileQueue.getTilesLoading();
+
+                // Request more tiles
+                frameState.tileQueue.reprioritize();
+                frameState.tileQueue.loadMoreTiles(24, 12);
+
+                // Continue while loading or for minimum iterations
+                return tilesLoading > 0 || index < 5;
+              }, true)
+            )
+            .subscribe({
+              next: () => {
+                // Calculate progress based on remaining tiles loading
+                let tilesLoading = frameState.tileQueue.getTilesLoading();
+                let progress = 1 - tilesLoading / tileCount;
+                progress = Math.min(1, Math.max(0.1, progress));
+
+                // Force render on each update
+                renderer.prepareFrame(frameState);
+                renderer.renderFrame(frameState, context.canvas);
+
+                // Check if complete
+                if (tilesLoading === 0) {
+                  // Final render
+                  renderer.prepareFrame(frameState);
+                  renderer.renderFrame(frameState, context.canvas);
+
+                  // Add border for visual clarity
+                  context.strokeStyle = 'rgba(0,0,0,0.2)';
+                  context.lineWidth = 1;
+                  context.strokeRect(0, 0, width, height);
+
+                  // Complete observable with finished canvas
+                  // @ts-ignore
+                  progress$.next([1, context.canvas, tileLoadErrorUrl]);
+                  progress$.complete();
+                  updateSub.unsubscribe();
+                } else {
+                  // Update progress
+                  // @ts-ignore
+                  progress$.next([progress, null, tileLoadErrorUrl]);
+                }
+              },
+              error: () => {
+                // Handle monitoring errors
+                // @ts-ignore
+                progress$.next([1, context.canvas, 'Error monitoring tiles']);
+                progress$.complete();
+              },
+            });
+        }
+      })
+      .catch(() => {
+        // Handle style application errors by rendering an error message
+        context.fillStyle = 'rgba(255,0,0,0.2)';
+        context.fillRect(0, 0, width, height);
+        context.fillStyle = 'red';
+        context.fillText('Error applying style', width / 2, height / 2);
+        // @ts-ignore
+        progress$.next([1, context.canvas, layerSpec.styleUrl]);
+        progress$.complete();
+      });
+
+    return progress$;
+  } catch (err) {
+    // Handle unexpected errors in the entire process
+    context.fillStyle = 'rgba(255,0,0,0.2)';
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = 'red';
+    context.fillText('Vector tile error', width / 2, height / 2);
+    // @ts-ignore
+    progress$.next([1, context.canvas, 'Vector tile error']);
+    progress$.complete();
+    return progress$;
+  }
 }

@@ -1,0 +1,23 @@
+{
+  "layers": [
+    {
+      "type": "VectorTile",
+      "url": "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+      "styleUrl": "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/styles/root.json",
+      "opacity": 1,
+      "attribution": "© Esri"
+    }
+  ],
+
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 50,
+  "scale": 40000000,
+  "scaleBar": {
+    "position": "bottom-left",
+    "units": "metric"
+  },
+  "projection": "EPSG:3857",
+  "northArrow": "top-right",
+  "attributions": "bottom-right"
+}
