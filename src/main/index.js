@@ -110,7 +110,23 @@ export { downloadBlob } from './utils.js';
  */
 
 /**
- * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer|GeoJSONLayer|BingMapsLayer|ImageArcGISRest} Layer
+ * @typedef {Object} VectorTileLayer
+ * @property {'VectorTile'} type
+ * @property {string} url URL or URL template for the vector tile layer; can contain the following tokens: `{z}`, `{x}`, and `{y}`.
+ * @property {string} [styleUrl] URL to the Mapbox GL style JSON.
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
+ * @property {string} [attribution] Attribution for the data used in the layer.
+ * @property {boolean} [legend=false] Whether a legend should be created for this layer.
+ * @property {number} [maxZoom=14] Maximum zoom level for the layer.
+ * @property {number} [minZoom=0] Minimum zoom level for the layer.
+ * @property {boolean} [declutter=true] Whether to declutter labels and symbols.
+ * @property {'vector'|'image'|'hybrid'} [renderMode='vector'] Render mode for the layer.
+ * @property {Array<string>|string} [layers] Specific layers within the style to use. If undefined all layers are used.
+ * @property {Function} [fontCallback] Function to replace font families in the style.
+ */
+
+/**
+ * @typedef {WmsLayer|XyzLayer|WmtsLayer|WfsLayer|GeoJSONLayer|BingMapsLayer|ImageArcGISRest|VectorTileLayer} Layer
  */
 
 /**
