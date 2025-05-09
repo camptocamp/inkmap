@@ -4,8 +4,7 @@
       "type": "VectorTile",
       "url": "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/{z}/{y}/{x}.pbf",
       "styleUrl": "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/styles/root.json",
-      "opacity": 1,
-      "attribution": "© Esri"
+      "opacity": 1
     }
   ],
 
@@ -18,6 +17,5 @@
     "units": "metric"
   },
   "projection": "EPSG:3857",
-  "northArrow": "top-right",
-  "attributions": "bottom-right"
+  "northArrow": "top-right"
 }
