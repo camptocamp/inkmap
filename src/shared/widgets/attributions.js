@@ -42,7 +42,9 @@ export function printAttributions(ctx, spec) {
 }
 
 /**
- * Returns the full attributions text of a spec
+ * Returns the attributions text of a spec.
+ * It concatenates all unique attributions from the layers.
+ * If no attributions are found, it returns 'Unknown source'.
  * @param {import('../../main/index.js').PrintSpec} spec
  * @return {string}
  */
@@ -51,6 +53,12 @@ export function computeAttributionsText(spec) {
     spec.layers
       .filter((layer) => !!layer.attribution)
       .map((layer) => layer.attribution)
+      .reduce((acc, attribution) => {
+        if (acc.indexOf(attribution) === -1) {
+          acc.push(attribution);
+        }
+        return acc;
+      }, [])
       .join(', ') || 'Unknown source'
   );
 }
