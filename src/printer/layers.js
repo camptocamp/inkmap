@@ -17,6 +17,7 @@ import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
 import {
   filter,
   map,
+  skipWhile,
   startWith,
   take,
   takeWhile,
@@ -357,21 +358,46 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
   /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
   const progress$ = new BehaviorSubject([0, null]);
 
-  // when this promise resolves, the layer is ready to be drawn
-  const styleReadyPromise = layerSpec.style
-    ? new OpenLayersParser()
-        .writeStyle(layerSpec.style)
-        .then(({ output: olStyle }) => layer.setStyle(olStyle))
-        .catch((error) => console.log(error))
-    : Promise.resolve();
+  // when true, the layer is ready to be drawn
+  let styleReady = false;
+  if (layerSpec.style) {
+    new OpenLayersParser()
+      .writeStyle(layerSpec.style)
+      .then(({ output: olStyle }) => {
+        layer.setStyle(olStyle);
+        styleReady = true;
+      })
+      .catch((error) => console.log(error));
+  } else {
+    styleReady = true;
+  }
 
-  // when ready, draw layer & send a complete progress value
-  styleReadyPromise.then(() => {
-    renderer.prepareFrame({ ...frameState, time: Date.now() });
-    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
-    progress$.next([1, context.canvas]);
-    progress$.complete();
-  });
+  const updateSub = update$
+    .pipe(
+      skipWhile(() => !styleReady),
+      tap(() => {
+        console.log('rendering layer...');
+        // try to render the layer on each update
+        renderer.prepareFrame({ ...frameState, time: Date.now() });
+        renderer.renderFrame(
+          { ...frameState, time: Date.now() },
+          context.canvas
+        );
+      }),
+      map(() => {
+        const layerReady = renderer.ready;
+        if (!layerReady) {
+          console.log('layer not fully rendered');
+          progress$.next([0.5, context.canvas]);
+        } else {
+          console.log('layer renderer ready');
+          progress$.next([1, context.canvas]);
+          progress$.complete();
+          updateSub.unsubscribe();
+        }
+      })
+    )
+    .subscribe();
 
   return progress$;
 }
