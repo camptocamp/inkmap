@@ -1,10 +1,6 @@
 import { map, switchMap, takeWhile } from 'rxjs/operators';
-
 import '../printer/index.js';
-import {
-  MESSAGE_JOB_CANCEL,
-  MESSAGE_JOB_REQUEST,
-} from '../shared/constants.js';
+import { MESSAGE_JOB_CANCEL } from '../shared/constants.js';
 import { registerWithExtent } from '../shared/projections.js';
 import { messageToPrinter } from './exchange.js';
 import {
@@ -13,7 +9,6 @@ import {
   getJobStatusObservable,
 } from './jobs.js';
 import getLegends from '../shared/widgets/legends.js';
-
 export { downloadBlob } from './utils.js';
 
 /**
@@ -181,7 +176,6 @@ export { downloadBlob } from './utils.js';
  * @return {Promise<Blob>} Promise resolving to the final image blob.
  */
 export function print(printSpec) {
-  messageToPrinter(MESSAGE_JOB_REQUEST, { spec: printSpec });
   return createNewJob(printSpec)
     .pipe(
       switchMap((jobId) => getJobStatusObservable(jobId)),
