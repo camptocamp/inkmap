@@ -1,6 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import fs from 'fs';
+import path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const example01 = fs.readFileSync(
   path.resolve(__dirname, 'examples/01-simple.js'),
@@ -27,7 +29,7 @@ const example08 = fs.readFileSync(
   path.resolve(__dirname, 'examples/08-legends.js'),
 );
 
-module.exports = {
+export default {
   mode: 'development',
   entry: {
     app: path.resolve(__dirname, 'index.js'),

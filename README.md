@@ -67,7 +67,7 @@ The worker file can be published either using a symbolic link or by actually cop
 If using Webpack to build the application, a solution is to use the [CopyWebpackPlugin](https://webpack.js.org/plugins/copy-webpack-plugin/):
 
 ```js
-module.exports = {
+export default {
   ...
   plugins: [
      new CopyWebpackPlugin([

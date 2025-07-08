@@ -25,6 +25,8 @@ const options = yargs
 
 const serverPort = 8888;
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 // UTILS
 
 async function getCases() {

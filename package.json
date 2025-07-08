@@ -13,7 +13,8 @@
   "scripts": {
     "lint": "eslint src",
     "typecheck": "tsc",
-    "format": "prettier --write src demo test",
+    "format": "npm run format:write",
+    "format:write": "prettier --write src demo test",
     "format:check": "prettier --check src demo test",
     "test:unit": "jest",
     "test:rendering": "node test/rendering/run.js",
