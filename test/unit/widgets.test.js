@@ -16,7 +16,7 @@ describe('widgets', () => {
           ctxMock,
           'bottom-left',
           [40, 60],
-          CM_PER_INCH * 20
+          CM_PER_INCH * 20,
         );
         expect(ctxMock.translate).toHaveBeenCalledWith(8, 332);
       });
@@ -25,7 +25,7 @@ describe('widgets', () => {
           ctxMock,
           'top-left',
           [40, 60],
-          CM_PER_INCH * 20
+          CM_PER_INCH * 20,
         );
         expect(ctxMock.translate).toHaveBeenCalledWith(8, 8);
       });
@@ -34,7 +34,7 @@ describe('widgets', () => {
           ctxMock,
           'bottom-right',
           [40, 60],
-          CM_PER_INCH * 20
+          CM_PER_INCH * 20,
         );
         expect(ctxMock.translate).toHaveBeenCalledWith(252, 332);
       });
@@ -43,7 +43,7 @@ describe('widgets', () => {
           ctxMock,
           'top-right',
           [40, 60],
-          CM_PER_INCH * 20
+          CM_PER_INCH * 20,
         );
         expect(ctxMock.translate).toHaveBeenCalledWith(252, 8);
       });

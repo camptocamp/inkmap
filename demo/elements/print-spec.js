@@ -96,7 +96,7 @@ class PrintSpecEditor extends HTMLElement {
           name === this.currentSpecName_ ? 'active' : ''
         }" data-name="${name}">
           ${name}
-        </button>`
+        </button>`,
       ).join('\n')}
     </div>
     <span class="mx-2 flex-grow-1">Choose a predefined spec from the list.</span>
@@ -125,7 +125,7 @@ class PrintSpecEditor extends HTMLElement {
         name === this.currentSpecName_ ? 'active' : ''
       }" data-name="${name}">
         ${name}
-      </button>`
+      </button>`,
     ).join('\n')}
   </div>
   <span class="mx-2 flex-grow-1">Choose a predefined spec from the list.</span>
@@ -140,7 +140,7 @@ class PrintSpecEditor extends HTMLElement {
       elt.addEventListener('click', () => {
         this.selectSpec(elt.getAttribute('data-name'));
         this.refreshDOM();
-      })
+      }),
     );
 
     if (this.expanded_) {

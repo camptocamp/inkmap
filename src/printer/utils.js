@@ -68,7 +68,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
       viewState.center,
       viewState.resolution,
       viewState.rotation,
-      sizeInPixel
+      sizeInPixel,
     ),
     index: 0,
     layerIndex: 0,
@@ -164,9 +164,9 @@ export function makeLayerFrameState(rootFrameState, layer, opacity) {
         tile,
         tileSourceKey,
         tileCenter,
-        tileResolution
+        tileResolution,
       ),
-    () => {}
+    () => {},
   );
   return frameState;
 }
@@ -201,7 +201,7 @@ export function generateGetFeatureUrl(
   layerName,
   format,
   projCode,
-  extent
+  extent,
 ) {
   if (baseUrl.substring(0, 4) !== 'http') {
     return baseUrl;

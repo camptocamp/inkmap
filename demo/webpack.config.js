@@ -3,28 +3,28 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const example01 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/01-simple.js')
+  path.resolve(__dirname, 'examples/01-simple.js'),
 );
 const example02 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/02-progress.js')
+  path.resolve(__dirname, 'examples/02-progress.js'),
 );
 const example03 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/03-cancel.js')
+  path.resolve(__dirname, 'examples/03-cancel.js'),
 );
 const example04 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/04-jobs.js')
+  path.resolve(__dirname, 'examples/04-jobs.js'),
 );
 const example05 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/05-pdf.js')
+  path.resolve(__dirname, 'examples/05-pdf.js'),
 );
 const example06 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/06-projection.js')
+  path.resolve(__dirname, 'examples/06-projection.js'),
 );
 const example07 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/07-errors.js')
+  path.resolve(__dirname, 'examples/07-errors.js'),
 );
 const example08 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/08-legends.js')
+  path.resolve(__dirname, 'examples/08-legends.js'),
 );
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
       '..',
       'src',
       'worker',
-      'index.js'
+      'index.js',
     ),
   },
   output: {

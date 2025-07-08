@@ -183,7 +183,7 @@ export function print(printSpec) {
     .pipe(
       switchMap((jobId) => getJobStatusObservable(jobId)),
       takeWhile((job) => job.progress < 1, true),
-      map((job) => job.imageBlob)
+      map((job) => job.imageBlob),
     )
     .toPromise();
 }
@@ -208,7 +208,7 @@ export function createLegends(printSpec) {
     return getLegends(printSpec);
   } else {
     console.warn(
-      'The given spec did not include any layer with a configured legend'
+      'The given spec did not include any layer with a configured legend',
     );
   }
 }
@@ -230,7 +230,7 @@ export function getJobsStatus() {
  */
 export function getJobStatus(jobId) {
   return getJobStatusObservable(jobId).pipe(
-    takeWhile((job) => job.progress < 1 && job.progress !== -1, true)
+    takeWhile((job) => job.progress < 1 && job.progress !== -1, true),
   );
 }
 

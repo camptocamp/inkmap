@@ -17,6 +17,6 @@ export function applyWidgetPositionTransform(ctx, position, widgetSizePx, dpi) {
 
   ctx.translate(
     xPart === 'left' ? offsetPx : ctx.canvas.width - offsetPx - widgetSizePx[0],
-    yPart === 'top' ? offsetPx : ctx.canvas.height - offsetPx - widgetSizePx[1]
+    yPart === 'top' ? offsetPx : ctx.canvas.height - offsetPx - widgetSizePx[1],
   );
 }

@@ -13,7 +13,7 @@ export default async function getLegends(spec) {
   const vectorLayers =
     /** @type {Array<import("../../main/index.js").WfsLayer|import("../../main/index.js").GeoJSONLayer>} */ (
       spec.layers.filter(
-        (layer) => layer.type === 'WFS' || layer.type === 'GeoJSON'
+        (layer) => layer.type === 'WFS' || layer.type === 'GeoJSON',
       )
     );
   const vectorLayerStyles = vectorLayers.map((layer) => layer.style);
@@ -28,7 +28,7 @@ export default async function getLegends(spec) {
     url.searchParams.set('FORMAT', 'image/png');
     url.searchParams.set(
       'DPI',
-      (spec.dpi || (layer.version === '1.1.1' ? 72 : 91)).toString()
+      (spec.dpi || (layer.version === '1.1.1' ? 72 : 91)).toString(),
     );
 
     if (spec.scale) {

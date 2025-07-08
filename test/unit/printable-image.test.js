@@ -32,7 +32,7 @@ describe('PrintableImage', () => {
     });
     it('throws an error on invalid unit', () => {
       expect(() =>
-        printableImage.getRealWorldDimensions('zzzz')
+        printableImage.getRealWorldDimensions('zzzz'),
       ).toThrowError();
     });
   });

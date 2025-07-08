@@ -19,7 +19,7 @@ describe('legends', () => {
             Promise.resolve(
               new Blob(['<image src="data:image/png;base64,"></image>'], {
                 type: 'image/png',
-              })
+              }),
             ),
         });
       });

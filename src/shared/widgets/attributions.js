@@ -32,7 +32,7 @@ export function printAttributions(ctx, spec) {
       ctx.measureText(text).width * pxToMmRatio,
       FONT_SIZE_MM * pxToMmRatio * 0.85,
     ],
-    spec.dpi
+    spec.dpi,
   );
 
   ctx.scale(pxToMmRatio, pxToMmRatio);

@@ -28,7 +28,7 @@ class ProgressBars extends HTMLElement {
             <label style="width: 100%">
                 job #${job.id} progress:
             <custom-progress progress="${job.progress}" status="${job.status}"></custom-progress>
-            </label>`
+            </label>`,
           )
           .join('\n')}
       </div>`;

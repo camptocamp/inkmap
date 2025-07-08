@@ -102,7 +102,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
         .getTilePixelSize(
           0,
           rootFrameState.pixelRatio,
-          rootFrameState.viewState.projection
+          rootFrameState.viewState.projection,
         );
       // @ts-ignore
       image.hintImageSize(tileSize[0], tileSize[1]);
@@ -123,7 +123,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
 
   renderer.renderFrame(frameState, context.canvas);
   const tileCount = Object.keys(
-    /** @type {any} */ (frameState.tileQueue).queuedElements_
+    /** @type {any} */ (frameState.tileQueue).queuedElements_,
   ).length;
 
   const updatedProgress$ = update$.pipe(
@@ -135,7 +135,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
     }, true),
     map(() => {
       let queuedTilesCount = Object.keys(
-        frameState.tileQueue.queuedElements_
+        frameState.tileQueue.queuedElements_,
       ).length;
 
       let progress = 1 - queuedTilesCount / tileCount;
@@ -152,16 +152,16 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
         return [progress, null, tileLoadErrorUrl];
       }
     }),
-    throttleTime(500, undefined, { leading: true, trailing: true })
+    throttleTime(500, undefined, { leading: true, trailing: true }),
   );
 
   const canceledProgress$ = cancel$.pipe(
     filter((canceledJobId) => canceledJobId === jobId),
-    map(() => [-1, null, undefined])
+    map(() => [-1, null, undefined]),
   );
 
   return merge(updatedProgress$, canceledProgress$).pipe(
-    takeWhile(([progress]) => progress !== -1 && progress !== 1, true)
+    takeWhile(([progress]) => progress !== -1 && progress !== 1, true),
   );
 }
 
@@ -180,7 +180,7 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
       transition: 0,
     }),
     rootFrameState,
-    layerSpec.opacity
+    layerSpec.opacity,
   );
 }
 
@@ -220,7 +220,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
         transition: 0,
       }),
       rootFrameState,
-      layerSpec.opacity
+      layerSpec.opacity,
     );
   }
 
@@ -264,7 +264,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
           progress$.next([-1, null, undefined]);
           progress$.complete();
           image.src = blankSrc;
-        })
+        }),
       )
       .subscribe();
 
@@ -325,7 +325,7 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
       crossOrigin: 'anonymous',
     }),
     rootFrameState,
-    layerSpec.opacity
+    layerSpec.opacity,
   );
 }
 
@@ -408,7 +408,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
         layerSpec.layer,
         layerSpec.format,
         projCode,
-        extent
+        extent,
       );
       fetch(requestUrl)
         .then((response) => {
@@ -423,7 +423,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
             renderer.prepareFrame({ ...frameState, time: Date.now() });
             renderer.renderFrame(
               { ...frameState, time: Date.now() },
-              context.canvas
+              context.canvas,
             );
           }
           progress$.next([1, context.canvas]);
@@ -441,7 +441,7 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
           tap(() => {
             progress$.next([-1, null]);
             progress$.complete();
-          })
+          }),
         )
         .subscribe();
     },
@@ -493,7 +493,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
         '?uriScheme=https&include=ImageryProviders&key=' +
         layerSpec.apiKey +
         '&c=' +
-        culture
+        culture,
     )
       .then((response) => {
         if (!response.ok) {
@@ -554,7 +554,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
           .getTilePixelSize(
             0,
             rootFrameState.pixelRatio,
-            rootFrameState.viewState.projection
+            rootFrameState.viewState.projection,
           );
         // @ts-ignore
         image.hintImageSize(tileSize[0], tileSize[1]);
@@ -586,7 +586,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
     await createLayerBingMapsInternal();
 
   const tileCount = Object.keys(
-    /** @type {any} */ (frameState.tileQueue).queuedElements_
+    /** @type {any} */ (frameState.tileQueue).queuedElements_,
   ).length;
 
   const updatedProgress$ = update$.pipe(
@@ -600,7 +600,7 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
     map(() => {
       let queuedTilesCount = Object.keys(
         // @ts-ignore
-        frameState.tileQueue.queuedElements_
+        frameState.tileQueue.queuedElements_,
       ).length;
 
       let progress = 1 - queuedTilesCount / tileCount;
@@ -617,16 +617,16 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
         return [progress, null, tileLoadErrorUrl];
       }
     }),
-    throttleTime(500, undefined, { leading: true, trailing: true })
+    throttleTime(500, undefined, { leading: true, trailing: true }),
   );
 
   const canceledProgress$ = cancel$.pipe(
     filter((canceledJobId) => canceledJobId === jobId),
-    map(() => [-1, null, undefined])
+    map(() => [-1, null, undefined]),
   );
 
   return merge(updatedProgress$, canceledProgress$).pipe(
-    takeWhile(([progress]) => progress !== -1 && progress !== 1, true)
+    takeWhile(([progress]) => progress !== -1 && progress !== 1, true),
   );
 }
 
@@ -675,7 +675,7 @@ function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
           progress$.next([-1, null, undefined]);
           progress$.complete();
           image.src = blankSrc;
-        })
+        }),
       )
       .subscribe();
 

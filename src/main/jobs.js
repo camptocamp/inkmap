@@ -18,19 +18,19 @@ export const jobs$ = messageToMain$.pipe(
   map((message) => message.status),
   scan(
     (jobs, status) => [...jobs.filter((job) => job.id !== status.id), status],
-    []
+    [],
   ),
   startWith([]),
-  shareReplay({ bufferSize: 1, refCount: true })
+  shareReplay({ bufferSize: 1, refCount: true }),
 );
 
 export const newJob$ = jobs$.pipe(
   pairwise(),
   switchMap(([prevJobs, jobs]) => {
     return from(
-      jobs.filter((job) => !prevJobs.some((prevJob) => prevJob.id === job.id))
+      jobs.filter((job) => !prevJobs.some((prevJob) => prevJob.id === job.id)),
     );
-  })
+  }),
 );
 
 export function getJobsStatusObservable() {
@@ -40,17 +40,17 @@ export function getJobsStatusObservable() {
       jobs.filter(
         (job) =>
           !prevJobs.find(
-            (prevJob) => prevJob.id === job.id && prevJob.progress == 1
-          )
-      )
-    )
+            (prevJob) => prevJob.id === job.id && prevJob.progress == 1,
+          ),
+      ),
+    ),
   );
 }
 
 export function getJobStatusObservable(jobId) {
   return jobs$.pipe(
     map((jobs) => jobs.find((job) => job.id === jobId)),
-    filter((job) => !!job)
+    filter((job) => !!job),
   );
 }
 
@@ -63,6 +63,6 @@ export function createNewJob(printSpec) {
   return newJob$.pipe(
     filter((job) => isEqual(job.spec, printSpec)),
     take(1),
-    map((job) => job.id)
+    map((job) => job.id),
   );
 }

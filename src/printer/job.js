@@ -42,8 +42,8 @@ export async function createJob(spec) {
         await Promise.all(
           spec.layers.map((layer) => {
             return createLayer(job.id, layer, frameState);
-          })
-        )
+          }),
+        ),
       )
     : of([]);
   layerStates$
@@ -79,7 +79,7 @@ export async function createJob(spec) {
             printAttributions(context, spec);
           }
           return canvasToBlob(context.canvas).pipe(
-            map((blob) => [1, blob, sourceLoadErrors])
+            map((blob) => [1, blob, sourceLoadErrors]),
           );
         } else if (oneCanceled) {
           return of([-1, null, sourceLoadErrors]);
@@ -102,15 +102,15 @@ export async function createJob(spec) {
             progress === 1
               ? 'finished'
               : progress === -1
-              ? 'canceled'
-              : 'ongoing',
+                ? 'canceled'
+                : 'ongoing',
           sourceLoadErrors,
         };
       }),
       takeWhile(
         (jobStatus) => jobStatus.progress < 1 && jobStatus.progress !== -1,
-        true
-      )
+        true,
+      ),
     )
     .subscribe((status) => messageToMain(MESSAGE_JOB_STATUS, { status }));
 }

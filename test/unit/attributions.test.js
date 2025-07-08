@@ -7,7 +7,7 @@ describe('attributions', () => {
         expect(
           computeAttributionsText({
             layers: [{ attribution: 'Text abcd' }],
-          })
+          }),
         ).toBe('Text abcd');
       });
     });
@@ -16,7 +16,7 @@ describe('attributions', () => {
         expect(
           computeAttributionsText({
             layers: [{ attribution: 'Text abcd' }, { attribution: 'Ef Ghi' }],
-          })
+          }),
         ).toBe('Text abcd, Ef Ghi');
       });
     });
@@ -28,7 +28,7 @@ describe('attributions', () => {
               { attribution: 'Text abcd' },
               { attribution: 'Text abcd' },
             ],
-          })
+          }),
         ).toBe('Text abcd');
       });
     });
@@ -37,7 +37,7 @@ describe('attributions', () => {
         expect(
           computeAttributionsText({
             layers: [{}],
-          })
+          }),
         ).toBe('Unknown source');
       });
     });

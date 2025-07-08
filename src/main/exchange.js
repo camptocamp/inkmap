@@ -22,7 +22,7 @@ export function messageToPrinter(type, message) {
             ...message,
             type,
           },
-        })
+        }),
       );
     }
   });
@@ -34,7 +34,7 @@ export const messageToMain$ = from(printerReady).pipe(
       ? fromEvent(navigator.serviceWorker, 'message').pipe(pluck('data'))
       : fromEvent(window, 'inkmap.toMain').pipe(pluck('detail'));
     return events$.pipe(
-      tap((message) => console.log('[inkmap] message to main:', message))
+      tap((message) => console.log('[inkmap] message to main:', message)),
     );
-  })
+  }),
 );

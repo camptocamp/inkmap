@@ -29,7 +29,7 @@ export function messageToMain(type, message) {
           ...message,
           type,
         },
-      })
+      }),
     );
   }
 }
@@ -39,5 +39,5 @@ const events$ = isWorker()
   : fromEvent(window, 'inkmap.toPrinter').pipe(pluck('detail'));
 
 export const messageToPrinter$ = events$.pipe(
-  tap((message) => console.log('[inkmap] message to printer:', message))
+  tap((message) => console.log('[inkmap] message to printer:', message)),
 );

@@ -55,7 +55,7 @@ btn.addEventListener('click', async () => {
     140,
     21,
     arrowSizeMm[0],
-    arrowSizeMm[1]
+    arrowSizeMm[1],
   );
 
   // add scalebar next to the north arrow
@@ -67,7 +67,7 @@ btn.addEventListener('click', async () => {
     287 - scalebarSizeMm[0],
     37 - scalebarSizeMm[1],
     scalebarSizeMm[0],
-    scalebarSizeMm[1]
+    scalebarSizeMm[1],
   );
 
   // add a creation date
@@ -79,7 +79,7 @@ btn.addEventListener('click', async () => {
     200,
     null,
     null,
-    'left'
+    'left',
   );
 
   // add attribution
