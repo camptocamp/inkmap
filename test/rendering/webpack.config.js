@@ -25,6 +25,10 @@ export default {
           },
         },
       },
+      {
+        test: /\.js$/,
+        resolve: { fullySpecified: false },
+      },
     ],
   },
 };

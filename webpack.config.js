@@ -53,6 +53,10 @@ function getBabelLoader() {
           },
         },
       },
+      {
+        test: /\.js$/,
+        resolve: { fullySpecified: false },
+      },
     ],
   };
 }

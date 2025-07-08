@@ -1,17 +1,18 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const process = require('process');
-const path = require('path');
-const { promisify } = require('util');
-const puppeteer = require('puppeteer');
-const webpack = require('webpack');
-const config = require('./webpack.config');
-const webpackDevServer = require('webpack-dev-server');
-const yargs = require('yargs');
-const pixelmatch = require('pixelmatch');
-const png = require('pngjs');
+import fs from 'fs';
+import process from 'process';
+import path from 'path';
+import { promisify } from 'util';
+import puppeteer from 'puppeteer';
+import webpack from 'webpack';
+import config from './webpack.config.js';
+import webpackDevServer from 'webpack-dev-server';
+import yargs from 'yargs';
+import pixelmatch from 'pixelmatch';
+import * as png from 'pngjs';
+import { hideBin } from 'yargs/helpers';
 
-const options = yargs
+const options = yargs(hideBin(process.argv))
   .option('fix', {
     describe: 'Write generated images to disk',
     type: 'boolean',
@@ -105,8 +106,12 @@ async function runTest(name) {
     resolver = resolve;
     rejecter = reject;
   });
-
-  const spec = require(`./cases/${name}/spec.json`);
+  const spec = JSON.parse(
+    fs.readFileSync(
+      path.resolve(__dirname, 'cases', name, 'spec.json'),
+      'utf-8',
+    ),
+  );
 
   await page.goto(
     `http://localhost:${serverPort}?spec=${JSON.stringify(spec)}`,
