@@ -9,6 +9,7 @@ import {
   getJobStatusObservable,
 } from './jobs.js';
 import getLegends from '../shared/widgets/legends.js';
+import { lastValueFrom } from 'rxjs';
 export { downloadBlob } from './utils.js';
 
 /**
@@ -176,13 +177,12 @@ export { downloadBlob } from './utils.js';
  * @return {Promise<Blob>} Promise resolving to the final image blob.
  */
 export function print(printSpec) {
-  return createNewJob(printSpec)
-    .pipe(
-      switchMap((jobId) => getJobStatusObservable(jobId)),
-      takeWhile((job) => job.progress < 1, true),
-      map((job) => job.imageBlob),
-    )
-    .toPromise();
+  const result$ = createNewJob(printSpec).pipe(
+    switchMap((jobId) => getJobStatusObservable(jobId)),
+    takeWhile((job) => job.progress < 1, true),
+    map((job) => job.imageBlob),
+  );
+  return lastValueFrom(result$);
 }
 
 /**
@@ -192,7 +192,7 @@ export function print(printSpec) {
  * @return {Promise<number>} Promise resolving to the print job id.
  */
 export function queuePrint(printSpec) {
-  return createNewJob(printSpec).toPromise();
+  return lastValueFrom(createNewJob(printSpec));
 }
 
 /**

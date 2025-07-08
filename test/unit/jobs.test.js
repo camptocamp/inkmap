@@ -1,6 +1,6 @@
 import '../../src/main/index.js'; // this will also initialize all message exchange logic
 import { createNewJob } from '../../src/main/jobs.js';
-import { combineLatest, of } from 'rxjs';
+import { combineLatest, lastValueFrom, of } from 'rxjs';
 import { print } from '../../src/main/index.js';
 
 jest.mock('../../src/printer/utils', () => ({
@@ -36,7 +36,7 @@ describe('jobs monitoring and creation', () => {
       beforeEach(async () => {
         jobIds = [];
         specs = [randomSpec(), randomSpec(), randomSpec()];
-        jobIds = await combineLatest(specs.map(createNewJob)).toPromise();
+        jobIds = await lastValueFrom(combineLatest(specs.map(createNewJob)));
       });
       it('returns a different id for each job', () => {
         expect(jobIds[1]).toBe(jobIds[0] + 1);
@@ -47,9 +47,9 @@ describe('jobs monitoring and creation', () => {
   describe('print', () => {
     let beforeJobId, afterJobId;
     beforeEach(async () => {
-      beforeJobId = await createNewJob(randomSpec()).toPromise();
+      beforeJobId = await lastValueFrom(createNewJob(randomSpec()));
       print(randomSpec());
-      afterJobId = await createNewJob(randomSpec()).toPromise();
+      afterJobId = await lastValueFrom(createNewJob(randomSpec()));
     });
     it('creates only one job', async () => {
       expect(afterJobId).toBe(beforeJobId + 2);
