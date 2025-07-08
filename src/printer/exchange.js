@@ -1,6 +1,6 @@
 import { fromEvent } from 'rxjs';
 import { pluck, tap } from 'rxjs/operators';
-import { isWorker } from '../worker/utils';
+import { isWorker } from '../worker/utils.js';
 
 /**
  * Sends a message to the main thread
@@ -29,7 +29,7 @@ export function messageToMain(type, message) {
           ...message,
           type,
         },
-      })
+      }),
     );
   }
 }
@@ -38,6 +38,9 @@ const events$ = isWorker()
   ? fromEvent(self, 'message').pipe(pluck('data'))
   : fromEvent(window, 'inkmap.toPrinter').pipe(pluck('detail'));
 
+/**
+ * @type {import('rxjs').Observable<Object>}
+ */
 export const messageToPrinter$ = events$.pipe(
-  tap((message) => console.log('[inkmap] message to printer:', message))
+  tap((message) => console.log('[inkmap] message to printer:', message)),
 );

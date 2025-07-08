@@ -1,4 +1,4 @@
-import { getPrintableScaleBar } from '../../src/shared/widgets/scalebar';
+import { getPrintableScaleBar } from '../../src/shared/widgets/scalebar.js';
 
 describe('scalebar utils', () => {
   describe('getPrintableScaleBar', () => {

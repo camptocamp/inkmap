@@ -1,4 +1,4 @@
-import { print } from '../../../src/main';
+import { print } from '../../../src/main/index.js';
 
 const canvas = document.getElementById('result');
 

@@ -1,8 +1,8 @@
 import { BehaviorSubject, of } from 'rxjs';
-import { createJob } from '../../../src/printer/job';
-import * as LayersMock from '../../../src/printer/layers';
-import { messageToMain } from '../../../src/printer/exchange';
-import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants';
+import { createJob } from '../../../src/printer/job.js';
+import * as LayersMock from '../../../src/printer/layers.js';
+import { messageToMain } from '../../../src/printer/exchange.js';
+import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants.js';
 import * as olDomMock from 'ol/dom';
 
 jest.mock('../../../src/printer/layers');
@@ -70,7 +70,7 @@ describe('job creation', () => {
     it('creates the correct canvas size from cm', () => {
       expect(olDomMock.createCanvasContext2D).toHaveBeenLastCalledWith(
         630,
-        315
+        315,
       );
     });
     it('broadcasts initial status to the main thread', () => {
@@ -132,7 +132,7 @@ describe('job creation', () => {
 
     it('does not broadcast a print success if all layers except one are complete', () => {
       layerSubjects.forEach((subject, index) =>
-        subject.next(index > 0 ? [1, { style: {} }] : [0.999, null, undefined])
+        subject.next(index > 0 ? [1, { style: {} }] : [0.999, null, undefined]),
       );
       expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
         status: {

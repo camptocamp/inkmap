@@ -1,36 +1,35 @@
-const path = require('path');
+import path from 'path';
 
-module.exports = [{
-  devtool: 'source-map',
-  //generate inkmap.js lib with umd target to run in browser window
-  entry: {
-    inkmap: path.resolve(__dirname, './src/main/index.js'),
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+export default [
+  {
+    devtool: 'source-map',
+    //generate inkmap.js lib with umd target to run in browser window
+    entry: {
+      inkmap: path.resolve(__dirname, './src/main/index.js'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+      library: '@camptocamp/inkmap',
+      libraryTarget: 'umd',
+    },
+    module: getBabelLoader(),
   },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-    library: '@camptocamp/inkmap',
-    libraryTarget: 'umd',
+  {
+    devtool: 'source-map',
+    //generate inkmap-worker.js without umd target to run in background
+    entry: {
+      ['inkmap-worker']: path.resolve(__dirname, 'src', 'worker', 'index.js'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+    },
+    module: getBabelLoader(),
   },
-  module: getBabelLoader()
-},
-{
-  devtool: 'source-map',
-  //generate inkmap-worker.js without umd target to run in background
-  entry: {
-    ['inkmap-worker']: path.resolve(
-      __dirname,
-      'src',
-      'worker',
-      'index.js'
-    ),
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-  },
-  module: getBabelLoader()
-}];
+];
 
 function getBabelLoader() {
   return {
@@ -41,20 +40,22 @@ function getBabelLoader() {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: [
-              ['@babel/preset-env']
-            ],
+            presets: [['@babel/preset-env']],
             // transpile promises to ES5 ("regeneratorRuntime is not defined")
             plugins: [
               [
-                "@babel/plugin-transform-runtime",
+                '@babel/plugin-transform-runtime',
                 {
-                  "regenerator": true,
-                }
-              ]
-            ]
+                  regenerator: true,
+                },
+              ],
+            ],
           },
         },
+      },
+      {
+        test: /\.js$/,
+        resolve: { fullySpecified: false },
       },
     ],
   };

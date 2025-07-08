@@ -1,6 +1,9 @@
-import { messageToPrinter$ } from './exchange';
-import { cancelJob, createJob } from './job';
-import { MESSAGE_JOB_CANCEL, MESSAGE_JOB_REQUEST } from '../shared/constants';
+import { messageToPrinter$ } from './exchange.js';
+import { cancelJob, createJob } from './job.js';
+import {
+  MESSAGE_JOB_CANCEL,
+  MESSAGE_JOB_REQUEST,
+} from '../shared/constants.js';
 
 messageToPrinter$.subscribe((message) => {
   switch (message.type) {

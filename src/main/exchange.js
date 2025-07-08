@@ -1,7 +1,7 @@
 import { fromEvent } from 'rxjs';
 import { pluck, switchMap, tap } from 'rxjs/operators';
 import { from } from 'rxjs';
-import { printerReady } from './utils';
+import { printerReady } from './utils.js';
 
 /**
  * Sends a message to the printer thread
@@ -22,19 +22,22 @@ export function messageToPrinter(type, message) {
             ...message,
             type,
           },
-        })
+        }),
       );
     }
   });
 }
 
+/**
+ * @type {import('rxjs').Observable<Object>}
+ */
 export const messageToMain$ = from(printerReady).pipe(
   switchMap((useWorker) => {
     const events$ = useWorker
       ? fromEvent(navigator.serviceWorker, 'message').pipe(pluck('data'))
       : fromEvent(window, 'inkmap.toMain').pipe(pluck('detail'));
     return events$.pipe(
-      tap((message) => console.log('[inkmap] message to main:', message))
+      tap((message) => console.log('[inkmap] message to main:', message)),
     );
-  })
+  }),
 );

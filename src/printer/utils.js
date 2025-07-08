@@ -1,16 +1,16 @@
-import { isWorker } from '../worker/utils';
+import { isWorker } from '../worker/utils.js';
 import { from, Observable } from 'rxjs';
 import { fromLonLat, get as getProjection } from 'ol/proj';
 import {
   registerWithExtent,
   search as searchProjection,
-} from '../shared/projections';
+} from '../shared/projections.js';
 import { getForViewAndSize } from 'ol/extent';
 import TileQueue, {
   getTilePriority as tilePriorityFunction,
 } from 'ol/TileQueue';
-import { CM_PER_INCH } from '../shared/constants';
-import { scaleToResolution } from '../shared/units';
+import { CM_PER_INCH } from '../shared/constants.js';
+import { scaleToResolution } from '../shared/units.js';
 
 /**
  * Transforms a canvas to a Blob through an observable
@@ -68,7 +68,7 @@ export async function getJobFrameState(spec, sizeInPixel) {
       viewState.center,
       viewState.resolution,
       viewState.rotation,
-      sizeInPixel
+      sizeInPixel,
     ),
     index: 0,
     layerIndex: 0,
@@ -164,9 +164,9 @@ export function makeLayerFrameState(rootFrameState, layer, opacity) {
         tile,
         tileSourceKey,
         tileCenter,
-        tileResolution
+        tileResolution,
       ),
-    () => {}
+    () => {},
   );
   return frameState;
 }
@@ -201,7 +201,7 @@ export function generateGetFeatureUrl(
   layerName,
   format,
   projCode,
-  extent
+  extent,
 ) {
   if (baseUrl.substring(0, 4) !== 'http') {
     return baseUrl;

@@ -1,6 +1,6 @@
-import { applyWidgetPositionTransform } from './position';
-import { PrintableImage } from '../../main/printable-image';
-import { realWorldToPixel } from '../units';
+import { applyWidgetPositionTransform } from './position.js';
+import { PrintableImage } from '../../main/printable-image.js';
+import { realWorldToPixel } from '../units.js';
 
 // size of the square containing the whole symbol
 const SOURCE_SYMBOL_SIZE_PX = 130;
@@ -66,14 +66,14 @@ export function printNorthArrow(ctx, position, dpi) {
     ctx,
     position === true ? 'top-right' : position,
     [finalSymbolSizePx, finalSymbolSizePx],
-    dpi
+    dpi,
   );
 
   // account for the fact that the symbol SVG is centered on 0,0 and has an intrinsic size
   ctx.translate(finalSymbolSizePx / 2, finalSymbolSizePx / 2);
   ctx.scale(
     finalSymbolSizePx / SOURCE_SYMBOL_SIZE_PX,
-    finalSymbolSizePx / SOURCE_SYMBOL_SIZE_PX
+    finalSymbolSizePx / SOURCE_SYMBOL_SIZE_PX,
   );
 
   printNorthArrowInternal(ctx);

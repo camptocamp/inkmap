@@ -1,12 +1,12 @@
 import { downloadBlob, getJobStatus, queuePrint } from '@camptocamp/inkmap';
-import { createLegends } from '../../src/main';
+import { createLegends } from '../../src/main/index.js';
 
 const root = document.getElementById('example-08');
 const mapBtn = /** @type {CustomButton} */ root.querySelector(
-  'custom-button.map-btn'
+  'custom-button.map-btn',
 );
 const legendBtn = /** @type {CustomButton} */ root.querySelector(
-  'custom-button.legend-btn'
+  'custom-button.legend-btn',
 );
 root.querySelector('custom-button.legend-btn');
 const bar = /** @type {CustomProgress} */ root.querySelector('custom-progress');

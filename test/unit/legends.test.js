@@ -1,5 +1,5 @@
-import getLegends from '../../src/shared/widgets/legends';
-import PresetSpecs from '../../demo/preset-specs';
+import getLegends from '../../src/shared/widgets/legends.js';
+import PresetSpecs from '../../demo/preset-specs.js';
 import 'isomorphic-fetch';
 
 describe('legends', () => {
@@ -19,7 +19,7 @@ describe('legends', () => {
             Promise.resolve(
               new Blob(['<image src="data:image/png;base64,"></image>'], {
                 type: 'image/png',
-              })
+              }),
             ),
         });
       });

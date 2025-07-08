@@ -1,4 +1,4 @@
-import { PrintableImage } from '../../src/main/printable-image';
+import { PrintableImage } from '../../src/main/printable-image.js';
 
 describe('PrintableImage', () => {
   let printableImage;
@@ -31,9 +31,7 @@ describe('PrintableImage', () => {
       expect(printableImage.getRealWorldDimensions('in')).toEqual([0.5, 0.25]);
     });
     it('throws an error on invalid unit', () => {
-      expect(() =>
-        printableImage.getRealWorldDimensions('zzzz')
-      ).toThrowError();
+      expect(() => printableImage.getRealWorldDimensions('zzzz')).toThrow();
     });
   });
 });

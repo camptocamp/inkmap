@@ -2,14 +2,18 @@ import { createCanvasContext2D } from 'ol/dom';
 import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 
-import { MESSAGE_JOB_STATUS } from '../shared/constants';
-import { registerWithExtent } from '../shared/projections';
-import { messageToMain } from './exchange';
-import { cancel$, createLayer } from './layers';
-import { calculateSizeInPixel, canvasToBlob, getJobFrameState } from './utils';
-import { printAttributions } from '../shared/widgets/attributions';
-import { printNorthArrow } from '../shared/widgets/north-arrow';
-import { printScaleBar } from '../shared/widgets/scalebar';
+import { MESSAGE_JOB_STATUS } from '../shared/constants.js';
+import { registerWithExtent } from '../shared/projections.js';
+import { messageToMain } from './exchange.js';
+import { cancel$, createLayer } from './layers.js';
+import {
+  calculateSizeInPixel,
+  canvasToBlob,
+  getJobFrameState,
+} from './utils.js';
+import { printAttributions } from '../shared/widgets/attributions.js';
+import { printNorthArrow } from '../shared/widgets/north-arrow.js';
+import { printScaleBar } from '../shared/widgets/scalebar.js';
 
 let counter = 0;
 
@@ -42,8 +46,8 @@ export async function createJob(spec) {
         await Promise.all(
           spec.layers.map((layer) => {
             return createLayer(job.id, layer, frameState);
-          })
-        )
+          }),
+        ),
       )
     : of([]);
   layerStates$
@@ -79,7 +83,7 @@ export async function createJob(spec) {
             printAttributions(context, spec);
           }
           return canvasToBlob(context.canvas).pipe(
-            map((blob) => [1, blob, sourceLoadErrors])
+            map((blob) => [1, blob, sourceLoadErrors]),
           );
         } else if (oneCanceled) {
           return of([-1, null, sourceLoadErrors]);
@@ -93,24 +97,25 @@ export async function createJob(spec) {
           return of([progress, null, sourceLoadErrors]);
         }
       }),
-      map(([progress, imageBlob, sourceLoadErrors]) => {
-        return {
-          ...job,
-          progress,
-          imageBlob,
-          status:
-            progress === 1
-              ? 'finished'
-              : progress === -1
-              ? 'canceled'
-              : 'ongoing',
-          sourceLoadErrors,
-        };
-      }),
+      map(
+        ([progress, imageBlob, sourceLoadErrors]) =>
+          /** @type {import('../main/index.js').PrintStatus} */ ({
+            ...job,
+            progress,
+            imageBlob,
+            status:
+              progress === 1
+                ? 'finished'
+                : progress === -1
+                  ? 'canceled'
+                  : 'ongoing',
+            sourceLoadErrors,
+          }),
+      ),
       takeWhile(
         (jobStatus) => jobStatus.progress < 1 && jobStatus.progress !== -1,
-        true
-      )
+        true,
+      ),
     )
     .subscribe((status) => messageToMain(MESSAGE_JOB_STATUS, { status }));
 }

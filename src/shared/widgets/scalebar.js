@@ -1,11 +1,11 @@
 import { fromLonLat, getPointResolution, METERS_PER_UNIT } from 'ol/proj';
-import { applyWidgetPositionTransform } from './position';
+import { applyWidgetPositionTransform } from './position.js';
 import {
   pixelToRealWorld,
   realWorldToPixel,
   scaleToResolution,
-} from '../units';
-import { PrintableImage } from '../../main/printable-image';
+} from '../units.js';
+import { PrintableImage } from '../../main/printable-image.js';
 
 const FONT_SIZE_MM = 6;
 const BAR_HEIGHT_MM = 3;
@@ -64,7 +64,7 @@ export function printScaleBar(ctx, spec) {
   const [totalWidthPx, totalHeightPx] = getScaleBarSizePx(
     scaleBarParams,
     spec.dpi,
-    ctx
+    ctx,
   );
 
   ctx.save();
@@ -72,7 +72,7 @@ export function printScaleBar(ctx, spec) {
     ctx,
     typeof position === 'boolean' ? 'bottom-left' : position,
     [totalWidthPx, totalHeightPx],
-    spec.dpi
+    spec.dpi,
   );
 
   // scale the canvas in order to use millimeters for draw instructions
@@ -104,7 +104,7 @@ function getScaleBarParams(spec, sizeHint) {
     spec.projection,
     resolution,
     center,
-    pointResolutionUnits
+    pointResolutionUnits,
   );
 
   let nominalCount = minWidthPx * pointResolution;
@@ -191,18 +191,18 @@ function getScaleBarParams(spec, sizeHint) {
 function getScaleBarSizePx(scaleBarParams, dpi, ctx) {
   ctx.font = `${FONT_SIZE_MM}px Arial`;
   const scaleTextWidthMm = ctx.measureText(
-    scaleBarParams.scaleIndication
+    scaleBarParams.scaleIndication,
   ).width;
   return [
     realWorldToPixel(
       scaleBarParams.widthMm + scaleTextWidthMm + BORDER_SIZE_MM,
       'mm',
-      dpi
+      dpi,
     ),
     realWorldToPixel(
       FONT_SIZE_MM + PADDING_UNDER_TEXT_MM + BAR_HEIGHT_MM + BORDER_SIZE_MM,
       'mm',
-      dpi
+      dpi,
     ),
   ];
 }
@@ -247,12 +247,12 @@ function printScaleBarInternal(ctx, scaleBarParams) {
     scaleWidthMm * 0.25,
     BORDER_SIZE_MM / 2,
     scaleWidthMm * 0.25,
-    BAR_HEIGHT_MM - BORDER_SIZE_MM
+    BAR_HEIGHT_MM - BORDER_SIZE_MM,
   );
   ctx.fillRect(
     scaleWidthMm * 0.75,
     BORDER_SIZE_MM / 2,
     scaleWidthMm * 0.25 - BORDER_SIZE_MM / 2,
-    BAR_HEIGHT_MM - BORDER_SIZE_MM
+    BAR_HEIGHT_MM - BORDER_SIZE_MM,
   );
 }

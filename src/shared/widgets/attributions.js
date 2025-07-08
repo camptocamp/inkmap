@@ -1,5 +1,5 @@
-import { applyWidgetPositionTransform } from './position';
-import { CM_PER_INCH } from '../constants';
+import { applyWidgetPositionTransform } from './position.js';
+import { CM_PER_INCH } from '../constants.js';
 
 const FONT_SIZE_MM = 6;
 
@@ -32,7 +32,7 @@ export function printAttributions(ctx, spec) {
       ctx.measureText(text).width * pxToMmRatio,
       FONT_SIZE_MM * pxToMmRatio * 0.85,
     ],
-    spec.dpi
+    spec.dpi,
   );
 
   ctx.scale(pxToMmRatio, pxToMmRatio);

@@ -1,4 +1,4 @@
-import { pixelToRealWorld, realWorldToPixel } from '../../src/shared/units';
+import { pixelToRealWorld, realWorldToPixel } from '../../src/shared/units.js';
 
 describe('units helpers', () => {
   describe('realWorldToPixel', () => {

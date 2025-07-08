@@ -1,33 +1,35 @@
-const fs = require('fs');
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import fs from 'fs';
+import path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const example01 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/01-simple.js')
+  path.resolve(__dirname, 'examples/01-simple.js'),
 );
 const example02 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/02-progress.js')
+  path.resolve(__dirname, 'examples/02-progress.js'),
 );
 const example03 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/03-cancel.js')
+  path.resolve(__dirname, 'examples/03-cancel.js'),
 );
 const example04 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/04-jobs.js')
+  path.resolve(__dirname, 'examples/04-jobs.js'),
 );
 const example05 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/05-pdf.js')
+  path.resolve(__dirname, 'examples/05-pdf.js'),
 );
 const example06 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/06-projection.js')
+  path.resolve(__dirname, 'examples/06-projection.js'),
 );
 const example07 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/07-errors.js')
+  path.resolve(__dirname, 'examples/07-errors.js'),
 );
 const example08 = fs.readFileSync(
-  path.resolve(__dirname, 'examples/08-legends.js')
+  path.resolve(__dirname, 'examples/08-legends.js'),
 );
 
-module.exports = {
+export default {
   mode: 'development',
   entry: {
     app: path.resolve(__dirname, 'index.js'),
@@ -36,7 +38,7 @@ module.exports = {
       '..',
       'src',
       'worker',
-      'index.js'
+      'index.js',
     ),
   },
   output: {
@@ -75,11 +77,15 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.js$/,
+        resolve: { fullySpecified: false },
+      },
     ],
   },
   resolve: {
     alias: {
-      '@camptocamp/inkmap$': '../../src/main',
+      '@camptocamp/inkmap$': '../../src/main/index.js',
     },
   },
 };

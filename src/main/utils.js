@@ -34,10 +34,10 @@ export const printerReady = new Promise((resolve) => {
       },
       () => {
         console.log(
-          '[inkmap] Service worker was not found. See https://github.com/camptocamp/inkmap for using multi-threading'
+          '[inkmap] Service worker was not found. See https://github.com/camptocamp/inkmap for using multi-threading',
         );
         resolve(false);
-      }
+      },
     );
   } else {
     resolve(false);
@@ -46,6 +46,6 @@ export const printerReady = new Promise((resolve) => {
 
 printerReady.then((useWorker) =>
   console.log(
-    `[inkmap] Ready, ${useWorker ? 'using worker' : 'using main thread'}`
-  )
+    `[inkmap] Ready, ${useWorker ? 'using worker' : 'using main thread'}`,
+  ),
 );

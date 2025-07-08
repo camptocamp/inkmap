@@ -1,17 +1,20 @@
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 
-import '../printer';
-import { MESSAGE_JOB_CANCEL, MESSAGE_JOB_REQUEST } from '../shared/constants';
-import { registerWithExtent } from '../shared/projections';
-import { messageToPrinter } from './exchange';
+import '../printer/index.js';
+import {
+  MESSAGE_JOB_CANCEL,
+  MESSAGE_JOB_REQUEST,
+} from '../shared/constants.js';
+import { registerWithExtent } from '../shared/projections.js';
+import { messageToPrinter } from './exchange.js';
 import {
   createNewJob,
   getJobsStatusObservable,
   getJobStatusObservable,
-} from './jobs';
-import getLegends from '../shared/widgets/legends';
+} from './jobs.js';
+import getLegends from '../shared/widgets/legends.js';
 
-export { downloadBlob } from './utils';
+export { downloadBlob } from './utils.js';
 
 /**
  * @typedef {Object} TileGrid
@@ -183,7 +186,7 @@ export function print(printSpec) {
     .pipe(
       switchMap((jobId) => getJobStatusObservable(jobId)),
       takeWhile((job) => job.progress < 1, true),
-      map((job) => job.imageBlob)
+      map((job) => job.imageBlob),
     )
     .toPromise();
 }
@@ -208,7 +211,7 @@ export function createLegends(printSpec) {
     return getLegends(printSpec);
   } else {
     console.warn(
-      'The given spec did not include any layer with a configured legend'
+      'The given spec did not include any layer with a configured legend',
     );
   }
 }
@@ -230,7 +233,7 @@ export function getJobsStatus() {
  */
 export function getJobStatus(jobId) {
   return getJobStatusObservable(jobId).pipe(
-    takeWhile((job) => job.progress < 1 && job.progress !== -1, true)
+    takeWhile((job) => job.progress < 1 && job.progress !== -1, true),
   );
 }
 
@@ -249,7 +252,7 @@ export function registerProjection(definition) {
   registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
 
-export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions';
+export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions.js';
 
-export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow';
-export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar';
+export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow.js';
+export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar.js';

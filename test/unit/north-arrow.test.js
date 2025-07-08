@@ -1,4 +1,4 @@
-import { getPrintableNorthArrow } from '../../src/shared/widgets/north-arrow';
+import { getPrintableNorthArrow } from '../../src/shared/widgets/north-arrow.js';
 
 describe('north arrow utils', () => {
   describe('getPrintableNorthArrow', () => {

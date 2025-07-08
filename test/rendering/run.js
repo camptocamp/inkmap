@@ -1,17 +1,18 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const process = require('process');
-const path = require('path');
-const { promisify } = require('util');
-const puppeteer = require('puppeteer');
-const webpack = require('webpack');
-const config = require('./webpack.config');
-const webpackDevServer = require('webpack-dev-server');
-const yargs = require('yargs');
-const pixelmatch = require('pixelmatch');
-const png = require('pngjs');
+import fs from 'fs';
+import process from 'process';
+import path from 'path';
+import { promisify } from 'util';
+import puppeteer from 'puppeteer';
+import webpack from 'webpack';
+import config from './webpack.config.js';
+import webpackDevServer from 'webpack-dev-server';
+import yargs from 'yargs';
+import pixelmatch from 'pixelmatch';
+import * as png from 'pngjs';
+import { hideBin } from 'yargs/helpers';
 
-const options = yargs
+const options = yargs(hideBin(process.argv))
   .option('fix', {
     describe: 'Write generated images to disk',
     type: 'boolean',
@@ -25,12 +26,14 @@ const options = yargs
 
 const serverPort = 8888;
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 // UTILS
 
 async function getCases() {
   const root = path.resolve(__dirname, 'cases');
   return await promisify(fs.readdir)(root).then((cases) =>
-    cases.filter((name) => fs.statSync(path.resolve(root, name)).isDirectory())
+    cases.filter((name) => fs.statSync(path.resolve(root, name)).isDirectory()),
   );
 }
 
@@ -68,6 +71,9 @@ let failed = false;
 async function startBrowser() {
   browser = await puppeteer.launch({
     headless: !options.argv.interactive,
+    args: process.env.CI
+      ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      : [],
   });
   page = await browser.newPage();
   page.on('error', (err) => {
@@ -103,14 +109,18 @@ async function runTest(name) {
     resolver = resolve;
     rejecter = reject;
   });
-
-  const spec = require(`./cases/${name}/spec.json`);
+  const spec = JSON.parse(
+    fs.readFileSync(
+      path.resolve(__dirname, 'cases', name, 'spec.json'),
+      'utf-8',
+    ),
+  );
 
   await page.goto(
     `http://localhost:${serverPort}?spec=${JSON.stringify(spec)}`,
     {
       waitUntil: 'networkidle0',
-    }
+    },
   );
 
   await testFinished;
@@ -134,12 +144,12 @@ async function validateResult(name) {
   const height = expectedImage.height;
   if (receivedImage.width != width) {
     throw new Error(
-      `Unexpected width for ${receivedPath}: expected ${width}, got ${receivedImage.width}`
+      `Unexpected width for ${receivedPath}: expected ${width}, got ${receivedImage.width}`,
     );
   }
   if (receivedImage.height != height) {
     throw new Error(
-      `Unexpected height for ${receivedPath}: expected ${height}, got ${receivedImage.height}`
+      `Unexpected height for ${receivedPath}: expected ${height}, got ${receivedImage.height}`,
     );
   }
   const count = pixelmatch(
@@ -147,7 +157,7 @@ async function validateResult(name) {
     expectedImage.data,
     null,
     width,
-    height
+    height,
   );
   const errorPercentage = count / (width * height);
 
@@ -155,7 +165,7 @@ async function validateResult(name) {
     console.log(
       `Image comparison failed for case ${name} with an error of ${(
         errorPercentage * 100
-      ).toFixed(2)}%.`
+      ).toFixed(2)}%.`,
     );
     return true;
   }
@@ -204,7 +214,7 @@ const server = new webpackDevServer(
       level: 'warn',
     },
     stats: 'errors-warnings',
-  })
+  }),
 );
 
 console.log('Starting webpack-dev-server...');
@@ -218,7 +228,7 @@ server.startCallback(function (err) {
       server.stop();
       if (failed) {
         console.log(
-          'One or several rendering tests failed - check the logs above.'
+          'One or several rendering tests failed - check the logs above.',
         );
         process.exit(1);
       } else {

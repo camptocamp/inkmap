@@ -2,20 +2,20 @@ import {
   cancel$,
   createLayer,
   getWMSParams,
-} from '../../../src/printer/layers';
-import { generateGetFeatureUrl } from '../../../src/printer/utils';
+} from '../../../src/printer/layers.js';
+import { generateGetFeatureUrl } from '../../../src/printer/utils.js';
 import ImageWMSSourceMock, {
   triggerLoadEnd,
   triggerLoadError,
-} from '../../../__mocks__/ol/source/ImageWMS';
+} from '../../../__mocks__/ol/source/ImageWMS.js';
 import TileWMSSourceMock, {
   triggerLoadError as triggerTileWMSError,
-} from '../../../__mocks__/ol/source/TileWMS';
+} from '../../../__mocks__/ol/source/TileWMS.js';
 import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
-} from '../../../__mocks__/ol/source/XYZ';
-import { setQueuedCount } from '../../../__mocks__/ol/TileQueue';
-import { waitForPromises } from '../utils';
+} from '../../../__mocks__/ol/source/XYZ.js';
+import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js';
+import { waitForPromises } from '../utils.js';
 import { defer } from 'rxjs';
 
 /** @type {import('ol/Map').FrameState} */
@@ -74,7 +74,7 @@ describe('layer creation', () => {
       layer$.subscribe(
         (status) => (received = status),
         null,
-        () => (completed = true)
+        () => (completed = true),
       );
     });
 
@@ -129,7 +129,7 @@ describe('layer creation', () => {
             type: 'WMS',
             url: 'https://my.url/wms',
             layer: 'SOME_LAYER',
-          })
+          }),
         ).toEqual({
           LAYERS: 'SOME_LAYER',
           VERSION: '1.3.0',
@@ -142,7 +142,7 @@ describe('layer creation', () => {
             url: 'https://my.url/wms',
             layer: 'SOME_LAYER',
             version: '1.1.1',
-          })
+          }),
         ).toEqual({
           LAYERS: 'SOME_LAYER',
           VERSION: '1.1.1',
@@ -155,7 +155,7 @@ describe('layer creation', () => {
             url: 'https://my.url/wms',
             layer: 'SOME_LAYER',
             customParams: { token: 'test' },
-          })
+          }),
         ).toEqual({
           LAYERS: 'SOME_LAYER',
           VERSION: '1.3.0',
@@ -172,7 +172,7 @@ describe('layer creation', () => {
             url: 'https://my.url/wms',
             layer: 'SOME_LAYER',
             tiled: true,
-          })
+          }),
         ).toEqual({
           LAYERS: 'SOME_LAYER',
           VERSION: '1.3.0',
@@ -187,7 +187,7 @@ describe('layer creation', () => {
             layer: 'SOME_LAYER',
             version: '1.1.1',
             tiled: true,
-          })
+          }),
         ).toEqual({
           LAYERS: 'SOME_LAYER',
           VERSION: '1.1.1',
@@ -217,7 +217,7 @@ describe('layer creation', () => {
         layer$.subscribe(
           (status) => (received = status),
           null,
-          () => (completed = true)
+          () => (completed = true),
         );
       });
 
@@ -264,7 +264,7 @@ describe('layer creation', () => {
         layer$.subscribe(
           (status) => (received = status),
           null,
-          () => (completed = true)
+          () => (completed = true),
         );
       });
 
@@ -332,7 +332,7 @@ describe('layer creation', () => {
       layer$.subscribe(
         (status) => (received = status),
         null,
-        () => (completed = true)
+        () => (completed = true),
       );
     });
 
@@ -347,10 +347,10 @@ describe('layer creation', () => {
         spec.layer,
         spec.format,
         frameState.viewState.projection,
-        frameState.extent
+        frameState.extent,
       );
       expect(url).toEqual(
-        'https://my.url/wfs?SERVICE=WFS&version=1.1.0&request=GetFeature&typename=my%3Alayername&srsName=EPSG%3A3857&bbox=-696165.0132013096%2C5090855.383524774%2C3367832.7922398755%2C7122854.286245367%2CEPSG%3A3857&outputFormat=application%2Fjson'
+        'https://my.url/wfs?SERVICE=WFS&version=1.1.0&request=GetFeature&typename=my%3Alayername&srsName=EPSG%3A3857&bbox=-696165.0132013096%2C5090855.383524774%2C3367832.7922398755%2C7122854.286245367%2CEPSG%3A3857&outputFormat=application%2Fjson',
       );
     });
   });
@@ -376,7 +376,7 @@ describe('layer creation', () => {
       layer$.subscribe(
         (status) => (received = status),
         console.error,
-        () => (completed = true)
+        () => (completed = true),
       );
     });
 
