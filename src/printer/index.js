@@ -1,1 +1,1 @@
-import '../printer/dispatcher';
+import '../printer/dispatcher.js';

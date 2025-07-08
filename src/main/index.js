@@ -1,17 +1,20 @@
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 
-import '../printer';
-import { MESSAGE_JOB_CANCEL, MESSAGE_JOB_REQUEST } from '../shared/constants';
-import { registerWithExtent } from '../shared/projections';
-import { messageToPrinter } from './exchange';
+import '../printer/index.js';
+import {
+  MESSAGE_JOB_CANCEL,
+  MESSAGE_JOB_REQUEST,
+} from '../shared/constants.js';
+import { registerWithExtent } from '../shared/projections.js';
+import { messageToPrinter } from './exchange.js';
 import {
   createNewJob,
   getJobsStatusObservable,
   getJobStatusObservable,
-} from './jobs';
-import getLegends from '../shared/widgets/legends';
+} from './jobs.js';
+import getLegends from '../shared/widgets/legends.js';
 
-export { downloadBlob } from './utils';
+export { downloadBlob } from './utils.js';
 
 /**
  * @typedef {Object} TileGrid
@@ -249,7 +252,7 @@ export function registerProjection(definition) {
   registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
 
-export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions';
+export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions.js';
 
-export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow';
-export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar';
+export { getPrintableNorthArrow as getNorthArrow } from '../shared/widgets/north-arrow.js';
+export { getPrintableScaleBar as getScaleBar } from '../shared/widgets/scalebar.js';

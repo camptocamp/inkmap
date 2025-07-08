@@ -9,8 +9,11 @@ import {
   take,
 } from 'rxjs/operators';
 import { from } from 'rxjs';
-import { messageToMain$, messageToPrinter } from './exchange';
-import { MESSAGE_JOB_REQUEST, MESSAGE_JOB_STATUS } from '../shared/constants';
+import { messageToMain$, messageToPrinter } from './exchange.js';
+import {
+  MESSAGE_JOB_REQUEST,
+  MESSAGE_JOB_STATUS,
+} from '../shared/constants.js';
 import isEqual from 'lodash/isEqual';
 
 export const jobs$ = messageToMain$.pipe(

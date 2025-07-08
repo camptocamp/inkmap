@@ -23,14 +23,14 @@ import {
   tap,
   throttleTime,
 } from 'rxjs/operators';
-import { isWorker } from '../worker/utils';
+import { isWorker } from '../worker/utils.js';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { extentFromProjection } from 'ol/tilegrid';
 import {
   generateGetFeatureUrl,
   makeLayerFrameState,
   useContainer,
-} from './utils';
+} from './utils.js';
 import OpenLayersParser from 'geostyler-openlayers-parser';
 
 const update$ = interval(500);

@@ -1,4 +1,4 @@
-import { pixelToRealWorld } from '../shared/units';
+import { pixelToRealWorld } from '../shared/units.js';
 
 export class PrintableImage {
   /**

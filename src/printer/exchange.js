@@ -1,6 +1,6 @@
 import { fromEvent } from 'rxjs';
 import { pluck, tap } from 'rxjs/operators';
-import { isWorker } from '../worker/utils';
+import { isWorker } from '../worker/utils.js';
 
 /**
  * Sends a message to the main thread

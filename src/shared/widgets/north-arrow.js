@@ -1,6 +1,6 @@
-import { applyWidgetPositionTransform } from './position';
-import { PrintableImage } from '../../main/printable-image';
-import { realWorldToPixel } from '../units';
+import { applyWidgetPositionTransform } from './position.js';
+import { PrintableImage } from '../../main/printable-image.js';
+import { realWorldToPixel } from '../units.js';
 
 // size of the square containing the whole symbol
 const SOURCE_SYMBOL_SIZE_PX = 130;

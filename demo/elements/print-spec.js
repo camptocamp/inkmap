@@ -1,4 +1,4 @@
-import PresetSpecs from '../preset-specs';
+import PresetSpecs from '../preset-specs.js';
 
 const PresetSpecsNames = Object.keys(PresetSpecs);
 

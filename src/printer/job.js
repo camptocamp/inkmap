@@ -2,14 +2,18 @@ import { createCanvasContext2D } from 'ol/dom';
 import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 
-import { MESSAGE_JOB_STATUS } from '../shared/constants';
-import { registerWithExtent } from '../shared/projections';
-import { messageToMain } from './exchange';
-import { cancel$, createLayer } from './layers';
-import { calculateSizeInPixel, canvasToBlob, getJobFrameState } from './utils';
-import { printAttributions } from '../shared/widgets/attributions';
-import { printNorthArrow } from '../shared/widgets/north-arrow';
-import { printScaleBar } from '../shared/widgets/scalebar';
+import { MESSAGE_JOB_STATUS } from '../shared/constants.js';
+import { registerWithExtent } from '../shared/projections.js';
+import { messageToMain } from './exchange.js';
+import { cancel$, createLayer } from './layers.js';
+import {
+  calculateSizeInPixel,
+  canvasToBlob,
+  getJobFrameState,
+} from './utils.js';
+import { printAttributions } from '../shared/widgets/attributions.js';
+import { printNorthArrow } from '../shared/widgets/north-arrow.js';
+import { printScaleBar } from '../shared/widgets/scalebar.js';
 
 let counter = 0;
 

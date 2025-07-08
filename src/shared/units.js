@@ -1,4 +1,4 @@
-import { CM_PER_INCH } from './constants';
+import { CM_PER_INCH } from './constants.js';
 import { get as getProjection } from 'ol/proj';
 
 /**

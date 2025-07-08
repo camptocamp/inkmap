@@ -81,7 +81,7 @@ export default {
   },
   resolve: {
     alias: {
-      '@camptocamp/inkmap$': '../../src/main',
+      '@camptocamp/inkmap$': '../../src/main/index.js',
     },
   },
 };

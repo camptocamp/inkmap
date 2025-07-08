@@ -1,5 +1,5 @@
-import './polyfills';
-import '../printer';
+import './polyfills.js';
+import '../printer/index.js';
 
 self.addEventListener('install', function () {
   console.log(`[inkmap] Installing worker...`);

@@ -1,5 +1,5 @@
-import { applyWidgetPositionTransform } from '../../src/shared/widgets/position';
-import { CM_PER_INCH } from '../../src/shared/constants';
+import { applyWidgetPositionTransform } from '../../src/shared/widgets/position.js';
+import { CM_PER_INCH } from '../../src/shared/constants.js';
 
 describe('widgets', () => {
   describe('position utils', () => {

@@ -1,7 +1,7 @@
 import { fromEvent } from 'rxjs';
 import { pluck, switchMap, tap } from 'rxjs/operators';
 import { from } from 'rxjs';
-import { printerReady } from './utils';
+import { printerReady } from './utils.js';
 
 /**
  * Sends a message to the printer thread

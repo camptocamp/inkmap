@@ -1,6 +1,6 @@
 import { print, getAttributionsText, getNorthArrow } from '@camptocamp/inkmap';
 import { jsPDF } from 'jspdf';
-import { getScaleBar } from '../../src/main';
+import { getScaleBar } from '../../src/main/index.js';
 
 const root = document.getElementById('example-05');
 const btn = /** @type {CustomButton} */ root.querySelector('custom-button');

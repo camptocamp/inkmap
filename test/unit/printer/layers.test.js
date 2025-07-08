@@ -2,20 +2,20 @@ import {
   cancel$,
   createLayer,
   getWMSParams,
-} from '../../../src/printer/layers';
-import { generateGetFeatureUrl } from '../../../src/printer/utils';
+} from '../../../src/printer/layers.js';
+import { generateGetFeatureUrl } from '../../../src/printer/utils.js';
 import ImageWMSSourceMock, {
   triggerLoadEnd,
   triggerLoadError,
-} from '../../../__mocks__/ol/source/ImageWMS';
+} from '../../../__mocks__/ol/source/ImageWMS.js';
 import TileWMSSourceMock, {
   triggerLoadError as triggerTileWMSError,
-} from '../../../__mocks__/ol/source/TileWMS';
+} from '../../../__mocks__/ol/source/TileWMS.js';
 import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
-} from '../../../__mocks__/ol/source/XYZ';
-import { setQueuedCount } from '../../../__mocks__/ol/TileQueue';
-import { waitForPromises } from '../utils';
+} from '../../../__mocks__/ol/source/XYZ.js';
+import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js';
+import { waitForPromises } from '../utils.js';
 import { defer } from 'rxjs';
 
 /** @type {import('ol/Map').FrameState} */

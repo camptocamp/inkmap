@@ -1,11 +1,11 @@
 import { fromLonLat, getPointResolution, METERS_PER_UNIT } from 'ol/proj';
-import { applyWidgetPositionTransform } from './position';
+import { applyWidgetPositionTransform } from './position.js';
 import {
   pixelToRealWorld,
   realWorldToPixel,
   scaleToResolution,
-} from '../units';
-import { PrintableImage } from '../../main/printable-image';
+} from '../units.js';
+import { PrintableImage } from '../../main/printable-image.js';
 
 const FONT_SIZE_MM = 6;
 const BAR_HEIGHT_MM = 3;

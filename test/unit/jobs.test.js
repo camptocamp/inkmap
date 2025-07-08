@@ -1,5 +1,5 @@
-import '../../src/main'; // this will also initialize all message exchange logic
-import { createNewJob } from '../../src/main/jobs';
+import '../../src/main/index.js'; // this will also initialize all message exchange logic
+import { createNewJob } from '../../src/main/jobs.js';
 import { combineLatest, of } from 'rxjs';
 
 jest.mock('../../src/printer/utils', () => ({

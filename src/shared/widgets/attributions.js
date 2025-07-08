@@ -1,5 +1,5 @@
-import { applyWidgetPositionTransform } from './position';
-import { CM_PER_INCH } from '../constants';
+import { applyWidgetPositionTransform } from './position.js';
+import { CM_PER_INCH } from '../constants.js';
 
 const FONT_SIZE_MM = 6;
 

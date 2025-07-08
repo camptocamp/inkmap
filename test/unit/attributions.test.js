@@ -1,4 +1,4 @@
-import { computeAttributionsText } from '../../src/shared/widgets/attributions';
+import { computeAttributionsText } from '../../src/shared/widgets/attributions.js';
 
 describe('attributions', () => {
   describe('computeAttribution', () => {
