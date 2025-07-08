@@ -8,7 +8,7 @@
     "src/"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "scripts": {
     "lint": "eslint src",
@@ -16,6 +16,7 @@
     "format": "npm run format:write",
     "format:write": "prettier --write src demo test",
     "format:check": "prettier --check src demo test",
+    "test": "npm run test:unit && npm run test:rendering",
     "test:unit": "jest",
     "test:rendering": "node test/rendering/run.js",
     "demo": "webpack-dev-server --config demo/webpack.config.js",
