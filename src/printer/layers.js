@@ -105,8 +105,6 @@ function createTiledLayer(jobId, source, rootFrameState, opacity) {
           rootFrameState.pixelRatio,
           rootFrameState.viewState.projection,
         );
-      // @ts-ignore
-      image.hintImageSize(tileSize[0], tileSize[1]);
     }
 
     image.src = src;
@@ -250,11 +248,6 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     /** @type {HTMLImageElement} */
     const image = /** @type {any} */ (layerImage).getImage();
 
-    if (isWorker()) {
-      // @ts-ignore
-      image.hintImageSize(width, height);
-    }
-
     const blankSrc =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     cancel$
@@ -381,7 +374,7 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
         renderer.prepareFrame({ ...frameState, time: Date.now() });
         renderer.renderFrame(
           { ...frameState, time: Date.now() },
-          context.canvas
+          context.canvas,
         );
       }),
       map(() => {
@@ -395,7 +388,7 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
           progress$.complete();
           updateSub.unsubscribe();
         }
-      })
+      }),
     )
     .subscribe();
 
@@ -582,8 +575,6 @@ async function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
             rootFrameState.pixelRatio,
             rootFrameState.viewState.projection,
           );
-        // @ts-ignore
-        image.hintImageSize(tileSize[0], tileSize[1]);
       }
       image.src = src;
     });
@@ -685,11 +676,6 @@ function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
   source.setImageLoadFunction(function (layerImage, src) {
     /** @type {HTMLImageElement} */
     const image = /** @type {any} */ (layerImage).getImage();
-
-    if (isWorker()) {
-      // @ts-ignore
-      image.hintImageSize(width, height);
-    }
 
     const blankSrc =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
