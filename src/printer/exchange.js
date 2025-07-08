@@ -38,6 +38,9 @@ const events$ = isWorker()
   ? fromEvent(self, 'message').pipe(pluck('data'))
   : fromEvent(window, 'inkmap.toPrinter').pipe(pluck('detail'));
 
+/**
+ * @type {import('rxjs').Observable<Object>}
+ */
 export const messageToPrinter$ = events$.pipe(
   tap((message) => console.log('[inkmap] message to printer:', message)),
 );

@@ -28,6 +28,9 @@ export function messageToPrinter(type, message) {
   });
 }
 
+/**
+ * @type {import('rxjs').Observable<Object>}
+ */
 export const messageToMain$ = from(printerReady).pipe(
   switchMap((useWorker) => {
     const events$ = useWorker

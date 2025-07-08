@@ -97,20 +97,21 @@ export async function createJob(spec) {
           return of([progress, null, sourceLoadErrors]);
         }
       }),
-      map(([progress, imageBlob, sourceLoadErrors]) => {
-        return {
-          ...job,
-          progress,
-          imageBlob,
-          status:
-            progress === 1
-              ? 'finished'
-              : progress === -1
-                ? 'canceled'
-                : 'ongoing',
-          sourceLoadErrors,
-        };
-      }),
+      map(
+        ([progress, imageBlob, sourceLoadErrors]) =>
+          /** @type {import('../main/index.js').PrintStatus} */ ({
+            ...job,
+            progress,
+            imageBlob,
+            status:
+              progress === 1
+                ? 'finished'
+                : progress === -1
+                  ? 'canceled'
+                  : 'ongoing',
+            sourceLoadErrors,
+          }),
+      ),
       takeWhile(
         (jobStatus) => jobStatus.progress < 1 && jobStatus.progress !== -1,
         true,
