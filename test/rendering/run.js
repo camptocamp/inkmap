@@ -71,6 +71,9 @@ let failed = false;
 async function startBrowser() {
   browser = await puppeteer.launch({
     headless: !options.argv.interactive,
+    args: process.env.CI
+      ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      : [],
   });
   page = await browser.newPage();
   page.on('error', (err) => {
