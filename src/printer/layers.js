@@ -306,7 +306,7 @@ function createImageLayer(jobId, source, rootFrameState, opacity) {
   ) {
     const originalFn = /** @type {import("ol/Image").LoadFunction} */ (
       source.getImageLoadFunction()
-    )
+    );
     source.setImageLoadFunction(function (layerImage, src) {
       /** @type {HTMLImageElement} */
       const image = /** @type {any} */ (layerImage).getImage();
