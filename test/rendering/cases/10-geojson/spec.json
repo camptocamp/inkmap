@@ -23,10 +23,7 @@
                 "kind": "Text",
                 "label": "{{name}}",
                 "size": 12,
-                "offset": [
-                  0,
-                  -20
-                ]
+                "offset": [0, -20]
               }
             ]
           }
@@ -303,7 +300,7 @@
               "type": "Point",
               "coordinates": [262943.377301, 6250714.425049]
             },
-            "properties" : {
+            "properties": {
               "name": "Paris"
             }
           },
@@ -311,9 +308,9 @@
             "type": "Feature",
             "geometry": {
               "type": "Point",
-              "coordinates": [534447.701770, 5738280.587425]
+              "coordinates": [534447.70177, 5738280.587425]
             },
-            "properties" : {
+            "properties": {
               "name": "Lyon"
             }
           },
@@ -323,10 +320,10 @@
               "type": "Point",
               "coordinates": [595597.324398, 5353037.964867]
             },
-            "properties" : {
+            "properties": {
               "name": "Marseille"
             }
-          } 
+          }
         ]
       }
     }
