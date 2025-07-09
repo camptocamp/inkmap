@@ -603,6 +603,28 @@ export const WfsSpec = {
   attributions: 'bottom-right',
 };
 
+export const MapboxVectorStyleSpec = {
+  layers: [
+    {
+      type: 'VectorTile',
+      styleUrl:
+        'https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/styles/root.json',
+      attribution: '© ESRI',
+    },
+  ],
+  size: [400, 240, 'mm'],
+  center: [12, 48],
+  dpi: 120,
+  scale: 10000000,
+  scaleBar: {
+    position: 'bottom-left',
+    units: 'metric',
+  },
+  projection: 'EPSG:3857',
+  northArrow: 'top-right',
+  attributions: 'bottom-right',
+};
+
 const CustomProjection = {
   layers: [
     {
@@ -725,7 +747,8 @@ const PresetSpecs = {
   'Mars Perseverance Rover Landing Site': MarsRoverLandingSpec,
   'Bayonne, 1935 (WMTS)': BayonneWmtsSpec,
   'North pole, arctic projection (WMS)': PolarProjectionSpec,
-  'WFS layer example': WfsSpec,
+  'Water areas geometries (WFS)': WfsSpec,
+  'Europe as vector tiles (Mapbox Style)': MapboxVectorStyleSpec,
   'Custom local projection (WMS)': CustomProjection,
   'Spec with invalid sources': ErrorSpec,
   'Spec with legends': LegendSpec,
