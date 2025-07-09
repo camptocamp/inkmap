@@ -174,6 +174,94 @@ function createLayerXYZ(jobId, layerSpec, rootFrameState) {
 }
 
 /**
+ * @param {number} jobId
+ * @param {import('ol/source/Vector').default} source
+ * @param {Object} style
+ * @param {import('ol/Map').FrameState} rootFrameState
+ * @param {number} [opacity=1]
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
+ */
+function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+
+  const layer = new VectorLayer({
+    source,
+  });
+
+  let frameState = makeLayerFrameState(rootFrameState, layer);
+  let renderer = layer.getRenderer();
+  // @ts-ignore
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
+  const progress$ = new BehaviorSubject([0, null]);
+
+  // when true, the layer is ready to be drawn
+  let styleReady = false;
+  if (style) {
+    new OpenLayersParser()
+      .writeStyle(style)
+      .then(({ output: olStyle }) => {
+        layer.setStyle(olStyle);
+        styleReady = true;
+      })
+      .catch((error) => console.log(error));
+  } else {
+    styleReady = true;
+  }
+
+  const updateSub = update$
+    .pipe(
+      skipWhile(() => !styleReady),
+      tap(() => {
+        console.log('rendering layer...');
+        // try to render the layer on each update
+        renderer.prepareFrame({ ...frameState, time: Date.now() });
+        renderer.renderFrame(
+          { ...frameState, time: Date.now() },
+          context.canvas,
+        );
+      }),
+      map(() => {
+        const sourceLoaded = source.getState() === 'ready';
+        const layerRendered = renderer.ready;
+        if (sourceLoaded && layerRendered) {
+          console.log('layer renderer ready');
+          progress$.next([1, context.canvas]);
+          progress$.complete();
+          updateSub.unsubscribe();
+          return;
+        } else if (sourceLoaded) {
+          console.log('source loaded, layer not fully rendered');
+          progress$.next([0.75, context.canvas]);
+        } else {
+          console.log('source not loaded');
+          progress$.next([0.5, context.canvas]);
+        }
+      }),
+    )
+    .subscribe();
+
+  cancel$
+    .pipe(
+      filter((canceledJobId) => canceledJobId === jobId),
+      take(1),
+      tap(() => {
+        progress$.next([-1, null]);
+        progress$.complete();
+        updateSub.unsubscribe();
+      }),
+    )
+    .subscribe();
+
+  return progress$;
+}
+
+/**
  * @param {import('../main/index.js').WmsLayer} layerSpec
  * @return {Object.<string, string|boolean>}
  */
@@ -314,75 +402,23 @@ function createLayerWMTS(jobId, layerSpec, rootFrameState) {
 }
 
 /**
+ * @param {number} jobId
  * @param {import('../main/index.js').GeoJSONLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
-function createLayerGeoJSON(layerSpec, rootFrameState) {
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
-
+function createLayerGeoJSON(jobId, layerSpec, rootFrameState) {
   const vectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(layerSpec.geojson),
   });
 
-  const layer = new VectorLayer({
-    source: vectorSource,
-  });
-
-  let frameState = makeLayerFrameState(rootFrameState, layer);
-  let renderer = layer.getRenderer();
-  // @ts-ignore
-  renderer.useContainer = useContainer.bind(renderer, context);
-
-  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
-  const progress$ = new BehaviorSubject([0, null]);
-
-  // when true, the layer is ready to be drawn
-  let styleReady = false;
-  if (layerSpec.style) {
-    new OpenLayersParser()
-      .writeStyle(layerSpec.style)
-      .then(({ output: olStyle }) => {
-        layer.setStyle(olStyle);
-        styleReady = true;
-      })
-      .catch((error) => console.log(error));
-  } else {
-    styleReady = true;
-  }
-
-  const updateSub = update$
-    .pipe(
-      skipWhile(() => !styleReady),
-      tap(() => {
-        console.log('rendering layer...');
-        // try to render the layer on each update
-        renderer.prepareFrame({ ...frameState, time: Date.now() });
-        renderer.renderFrame(
-          { ...frameState, time: Date.now() },
-          context.canvas,
-        );
-      }),
-      map(() => {
-        const layerReady = renderer.ready;
-        if (!layerReady) {
-          console.log('layer not fully rendered');
-          progress$.next([0.5, context.canvas]);
-        } else {
-          console.log('layer renderer ready');
-          progress$.next([1, context.canvas]);
-          progress$.complete();
-          updateSub.unsubscribe();
-        }
-      }),
-    )
-    .subscribe();
-
-  return progress$;
+  return createVectorLayer(
+    jobId,
+    vectorSource,
+    layerSpec.style,
+    rootFrameState,
+    layerSpec.opacity,
+  );
 }
 
 /**
@@ -392,22 +428,10 @@ function createLayerGeoJSON(layerSpec, rootFrameState) {
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerWFS(jobId, layerSpec, rootFrameState) {
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
-
-  let frameState;
-  let renderer;
   const version = layerSpec.version || '1.1.0';
   const format =
     layerSpec.format === 'geojson' ? new GeoJSON() : new WFS({ version });
-
-  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
-  const progress$ = new BehaviorSubject([0, null]);
-
-  let vectorSource = new VectorSource({
+  const vectorSource = new VectorSource({
     format,
     loader: function (extent, resolution, projection) {
       const projCode = projection.getCode();
@@ -428,55 +452,20 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
         })
         .then((responseText) => {
           vectorSource.addFeatures(format.readFeatures(responseText));
-          if (vectorSource.getFeatures().length !== 0) {
-            renderer.prepareFrame({ ...frameState, time: Date.now() });
-            renderer.renderFrame(
-              { ...frameState, time: Date.now() },
-              context.canvas,
-            );
-          }
-          progress$.next([1, context.canvas]);
-          progress$.complete();
-        })
-        .catch(() => {
-          progress$.next([1, context.canvas, layerSpec.url]);
-          progress$.complete();
+          vectorSource.setState('ready');
         });
-
-      cancel$
-        .pipe(
-          filter((canceledJobId) => canceledJobId === jobId),
-          take(1),
-          tap(() => {
-            progress$.next([-1, null]);
-            progress$.complete();
-          }),
-        )
-        .subscribe();
+      vectorSource.setState('loading');
     },
     strategy: bbox,
   });
 
-  let layer = new VectorLayer({
-    source: vectorSource,
-  });
-
-  if (layerSpec.style) {
-    const parser = new OpenLayersParser();
-    parser
-      .writeStyle(layerSpec.style)
-      .then(({ output: olStyle }) => layer.setStyle(olStyle))
-      .catch((error) => console.log(error));
-  }
-
-  frameState = makeLayerFrameState(rootFrameState, layer);
-  renderer = layer.getRenderer();
-  // @ts-ignore
-  renderer.useContainer = useContainer.bind(renderer, context);
-
-  renderer.prepareFrame({ ...frameState, time: Date.now() });
-
-  return progress$;
+  return createVectorLayer(
+    jobId,
+    vectorSource,
+    layerSpec.style,
+    rootFrameState,
+    layerSpec.opacity,
+  );
 }
 
 /**
