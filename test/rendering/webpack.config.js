@@ -4,6 +4,7 @@ const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export default {
   mode: 'development',
+  devtool: 'source-map',
   entry: {
     print: path.resolve(__dirname, 'testbench/print.js'),
     ['inkmap-worker']: path.resolve(__dirname, '../../src/worker/index.js'),
@@ -21,7 +22,7 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: [['@babel/preset-env', { targets: { node: '10' } }]],
+            presets: [['@babel/preset-env', { targets: { node: '20' } }]],
           },
         },
       },

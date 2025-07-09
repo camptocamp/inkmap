@@ -2,12 +2,10 @@
   "layers": [
     {
       "type": "VectorTile",
-      "url": "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/{z}/{y}/{x}.pbf",
-      "styleUrl": "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/styles/root.json",
+      "styleUrl": "/VectorTileServer/style.json",
       "opacity": 1
     }
   ],
-
   "size": [256, 256],
   "center": [12, 48],
   "dpi": 50,

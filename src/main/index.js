@@ -112,8 +112,9 @@ export { downloadBlob } from './utils.js';
 /**
  * @typedef {Object} VectorTileLayer
  * @property {'VectorTile'} type
- * @property {string} url URL or URL template for the vector tile layer; can contain the following tokens: `{z}`, `{x}`, and `{y}`.
  * @property {string} [styleUrl] URL to the Mapbox GL style JSON.
+ * @property {string} [url] URL template for the vector tiles; should contain the following tokens: `{z}`, `{x}`, and `{y}` (will be used if no `styleUrl` is provided).
+ * @property {Object} [style] Vector style (will be used if no `styleUrl` is provided).
  * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {string} [attribution] Attribution for the data used in the layer.
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.

@@ -77,3 +77,8 @@ class FakeHTMLVideoElement {
 self.HTMLImageElement = Image;
 self.HTMLCanvasElement = OffscreenCanvas;
 self.HTMLVideoElement = FakeHTMLVideoElement;
+
+self.window = {
+  devicePixelRatio: 1,
+  location: self.location,
+};

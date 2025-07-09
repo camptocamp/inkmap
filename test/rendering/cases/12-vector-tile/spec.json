@@ -1,0 +1,45 @@
+{
+  "layers": [
+    {
+      "type": "VectorTile",
+      "url": "/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+      "style": {
+        "name": "Test Style",
+        "rules": [
+          {
+            "name": "Rule 1",
+            "symbolizers": [
+              {
+                "kind": "Line",
+                "color": "blue",
+                "width": 1
+              },
+              {
+                "kind": "Icon",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Parking_icon.svg/128px-Parking_icon.svg.png",
+                "size": 12
+              },
+              {
+                "kind": "Text",
+                "label": "{{name}}",
+                "size": 12,
+                "offset": [0, -20]
+              }
+            ]
+          }
+        ]
+      },
+      "opacity": 1
+    }
+  ],
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 50,
+  "scale": 40000000,
+  "scaleBar": {
+    "position": "bottom-left",
+    "units": "metric"
+  },
+  "projection": "EPSG:3857",
+  "northArrow": "top-right"
+}

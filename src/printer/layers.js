@@ -15,7 +15,7 @@ import VectorLayer from 'ol/layer/Vector';
 import ImageArcGISRest from 'ol/source/ImageArcGISRest';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
-import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
+import { BehaviorSubject, from, interval, merge, Subject } from 'rxjs';
 import {
   filter,
   map,
@@ -35,10 +35,9 @@ import {
   useContainer,
 } from './utils.js';
 import OpenLayersParser from 'geostyler-openlayers-parser';
-import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
-import { stylefunction } from 'ol-mapbox-style';
+import { applyStyle } from 'ol-mapbox-style';
 
 const blankSrc =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -85,32 +84,28 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
 
 /**
  * @param {number} jobId
- * @param {import('ol/source/TileImage').default} source
+ * @param {import('ol/source/TileImage').default|import('ol/source/VectorTile').default} source
  * @param {import('ol/Map').FrameState} rootFrameState
  * @param {number} [opacity=1]
+ * @param {import('ol/layer/Layer').default} [layer] Predefined layer (if any)
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
-function createTiledLayer(jobId, source, rootFrameState, opacity) {
+function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
   // @ts-ignore
   context.canvas.style = {};
   let frameState;
-  let layer;
   let renderer;
   let tileLoadErrorUrl;
 
-  layer = new TileLayer({
-    source,
-  });
-  source.setTileLoadFunction(function (tile, src) {
-    /** @type {HTMLImageElement} */
-    const image = /** @type {any} */ (tile).getImage();
-    image.src = src;
-  });
-
-  layer.getSource().on('tileloaderror', function (e) {
+  layer =
+    layer ??
+    new TileLayer({
+      source,
+    });
+  source.on('tileloaderror', function (e) {
     tileLoadErrorUrl = e.target.getUrls()[0];
   });
 
@@ -575,7 +570,7 @@ async function createBingMapsSource(layerSpec) {
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
-  return fromPromise(createBingMapsSource(layerSpec)).pipe(
+  return from(createBingMapsSource(layerSpec)).pipe(
     switchMap((source) =>
       createTiledLayer(jobId, source, rootFrameState, layerSpec.opacity),
     ),
@@ -604,20 +599,29 @@ function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
  * @return {import('rxjs').Observable<LayerPrintStatus>} Observable emitting layer print status
  */
 function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
-  // Create a canvas with dimensions from the frame state
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
+  const tileLoadFunction =
+    /** @type {function(import('ol/VectorTile').default,string): void} */ (
+      function (tile, url) {
+        tile.setLoader(async (extent, resolution, projection) => {
+          const data = await fetch(url)
+            .then((response) => response.arrayBuffer())
+            .catch(() => tile.setState('error'));
+          const format = tile.getFormat();
+          const features = format.readFeatures(data, {
+            extent: extent,
+            featureProjection: projection,
+          });
+          tile.setFeatures(features);
+        });
+      }
+    );
 
-  // Create progress tracking subject that emits [progress, canvas, errorUrl]
-  const progress$ = new BehaviorSubject([0, null, undefined]);
-  let tileLoadErrorUrl;
+  const layer = new VectorTileLayer({});
+  /** @type {VectorTileSource} */
+  let source;
 
-  try {
-    // Use URL exactly as provided in config - no special handling needed
-    const source = new VectorTileSource({
+  if (!layerSpec.styleUrl) {
+    source = new VectorTileSource({
       format: new MVT(), // Mapbox Vector Tile format
       url: layerSpec.url, // URL with tile template placeholders {z}/{x}/{y}.pbf
       // @ts-ignore - crossOrigin is valid but not in typedefs
@@ -625,344 +629,65 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
       maxZoom: layerSpec.maxZoom || 14,
       minZoom: layerSpec.minZoom || 0,
       projection: rootFrameState.viewState.projection,
+      tileLoadFunction,
     });
-
-    // Custom tile loading function to handle vector tiles
-    source.setTileLoadFunction((tile, url) => {
-      // Use fetch with proper headers for vector tiles
-      fetch(url, {
-        headers: {
-          Accept: 'application/x-protobuf',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      })
-        .then((response) => {
-          if (!response.ok) {
-            // Handle HTTP errors by setting tile to error state
-            tile.setState(3); // TileState.ERROR
-            throw new Error(`HTTP error ${response.status}`);
-          }
-          return response.arrayBuffer();
-        })
-        .then((data) => {
-          if (data !== undefined && data.byteLength > 0) {
-            try {
-              // @ts-ignore - VectorTile specific properties
-              const format = tile.getFormat();
-              // @ts-ignore
-              const tileCoord = tile.getTileCoord();
-              const extent = source.getTileGrid().getTileCoordExtent(tileCoord);
-
-              // Parse features from binary data using MVT parser
-              const features = format.readFeatures(data, {
-                extent: extent,
-                featureProjection: rootFrameState.viewState.projection,
-              });
-
-              // Set parsed features on the tile and mark as loaded
-              // @ts-ignore
-              tile.setFeatures(features);
-              tile.setState(2); // TileState.LOADED
-            } catch (err) {
-              // Handle parsing errors
-              tileLoadErrorUrl = url;
-              tile.setState(3); // TileState.ERROR
-            }
-          } else {
-            // Empty tiles are normal for areas without data
-            // @ts-ignore - Set empty features array but mark as loaded
-            tile.setFeatures([]);
-            tile.setState(2); // TileState.LOADED
-          }
-        })
-        .catch(() => {
-          // Record the URL that caused the error for reporting
-          tileLoadErrorUrl = url;
-          tile.setState(3); // TileState.ERROR
-        });
-    });
-
-    // Create the vector tile layer
-    const layer = new VectorTileLayer({
-      source,
-      declutter: layerSpec.declutter !== false, // Enable decluttering by default
-      // @ts-ignore - renderMode is valid but not in typedefs
-      renderMode: layerSpec.renderMode || 'hybrid', // 'hybrid' mode for better performance
-      opacity: layerSpec.opacity || 1,
-    });
-
-    // Set up frame state and renderer
-    const frameState = makeLayerFrameState(rootFrameState, layer);
-    const renderer = layer.getRenderer();
-    // @ts-ignore
-    renderer.useContainer = useContainer.bind(renderer, context);
-
-    // Track tile load errors
-    source.on('tileloaderror', (/* e */) => {
-      tileLoadErrorUrl = layerSpec.url;
-    });
-
-    // Fetch and apply style to the vector tiles
-    const applyStyle = () => {
-      return fetch(layerSpec.styleUrl)
-        .then((r) => {
-          if (!r.ok) {
-            throw new Error(
-              `Failed to fetch style: ${r.status} ${r.statusText}`,
-            );
-          }
-          return r.json();
-        })
-        .then((glStyle) => {
-          // Calculate sprite URLs for style icons based on device pixel ratio
-          const pixelRatio = rootFrameState.pixelRatio || 1;
-          const spriteUrl = glStyle.sprite
-            ? glStyle.sprite + (pixelRatio > 1 ? '@2x' : '') + '.json'
-            : null;
-          const spriteImageUrl = glStyle.sprite
-            ? glStyle.sprite + (pixelRatio > 1 ? '@2x' : '') + '.png'
-            : null;
-
-          // Ensure the style has a source that matches our URL
-          let targetSourceName = null;
-          if (glStyle.sources) {
-            // Try to find either an exact URL match or any vector source
-            for (const [name, source] of Object.entries(glStyle.sources)) {
-              if (source.type === 'vector') {
-                if (source.url === layerSpec.url) {
-                  targetSourceName = name;
-                  break;
-                } else if (!targetSourceName) {
-                  // Keep as backup if no exact match
-                  targetSourceName = name;
-                }
-              }
-            }
-
-            // If no matching source found, add one with a default name
-            if (!targetSourceName) {
-              targetSourceName = 'vectorTileSource';
-              glStyle.sources[targetSourceName] = {
-                type: 'vector',
-                url: layerSpec.url,
-              };
-            }
-
-            // Make sure our target source has the correct URL
-            if (glStyle.sources[targetSourceName].url !== layerSpec.url) {
-              glStyle.sources[targetSourceName].url = layerSpec.url;
-            }
-          }
-
-          // Fetch sprite data if available
-          return Promise.all([
-            glStyle,
-            spriteUrl
-              ? fetch(spriteUrl)
-                  .then((r) => (r.ok ? r.json() : {}))
-                  .catch(() => ({})) // Return empty object on error
-              : Promise.resolve({}),
-            targetSourceName,
-            spriteImageUrl,
-          ]);
-        })
-        .then(([glStyle, spriteData, targetSourceName, spriteImageUrl]) => {
-          // Define a font replacement function for text rendering
-          const fontReplacer = (font) =>
-            font[0]
-              .replace('Noto Sans', 'serif')
-              .replace('Roboto', 'sans-serif');
-
-          let styleApplied = false;
-
-          // Try multiple approaches to ensure style gets applied
-
-          // 1. Try with the identified target source first
-          if (targetSourceName && !styleApplied) {
-            try {
-              stylefunction(
-                layer,
-                glStyle,
-                targetSourceName,
-                undefined,
-                spriteData,
-                spriteImageUrl,
-                // @ts-ignore
-                layerSpec.fontCallback || fontReplacer,
-              );
-              styleApplied = true;
-            } catch (_) {
-              // Failed with target source, will try alternatives
-            }
-          }
-
-          // 2. If that didn't work, try each source in the style
-          if (!styleApplied && glStyle.sources) {
-            for (const sourceName of Object.keys(glStyle.sources)) {
-              if (styleApplied) break;
-
-              try {
-                stylefunction(
-                  layer,
-                  glStyle,
-                  sourceName,
-                  undefined,
-                  spriteData,
-                  spriteImageUrl,
-                  // @ts-ignore
-                  layerSpec.fontCallback || fontReplacer,
-                );
-                styleApplied = true;
-              } catch (_) {
-                // Continue trying other sources
-              }
-            }
-          }
-
-          // 3. If still nothing worked, try with no specific source
-          if (!styleApplied) {
-            try {
-              stylefunction(
-                layer,
-                glStyle,
-                undefined,
-                undefined,
-                spriteData,
-                spriteImageUrl,
-                // @ts-ignore
-                layerSpec.fontCallback || fontReplacer,
-              );
-              styleApplied = true;
-            } catch (_) {
-              // All style application attempts failed
-            }
-          }
-
-          return styleApplied;
-        });
-    };
-
-    // Handle cancellation
-    cancel$
-      .pipe(
-        filter((canceledJobId) => canceledJobId === jobId),
-        take(1),
-      )
-      .subscribe(() => {
-        progress$.next([-1, null, undefined]);
-        progress$.complete();
-      });
-
-    // Apply style and monitor loading
-    applyStyle()
-      .then(() => {
-        // Default number of tiles to track for progress reporting
-        let tileCount = 20;
-
-        // Force initial rendering passes to trigger tile loading
-        for (let i = 0; i < 3; i++) {
-          renderer.prepareFrame(frameState);
-          renderer.renderFrame(frameState, context.canvas);
-
-          // Load more tiles explicitly - necessary to start vector tile loading
-          frameState.tileQueue.reprioritize();
-          frameState.tileQueue.loadMoreTiles(24, 12);
-        }
-
-        // Give tiles more time to start loading
-        setTimeout(() => {
-          startMonitoring();
-        }, 200); // Longer timeout to ensure loading starts
-
-        // Monitor tile loading with aggressive tile loading strategy
-        function startMonitoring() {
-          const updateSub = update$
-            .pipe(
-              startWith(true),
-              // @ts-ignore
-              takeWhile((value, index) => {
-                // Force loading for multiple iterations to ensure tiles start loading
-                if (index < 5) {
-                  // Aggressive tile loading for initial iterations
-                  frameState.tileQueue.reprioritize();
-                  frameState.tileQueue.loadMoreTiles(24, 12);
-                  return true;
-                }
-
-                // Get current loading status
-                const tilesLoading = frameState.tileQueue.getTilesLoading();
-
-                // Request more tiles
-                frameState.tileQueue.reprioritize();
-                frameState.tileQueue.loadMoreTiles(24, 12);
-
-                // Continue while loading or for minimum iterations
-                return tilesLoading > 0 || index < 5;
-              }, true),
-            )
-            .subscribe({
-              next: () => {
-                // Calculate progress based on remaining tiles loading
-                let tilesLoading = frameState.tileQueue.getTilesLoading();
-                let progress = 1 - tilesLoading / tileCount;
-                progress = Math.min(1, Math.max(0.1, progress));
-
-                // Force render on each update
-                renderer.prepareFrame(frameState);
-                renderer.renderFrame(frameState, context.canvas);
-
-                // Check if complete
-                if (tilesLoading === 0) {
-                  // Final render
-                  renderer.prepareFrame(frameState);
-                  renderer.renderFrame(frameState, context.canvas);
-
-                  // Add border for visual clarity
-                  context.strokeStyle = 'rgba(0,0,0,0.2)';
-                  context.lineWidth = 1;
-                  context.strokeRect(0, 0, width, height);
-
-                  // Complete observable with finished canvas
-                  // @ts-ignore
-                  progress$.next([1, context.canvas, tileLoadErrorUrl]);
-                  progress$.complete();
-                  updateSub.unsubscribe();
-                } else {
-                  // Update progress
-                  // @ts-ignore
-                  progress$.next([progress, null, tileLoadErrorUrl]);
-                }
-              },
-              error: () => {
-                // Handle monitoring errors
-                // @ts-ignore
-                progress$.next([1, context.canvas, 'Error monitoring tiles']);
-                progress$.complete();
-              },
-            });
-        }
-      })
-      .catch(() => {
-        // Handle style application errors by rendering an error message
-        context.fillStyle = 'rgba(255,0,0,0.2)';
-        context.fillRect(0, 0, width, height);
-        context.fillStyle = 'red';
-        context.fillText('Error applying style', width / 2, height / 2);
-        // @ts-ignore
-        progress$.next([1, context.canvas, layerSpec.styleUrl]);
-        progress$.complete();
-      });
-
-    return progress$;
-  } catch (err) {
-    // Handle unexpected errors in the entire process
-    context.fillStyle = 'rgba(255,0,0,0.2)';
-    context.fillRect(0, 0, width, height);
-    context.fillStyle = 'red';
-    context.fillText('Vector tile error', width / 2, height / 2);
-    // @ts-ignore
-    progress$.next([1, context.canvas, 'Vector tile error']);
-    progress$.complete();
-    return progress$;
+    layer.setSource(source);
   }
+
+  let styleReadyPromise;
+  if (layerSpec.styleUrl) {
+    styleReadyPromise = fetch(layerSpec.styleUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch style: ${response.status} ${response.statusText}`,
+          );
+        }
+        return response.json();
+      })
+      .then((styleJson) => {
+        const spriteUrl = /** @type {string} */ (styleJson.sprite);
+        if (!spriteUrl.includes('://')) {
+          const newSpriteUrl = new URL(
+            layerSpec.styleUrl,
+            window.location.toString(),
+          );
+          newSpriteUrl.pathname += `/../${spriteUrl}`;
+          styleJson.sprite = newSpriteUrl.toString();
+        }
+        for (const source in styleJson.sources) {
+          const sourceObj = styleJson.sources[source];
+          const sourceUrl = /** @type {string} */ (sourceObj.url);
+          if (!sourceUrl.includes('://')) {
+            const newSourceUrl = new URL(
+              layerSpec.styleUrl,
+              window.location.toString(),
+            );
+            newSourceUrl.pathname += `/../${sourceUrl}`;
+            sourceObj.url = newSourceUrl.toString();
+          }
+        }
+
+        return applyStyle(layer, styleJson);
+      })
+      .then(() => {
+        source = layer.getSource();
+        source.setTileLoadFunction(tileLoadFunction);
+      });
+  } else if (layerSpec.style) {
+    styleReadyPromise = new OpenLayersParser()
+      .writeStyle(layerSpec.style)
+      .then(({ output: olStyle }) => {
+        layer.setStyle(olStyle);
+      })
+      .catch((error) => console.log(error));
+  } else {
+    styleReadyPromise = Promise.resolve();
+  }
+
+  return from(styleReadyPromise).pipe(
+    switchMap(() =>
+      createTiledLayer(jobId, source, rootFrameState, layerSpec.opacity, layer),
+    ),
+  );
 }
