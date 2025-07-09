@@ -52,6 +52,7 @@ export { downloadBlob } from './utils.js';
  * @property {string} imagerySet imagerySet name.
  * @property {string} apiKey apiKey of BingMaps (can be generated here : https://www.bingmapsportal.com/).
  * @property {string} culture Culture code (en-us as default).
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {string} [attribution] Attribution for the data used in the layer
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
