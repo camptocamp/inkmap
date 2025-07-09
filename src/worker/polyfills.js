@@ -9,6 +9,8 @@
 class Image extends OffscreenCanvas {
   constructor() {
     super(1, 1);
+    this.width = this.naturalWidth = 0;
+    this.height = this.naturalHeight = 0;
     this.src_ = null;
     this.loadPromiseResolver = null;
     this.loadPromiseRejecter = null;

@@ -221,7 +221,6 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
     .pipe(
       skipWhile(() => !styleReady),
       tap(() => {
-        console.log('rendering layer...');
         // try to render the layer on each update
         renderer.prepareFrame({ ...frameState, time: Date.now() });
         renderer.renderFrame(
@@ -233,17 +232,13 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
         const sourceLoaded = source.getState() === 'ready';
         const layerRendered = renderer.ready;
         if (sourceLoaded && layerRendered) {
-          console.log('layer renderer ready');
           progress$.next([1, context.canvas]);
           progress$.complete();
           updateSub.unsubscribe();
           cancelSub.unsubscribe();
-          return;
         } else if (sourceLoaded) {
-          console.log('source loaded, layer not fully rendered');
           progress$.next([0.75, context.canvas]);
         } else {
-          console.log('source not loaded');
           progress$.next([0.5, context.canvas]);
         }
       }),
