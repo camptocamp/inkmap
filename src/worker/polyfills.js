@@ -82,3 +82,6 @@ self.window = {
   devicePixelRatio: 1,
   location: self.location,
 };
+self.document = {
+  fonts: self.fonts,
+};

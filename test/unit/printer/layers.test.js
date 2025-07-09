@@ -15,6 +15,8 @@ import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
 } from '../../../__mocks__/ol/source/XYZ.js';
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js';
+import { applyStyle } from 'ol-mapbox-style';
+import VectorTileLayer from 'ol/layer/VectorTile';
 
 /** @type {import('ol/Map').FrameState} */
 const frameState = {
@@ -415,7 +417,147 @@ describe('layer creation', () => {
     });
   });
 
+  describe('VectorTile layer creation (without style json)', () => {
+    const jobId = 1;
+    /** @type {Layer} */
+    const spec = {
+      type: 'VectorTile',
+      url: '/VectorTileServer/tile/{z}/{y}/{x}.pbf',
+      style: {
+        name: 'Demo Style',
+        rules: [
+          {
+            name: 'Rule 1',
+            symbolizers: [
+              {
+                kind: 'Line',
+                color: 'blue',
+                width: 3,
+              },
+            ],
+          },
+        ],
+      },
+    };
+    let layer$;
+    let received;
+    let completed;
+
+    beforeEach(async () => {
+      completed = false;
+      layer$ = await createLayer(jobId, spec, { ...frameState });
+      layer$.subscribe(
+        (status) => (received = status),
+        console.error,
+        () => (completed = true),
+      );
+    });
+
+    it('initially emit a status with progress 0 (once style is parsed)', async () => {
+      await jest.advanceTimersByTimeAsync(500);
+      expect(received).toEqual([0, null]);
+    });
+
+    it('does not call applyStyle() from ol-mapbox-style', () => {
+      expect(applyStyle).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('VectorTile layer creation (with style json)', () => {
+    const jobId = 1;
+    /** @type {Layer} */
+    const spec = {
+      type: 'VectorTile',
+      styleUrl: 'http://localhost/VectorTileServer/style.json',
+    };
+    let layer$;
+    let received;
+    let completed;
+
+    describe('nominal style JSON', () => {
+      beforeEach(() => {
+        window.fetch = () =>
+          Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                version: 8,
+                sprite: 'http://localhost/VectorTileServer/sprite',
+                glyphs: '../fonts/{fontstack}/{range}.pbf',
+                sources: {
+                  esri: {
+                    type: 'vector',
+                    url: 'http://localhost/VectorTileServer/source.json',
+                  },
+                },
+                layers: [],
+              }),
+          });
+      });
+
+      beforeEach(async () => {
+        completed = false;
+        layer$ = await createLayer(jobId, spec, { ...frameState });
+        layer$.subscribe(
+          (status) => (received = status),
+          console.error,
+          () => (completed = true),
+        );
+      });
+
+      it('initially emit a status with progress 0', () => {
+        expect(received).toEqual([0, null]);
+      });
+
+      it('does call applyStyle() from ol-mapbox-style', () => {
+        expect(applyStyle).toHaveBeenCalled();
+      });
+    });
+
+    describe('style JSON containing relative paths', () => {
+      beforeEach(() => {
+        window.fetch = () =>
+          Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                version: 8,
+                sprite: './sprite',
+                glyphs: '../fonts/{fontstack}/{range}.pbf',
+                sources: {
+                  esri: {
+                    type: 'vector',
+                    url: './source.json',
+                  },
+                },
+                layers: [],
+              }),
+          });
+      });
+
+      beforeEach(async () => {
+        await createLayer(jobId, spec, { ...frameState }).subscribe();
+      });
+
+      it('does call applyStyle() with corrected URLs (not relative)', () => {
+        expect(applyStyle).toHaveBeenCalledWith(expect.any(VectorTileLayer), {
+          glyphs: '../fonts/{fontstack}/{range}.pbf',
+          layers: [],
+          sources: {
+            esri: {
+              type: 'vector',
+              url: 'http://localhost/VectorTileServer/source.json',
+            },
+          },
+          sprite: 'http://localhost/VectorTileServer/sprite',
+          version: 8,
+        });
+      });
+    });
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
+    jest.clearAllMocks();
   });
 });
