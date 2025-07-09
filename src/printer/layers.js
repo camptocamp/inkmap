@@ -708,7 +708,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
         .then((r) => {
           if (!r.ok) {
             throw new Error(
-              `Failed to fetch style: ${r.status} ${r.statusText}`
+              `Failed to fetch style: ${r.status} ${r.statusText}`,
             );
           }
           return r.json();
@@ -788,7 +788,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
                 spriteData,
                 spriteImageUrl,
                 // @ts-ignore
-                layerSpec.fontCallback || fontReplacer
+                layerSpec.fontCallback || fontReplacer,
               );
               styleApplied = true;
             } catch (_) {
@@ -810,7 +810,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
                   spriteData,
                   spriteImageUrl,
                   // @ts-ignore
-                  layerSpec.fontCallback || fontReplacer
+                  layerSpec.fontCallback || fontReplacer,
                 );
                 styleApplied = true;
               } catch (_) {
@@ -830,7 +830,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
                 spriteData,
                 spriteImageUrl,
                 // @ts-ignore
-                layerSpec.fontCallback || fontReplacer
+                layerSpec.fontCallback || fontReplacer,
               );
               styleApplied = true;
             } catch (_) {
@@ -846,7 +846,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
     cancel$
       .pipe(
         filter((canceledJobId) => canceledJobId === jobId),
-        take(1)
+        take(1),
       )
       .subscribe(() => {
         progress$.next([-1, null, undefined]);
@@ -898,7 +898,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
 
                 // Continue while loading or for minimum iterations
                 return tilesLoading > 0 || index < 5;
-              }, true)
+              }, true),
             )
             .subscribe({
               next: () => {

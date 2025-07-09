@@ -77,15 +77,19 @@ async function startBrowser() {
       (process.platform === 'win32'
         ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
         : process.platform === 'darwin'
-        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        : '/usr/bin/google-chrome'),
+          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+          : '/usr/bin/google-chrome'),
     ignoreDefaultArgs: ['--disable-extensions'],
     args: [],
   };
 
   // Add --no-sandbox for CI environments
   if (process.env.CI || process.env.GITHUB_ACTIONS) {
-    launchOptions.args.push('--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage');
+    launchOptions.args.push(
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+    );
   }
 
   try {
