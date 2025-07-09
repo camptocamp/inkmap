@@ -15,8 +15,23 @@
               {
                 "kind": "Line",
                 "color": "blue",
-                "width": 3,
-                "opacity": 0.7
+                "width": 3
+              },
+              {
+                "kind": "Fill",
+                "color": "orange"
+              },
+              {
+                "kind": "Icon",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Parking_icon.svg/128px-Parking_icon.svg.png",
+                "size": 12,
+                "offset": [0, 22]
+              },
+              {
+                "kind": "Mark",
+                "wellKnownName": "circle",
+                "color": "red",
+                "radius": 8
               }
             ]
           }
@@ -24,9 +39,9 @@
       }
     }
   ],
-  "size": [800, 600],
-  "center": [-80.419202, 43.398141],
-  "dpi": 200,
-  "scale": 400000,
+  "size": [256, 256],
+  "center": [8.2, 49.1],
+  "dpi": 120,
+  "scale": 3000000,
   "projection": "EPSG:3857"
 }

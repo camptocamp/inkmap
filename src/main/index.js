@@ -52,6 +52,7 @@ export { downloadBlob } from './utils.js';
  * @property {string} imagerySet imagerySet name.
  * @property {string} apiKey apiKey of BingMaps (can be generated here : https://www.bingmapsportal.com/).
  * @property {string} culture Culture code (en-us as default).
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible).
  * @property {string} [attribution] Attribution for the data used in the layer
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
@@ -61,6 +62,7 @@ export { downloadBlob } from './utils.js';
  * @property {'GeoJSON'} type
  * @property {Object} geojson Feature collection in GeoJSON format; coordinates are expected to be in the print job reference system
  * @property {Object} style JSON object in geostyler notation, defining the layer style.
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible)
  * @property {string} [attribution] Attribution for the data used in the layer
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */
@@ -89,6 +91,7 @@ export { downloadBlob } from './utils.js';
  * @property {string} version Version of WFS protocol used: `1.0.0`, `1.1.0` (default) or `2.0.0`.
  * @property {string} format Format used when querying WFS, `gml` (default) or `geojson`. inkmap determines the GML parser based on the WFS version used.
  * @property {Object} style JSON object in geostyler notation, defining the layer style.
+ * @property {number} opacity Opacity, from 0 (hidden) to 1 (visible)
  * @property {string} [attribution] Attribution for the data used in the layer
  * @property {boolean} [legend=false] Whether a legend should be created for this layer.
  */

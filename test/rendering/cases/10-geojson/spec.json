@@ -11,8 +11,19 @@
             "symbolizers": [
               {
                 "kind": "Line",
-                "color": "black",
-                "width": 5
+                "color": "blue",
+                "width": 1
+              },
+              {
+                "kind": "Icon",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Parking_icon.svg/128px-Parking_icon.svg.png",
+                "size": 12
+              },
+              {
+                "kind": "Text",
+                "label": "{{name}}",
+                "size": 12,
+                "offset": [0, -20]
               }
             ]
           }
@@ -30,7 +41,9 @@
         "features": [
           {
             "type": "Feature",
-            "properties": {},
+            "properties": {
+              "name": "France"
+            },
             "geometry": {
               "type": "MultiPolygon",
               "coordinates": [
@@ -279,6 +292,36 @@
                   ]
                 ]
               ]
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [262943.377301, 6250714.425049]
+            },
+            "properties": {
+              "name": "Paris"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [534447.70177, 5738280.587425]
+            },
+            "properties": {
+              "name": "Lyon"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [595597.324398, 5353037.964867]
+            },
+            "properties": {
+              "name": "Marseille"
             }
           }
         ]

@@ -9,8 +9,9 @@
 class Image extends OffscreenCanvas {
   constructor() {
     super(1, 1);
+    this.width = this.naturalWidth = 0;
+    this.height = this.naturalHeight = 0;
     this.src_ = null;
-    this.hintImageSize(1, 1);
     this.loadPromiseResolver = null;
     this.loadPromiseRejecter = null;
     this.loadPromise = new Promise((resolve, reject) => {
@@ -19,23 +20,14 @@ class Image extends OffscreenCanvas {
     });
   }
 
-  // this is a new API, required because we cannot guess an image size
-  // simply from the blob received by `fetch`
-  hintImageSize(width, height) {
-    this.width = width;
-    this.height = height;
-    this.naturalWidth = width;
-    this.naturalHeight = height;
-  }
-
   // setting `src` will trigger a loading of the image and a trigger of a `load` event eventually
   set src(url) {
     fetch(url)
       .then((response) => response.blob())
-      .then((blob) => {
-        return createImageBitmap(blob);
-      })
+      .then((blob) => createImageBitmap(blob))
       .then((imageData) => {
+        this.width = this.naturalWidth = imageData.width;
+        this.height = this.naturalHeight = imageData.height;
         const ctx = this.getContext('2d');
         ctx.drawImage(imageData, 0, 0);
         return this.loadPromiseResolver();

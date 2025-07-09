@@ -8,6 +8,7 @@ export default class LayerMock {
     return {
       renderFrame() {},
       prepareFrame() {},
+      ready: true
     };
   }
   setSource(source) {
