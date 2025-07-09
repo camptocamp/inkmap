@@ -35,6 +35,9 @@ import {
 import OpenLayersParser from 'geostyler-openlayers-parser';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 
+const blankSrc =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 const update$ = interval(500);
 export const cancel$ = new Subject();
 
@@ -64,7 +67,7 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
     case 'WFS':
       return createLayerWFS(jobId, layerSpec, rootFrameState);
     case 'GeoJSON':
-      return createLayerGeoJSON(layerSpec, rootFrameState);
+      return createLayerGeoJSON(jobId, layerSpec, rootFrameState);
     case 'BingMaps':
       // @ts-ignore
       return createLayerBingMaps(jobId, layerSpec, rootFrameState);
@@ -234,6 +237,7 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
           progress$.next([1, context.canvas]);
           progress$.complete();
           updateSub.unsubscribe();
+          cancelSub.unsubscribe();
           return;
         } else if (sourceLoaded) {
           console.log('source loaded, layer not fully rendered');
@@ -246,7 +250,7 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
     )
     .subscribe();
 
-  cancel$
+  const cancelSub = cancel$
     .pipe(
       filter((canceledJobId) => canceledJobId === jobId),
       take(1),
@@ -254,9 +258,93 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
         progress$.next([-1, null]);
         progress$.complete();
         updateSub.unsubscribe();
+        cancelSub.unsubscribe();
       }),
     )
     .subscribe();
+
+  return progress$;
+}
+
+/**
+ * @param {number} jobId
+ * @param {import('ol/source/Image').default} source
+ * @param {import('ol/Map').FrameState} rootFrameState
+ * @param {number} [opacity=1]
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
+ */
+function createImageLayer(jobId, source, rootFrameState, opacity) {
+  const width = rootFrameState.size[0];
+  const height = rootFrameState.size[1];
+  const context = createCanvasContext2D(width, height);
+  // @ts-ignore
+  context.canvas.style = {};
+  let frameState;
+  let layer;
+  let renderer;
+
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
+  const progress$ = new BehaviorSubject([0, null, undefined]);
+  layer = new ImageLayer({
+    source,
+  });
+
+  let isCancelled = false;
+  const cancelSub = cancel$
+    .pipe(
+      filter((canceledJobId) => canceledJobId === jobId),
+      take(1),
+      tap(() => {
+        progress$.next([-1, null, undefined]);
+        progress$.complete();
+        isCancelled = true;
+        cancelSub.unsubscribe();
+      }),
+    )
+    .subscribe();
+
+  if (
+    'setImageLoadFunction' in source &&
+    typeof source.setImageLoadFunction === 'function' &&
+    'getImageLoadFunction' in source &&
+    typeof source.getImageLoadFunction === 'function'
+  ) {
+    const originalFn = /** @type {import("ol/Image").LoadFunction} */ (
+      source.getImageLoadFunction()
+    )
+    source.setImageLoadFunction(function (layerImage, src) {
+      /** @type {HTMLImageElement} */
+      const image = /** @type {any} */ (layerImage).getImage();
+
+      if (isCancelled) {
+        image.src = blankSrc;
+        return;
+      }
+
+      originalFn(layerImage, src);
+    });
+  }
+
+  frameState = makeLayerFrameState(rootFrameState, layer, opacity);
+
+  renderer = layer.getRenderer();
+  // @ts-ignore
+  renderer.useContainer = useContainer.bind(renderer, context);
+
+  source.once('imageloaderror', function (e) {
+    const imageLoadErrorUrl = e.target.getUrl();
+    progress$.next([1, context.canvas, imageLoadErrorUrl]);
+    progress$.complete();
+    cancelSub.unsubscribe();
+  });
+  source.once('imageloadend', () => {
+    renderer.prepareFrame({ ...frameState, time: Date.now() });
+    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+    progress$.next([1, context.canvas, undefined]);
+    progress$.complete();
+    cancelSub.unsubscribe();
+  });
+  renderer.prepareFrame({ ...frameState, time: Date.now() });
 
   return progress$;
 }
@@ -301,68 +389,13 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     );
   }
 
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
-  let frameState;
-  let layer;
-  let renderer;
-
-  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
-  const progress$ = new BehaviorSubject([0, null, undefined]);
-
   const source = new ImageWMS({
     crossOrigin: 'anonymous',
     url: layerSpec.url,
     params: getWMSParams(layerSpec),
     ratio: 1,
   });
-  layer = new ImageLayer({
-    source,
-  });
-  source.setImageLoadFunction(function (layerImage, src) {
-    /** @type {HTMLImageElement} */
-    const image = /** @type {any} */ (layerImage).getImage();
-
-    const blankSrc =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-    cancel$
-      .pipe(
-        filter((canceledJobId) => canceledJobId === jobId),
-        take(1),
-        tap(() => {
-          progress$.next([-1, null, undefined]);
-          progress$.complete();
-          image.src = blankSrc;
-        }),
-      )
-      .subscribe();
-
-    image.src = src;
-  });
-
-  frameState = makeLayerFrameState(rootFrameState, layer, layerSpec.opacity);
-
-  renderer = layer.getRenderer();
-  // @ts-ignore
-  renderer.useContainer = useContainer.bind(renderer, context);
-
-  layer.getSource().once('imageloaderror', function (e) {
-    const imageLoadErrorUrl = e.target.getUrl();
-    progress$.next([1, context.canvas, imageLoadErrorUrl]);
-    progress$.complete();
-  });
-  layer.getSource().once('imageloadend', () => {
-    renderer.prepareFrame({ ...frameState, time: Date.now() });
-    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
-    progress$.next([1, context.canvas, undefined]);
-    progress$.complete();
-  });
-  renderer.prepareFrame({ ...frameState, time: Date.now() });
-
-  return progress$;
+  return createImageLayer(jobId, source, rootFrameState, layerSpec.opacity);
 }
 
 /**
@@ -537,7 +570,7 @@ async function createBingMapsSource(layerSpec) {
  * @param {number} jobId
  * @param {import('../main/index.js').BingMapsLayer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
- * @return Observable<LayerPrintStatus>
+ * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
   return fromPromise(createBingMapsSource(layerSpec)).pipe(
@@ -554,64 +587,9 @@ function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
-  const width = rootFrameState.size[0];
-  const height = rootFrameState.size[1];
-  const context = createCanvasContext2D(width, height);
-  // @ts-ignore
-  context.canvas.style = {};
-  let frameState;
-  let layer;
-  let renderer;
-
   const source = new ImageArcGISRest({
     ...layerSpec,
     crossOrigin: 'anonymous',
   });
-  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
-  const progress$ = new BehaviorSubject([0, null, undefined]);
-
-  layer = new ImageLayer({
-    source: source,
-  });
-  source.setImageLoadFunction(function (layerImage, src) {
-    /** @type {HTMLImageElement} */
-    const image = /** @type {any} */ (layerImage).getImage();
-
-    const blankSrc =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-    cancel$
-      .pipe(
-        filter((canceledJobId) => canceledJobId === jobId),
-        take(1),
-        tap(() => {
-          progress$.next([-1, null, undefined]);
-          progress$.complete();
-          image.src = blankSrc;
-        }),
-      )
-      .subscribe();
-
-    image.src = src;
-  });
-
-  frameState = makeLayerFrameState(rootFrameState, layer, layerSpec.opacity);
-
-  renderer = layer.getRenderer();
-  // @ts-ignore
-  renderer.useContainer = useContainer.bind(renderer, context);
-
-  layer.getSource().once('imageloaderror', function (e) {
-    const imageLoadErrorUrl = e.target.getUrl();
-    progress$.next([1, context.canvas, imageLoadErrorUrl]);
-    progress$.complete();
-  });
-  layer.getSource().once('imageloadend', () => {
-    renderer.prepareFrame({ ...frameState, time: Date.now() });
-    renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
-    progress$.next([1, context.canvas, undefined]);
-    progress$.complete();
-  });
-  renderer.prepareFrame({ ...frameState, time: Date.now() });
-
-  return progress$;
+  return createImageLayer(jobId, source, rootFrameState, layerSpec.opacity);
 }
