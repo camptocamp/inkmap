@@ -15,8 +15,6 @@ import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
 } from '../../../__mocks__/ol/source/XYZ.js';
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js';
-import { waitForPromises } from '../utils.js';
-import { defer } from 'rxjs';
 
 /** @type {import('ol/Map').FrameState} */
 const frameState = {
@@ -54,6 +52,7 @@ export class SourceEventMock {
 }
 
 jest.useFakeTimers();
+
 describe('layer creation', () => {
   describe('XYZ layer creation', () => {
     const jobId = 1;
@@ -362,9 +361,34 @@ describe('layer creation', () => {
       type: 'GeoJSON',
       geojson: {
         type: 'FeatureCollection',
-        features: [],
+        features: [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [0, 0],
+            },
+            properties: {
+              name: 'Test Point',
+            },
+          },
+        ],
       },
-      style: {},
+      style: {
+        name: 'Demo Style',
+        rules: [
+          {
+            name: 'Rule 1',
+            symbolizers: [
+              {
+                kind: 'Line',
+                color: 'blue',
+                width: 3,
+              },
+            ],
+          },
+        ],
+      },
     };
     let layer$;
     let received;
@@ -384,9 +408,8 @@ describe('layer creation', () => {
       expect(received).toEqual([0, null]);
     });
 
-    it('when style is ready after 10 ms, canvas is received', async () => {
-      jest.advanceTimersByTime(10);
-      await waitForPromises();
+    it('after waiting the layer completes', async () => {
+      await jest.advanceTimersByTimeAsync(2000);
       expect(received).toEqual([1, expect.anything()]);
       expect(completed).toBeTruthy();
     });

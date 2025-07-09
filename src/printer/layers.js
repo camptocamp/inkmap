@@ -237,9 +237,9 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
           updateSub.unsubscribe();
           cancelSub.unsubscribe();
         } else if (sourceLoaded) {
-          progress$.next([0.75, context.canvas]);
+          progress$.next([0.75, null]);
         } else {
-          progress$.next([0.5, context.canvas]);
+          progress$.next([0.5, null]);
         }
       }),
     )
