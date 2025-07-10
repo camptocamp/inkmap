@@ -5,6 +5,8 @@ import BingMaps from 'ol/source/BingMaps';
 import { quadKey } from 'ol/source/BingMaps';
 import ImageWMS from 'ol/source/ImageWMS';
 import TileWMS from 'ol/source/TileWMS';
+import MVT from 'ol/format/MVT';
+
 import WFS from 'ol/format/WFS';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
@@ -13,7 +15,7 @@ import VectorLayer from 'ol/layer/Vector';
 import ImageArcGISRest from 'ol/source/ImageArcGISRest';
 import { bbox } from 'ol/loadingstrategy';
 import { createCanvasContext2D } from 'ol/dom';
-import { BehaviorSubject, interval, merge, Subject } from 'rxjs';
+import { BehaviorSubject, from, interval, merge, Subject } from 'rxjs';
 import {
   filter,
   map,
@@ -33,7 +35,9 @@ import {
   useContainer,
 } from './utils.js';
 import OpenLayersParser from 'geostyler-openlayers-parser';
-import { fromPromise } from 'rxjs/internal/observable/innerFrom';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
+import { applyStyle } from 'ol-mapbox-style';
 
 const blankSrc =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -73,37 +77,35 @@ export function createLayer(jobId, layerSpec, rootFrameState) {
       return createLayerBingMaps(jobId, layerSpec, rootFrameState);
     case 'ImageArcGISRest':
       return createLayerImageArcGISRest(jobId, layerSpec, rootFrameState);
+    case 'VectorTile':
+      return createLayerVectorTile(jobId, layerSpec, rootFrameState);
   }
 }
 
 /**
  * @param {number} jobId
- * @param {import('ol/source/TileImage').default} source
+ * @param {import('ol/source/TileImage').default|import('ol/source/VectorTile').default} source
  * @param {import('ol/Map').FrameState} rootFrameState
  * @param {number} [opacity=1]
+ * @param {import('ol/layer/Layer').default} [layer] Predefined layer (if any)
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
-function createTiledLayer(jobId, source, rootFrameState, opacity) {
+function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
   const width = rootFrameState.size[0];
   const height = rootFrameState.size[1];
   const context = createCanvasContext2D(width, height);
   // @ts-ignore
   context.canvas.style = {};
   let frameState;
-  let layer;
   let renderer;
   let tileLoadErrorUrl;
 
-  layer = new TileLayer({
-    source,
-  });
-  source.setTileLoadFunction(function (tile, src) {
-    /** @type {HTMLImageElement} */
-    const image = /** @type {any} */ (tile).getImage();
-    image.src = src;
-  });
-
-  layer.getSource().on('tileloaderror', function (e) {
+  layer =
+    layer ??
+    new TileLayer({
+      source,
+    });
+  source.on('tileloaderror', function (e) {
     tileLoadErrorUrl = e.target.getUrls()[0];
   });
 
@@ -568,7 +570,7 @@ async function createBingMapsSource(layerSpec) {
  * @return {import('rxjs').Observable<LayerPrintStatus>}
  */
 function createLayerBingMaps(jobId, layerSpec, rootFrameState) {
-  return fromPromise(createBingMapsSource(layerSpec)).pipe(
+  return from(createBingMapsSource(layerSpec)).pipe(
     switchMap((source) =>
       createTiledLayer(jobId, source, rootFrameState, layerSpec.opacity),
     ),
@@ -587,4 +589,105 @@ function createLayerImageArcGISRest(jobId, layerSpec, rootFrameState) {
     crossOrigin: 'anonymous',
   });
   return createImageLayer(jobId, source, rootFrameState, layerSpec.opacity);
+}
+
+/**
+ * Creates a vector tile layer and handles its rendering process
+ * @param {number} jobId - Unique identifier for the print job
+ * @param {import('../main/index.js').VectorTileLayer} layerSpec - Vector tile layer configuration
+ * @param {import('ol/Map').FrameState} rootFrameState - Frame state from the root map
+ * @return {import('rxjs').Observable<LayerPrintStatus>} Observable emitting layer print status
+ */
+function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
+  const tileLoadFunction =
+    /** @type {function(import('ol/VectorTile').default,string): void} */ (
+      function (tile, url) {
+        tile.setLoader(async (extent, resolution, projection) => {
+          const data = await fetch(url)
+            .then((response) => response.arrayBuffer())
+            .catch(() => tile.setState('error'));
+          const format = tile.getFormat();
+          const features = format.readFeatures(data, {
+            extent: extent,
+            featureProjection: projection,
+          });
+          tile.setFeatures(features);
+        });
+      }
+    );
+
+  const layer = new VectorTileLayer({});
+  /** @type {VectorTileSource} */
+  let source;
+
+  if (!layerSpec.styleUrl) {
+    source = new VectorTileSource({
+      format: new MVT(), // Mapbox Vector Tile format
+      url: layerSpec.url, // URL with tile template placeholders {z}/{x}/{y}.pbf
+      // @ts-ignore - crossOrigin is valid but not in typedefs
+      crossOrigin: 'anonymous',
+      maxZoom: layerSpec.maxZoom || 14,
+      minZoom: layerSpec.minZoom || 0,
+      projection: rootFrameState.viewState.projection,
+      tileLoadFunction,
+    });
+    layer.setSource(source);
+  }
+
+  let styleReadyPromise;
+  if (layerSpec.styleUrl) {
+    styleReadyPromise = fetch(layerSpec.styleUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch style: ${response.status} ${response.statusText}`,
+          );
+        }
+        return response.json();
+      })
+      .then((styleJson) => {
+        const spriteUrl = /** @type {string} */ (styleJson.sprite);
+        if (!spriteUrl.includes('://')) {
+          const newSpriteUrl = new URL(
+            layerSpec.styleUrl,
+            window.location.toString(),
+          );
+          newSpriteUrl.pathname += `/../${spriteUrl}`;
+          styleJson.sprite = newSpriteUrl.toString();
+        }
+        for (const source in styleJson.sources) {
+          const sourceObj = styleJson.sources[source];
+          const sourceUrl = /** @type {string} */ (sourceObj.url);
+          if (!sourceUrl.includes('://')) {
+            const newSourceUrl = new URL(
+              layerSpec.styleUrl,
+              window.location.toString(),
+            );
+            newSourceUrl.pathname += `/../${sourceUrl}`;
+            sourceObj.url = newSourceUrl.toString();
+          }
+        }
+
+        return applyStyle(layer, styleJson);
+      })
+      .then(() => {
+        source = layer.getSource();
+        source.setTileLoadFunction(tileLoadFunction);
+      });
+  } else if (layerSpec.style) {
+    styleReadyPromise = new OpenLayersParser()
+      .writeStyle(layerSpec.style)
+      .then(({ output: olStyle }) => {
+        layer.setStyle(olStyle);
+      })
+      .catch((error) => console.log(error));
+  } else {
+    styleReadyPromise = Promise.resolve();
+  }
+
+  return from(styleReadyPromise).pipe(
+    switchMap(() =>
+      createTiledLayer(jobId, source, rootFrameState, layerSpec.opacity, layer),
+    ),
+  );
 }

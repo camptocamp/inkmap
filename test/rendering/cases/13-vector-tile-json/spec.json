@@ -1,0 +1,19 @@
+{
+  "layers": [
+    {
+      "type": "VectorTile",
+      "styleUrl": "/VectorTileServer/style.json",
+      "opacity": 1
+    }
+  ],
+  "size": [256, 256],
+  "center": [12, 48],
+  "dpi": 50,
+  "scale": 40000000,
+  "scaleBar": {
+    "position": "bottom-left",
+    "units": "metric"
+  },
+  "projection": "EPSG:3857",
+  "northArrow": "top-right"
+}

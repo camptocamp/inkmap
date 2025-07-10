@@ -218,6 +218,19 @@ Additional options for `ImageArcGISRest` layer type.
 | `tiled` | `boolean` | Indicates whether the WMS layer should be requested as tiles. Defaults to `false`. |
 | `params` | `object` | ArcGIS Rest parameters. This field is optional. |
 
+#### `VectorTile layer` type
+
+Options for `VectorTile` layer type.
+
+| field | type | description |
+|---|---|---|
+| `url` | `string` | URL template for vector tiles with placeholders {z}/{y}/{x}.pbf |
+| `styleUrl` | `string` | URL to a MapBox GL style JSON file used to style the vector tiles |
+| `maxZoom` | `number` | Maximum zoom level for the tile source (optional, default: 14) |
+| `minZoom` | `number` | Minimum zoom level for the tile source (optional, default: 0) |
+| `declutter` | `boolean` | Whether to declutter features (optional, default: true) |
+| `renderMode` | `string` | Render mode for vector tiles ('hybrid', 'image', 'vector') (optional, default: 'hybrid') |
+
 #### `BingMaps layer` type
 
 Options for `BingMaps` layer type. (Doesn't work with URL)

@@ -69,12 +69,43 @@ let resolver, rejecter;
 let failed = false;
 
 async function startBrowser() {
-  browser = await puppeteer.launch({
+  const launchOptions = {
     headless: !options.argv.interactive,
-    args: process.env.CI
-      ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-      : [],
-  });
+    // Try to use an existing Chrome installation if Chromium download failed
+    executablePath:
+      process.env.CHROME_PATH ||
+      (process.platform === 'win32'
+        ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+        : process.platform === 'darwin'
+          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+          : '/usr/bin/google-chrome'),
+    ignoreDefaultArgs: ['--disable-extensions'],
+    args: [],
+  };
+
+  // Add --no-sandbox for CI environments
+  if (process.env.CI || process.env.GITHUB_ACTIONS) {
+    launchOptions.args.push(
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+    );
+  }
+
+  try {
+    browser = await puppeteer.launch(launchOptions);
+  } catch (error) {
+    console.error('Failed to launch browser with specified path:', error);
+    console.log('Attempting to launch with default configuration...');
+    browser = await puppeteer.launch({
+      headless: !options.argv.interactive,
+      args:
+        process.env.CI || process.env.GITHUB_ACTIONS
+          ? ['--no-sandbox', '--disable-setuid-sandbox']
+          : [],
+    });
+  }
+
   page = await browser.newPage();
   page.on('error', (err) => {
     console.error('page crash', err);
