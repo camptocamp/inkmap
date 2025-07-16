@@ -205,6 +205,7 @@ describe('layer creation', () => {
         url: 'https://my.url/wms',
         layer: 'SOME_LAYER',
         opacity: 0.4,
+        projection: 'EPSG:6870',
       };
       let layer$;
       let received;
@@ -252,6 +253,7 @@ describe('layer creation', () => {
         layer: 'SOME_LAYER',
         opacity: 0.4,
         tiled: true,
+        projection: 'EPSG:6870',
       };
       let layer$;
       let received;
