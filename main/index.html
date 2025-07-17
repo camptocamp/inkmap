@@ -232,7 +232,7 @@ btn.addEventListener(&#39;click&#39;, async () =&gt; {
   // download the result
   doc.save(&#39;inkmap.pdf&#39;);
 });
-</code></pre></div></div></div><div class="mt-5" id="example-06"><h2>Using projections</h2><p><strong>inkmap</strong> supports a large amount of projections for rendering the map. Projections can be defined and registered using <code>registerProjection</code>. If the map projection is not registered, <strong>inkmap</strong> will look it up on <a href="https://epsg.io/">epsg.io</a>.</p><p>Under the hood, <strong>inkmap</strong> uses <a href="http://proj4js.org/">proj4js</a>.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-06-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-06-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-06-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false" select="North pole, arctic projection (WMS)"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div><div class="tab-pane example-06-source"><pre class="rounded small"><code class="js">import { downloadBlob, print, registerProjection } from &#39;@camptocamp/inkmap&#39;;
+</code></pre></div></div></div><div class="mt-5" id="example-06"><h2>Using projections</h2><p><strong>inkmap</strong> supports rendering maps in many different projections. Projections can be defined using the <code>projectionDefinitions</code> field of a spec. If a projection is not defined in the spec but still needed for rendering, <strong>inkmap</strong> will look it up on <a href="https://epsg.io/">epsg.io</a>. This only works for projections with an EPSG code!</p><p>Under the hood, <strong>inkmap</strong> uses <a href="http://proj4js.org/">proj4js</a>.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-06-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-06-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-06-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false" select="Custom local projection (WMS)"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div><div class="tab-pane example-06-source"><pre class="rounded small"><code class="js">import { downloadBlob, print } from &#39;@camptocamp/inkmap&#39;;
 
 const root = document.getElementById(&#39;example-06&#39;);
 const btn = /** @type {CustomButton} */ root.querySelector(&#39;custom-button&#39;);
@@ -243,14 +243,6 @@ spec.onValidityCheck((valid) =&gt; (btn.enabled = valid));
 
 btn.addEventListener(&#39;click&#39;, async () =&gt; {
   btn.showSpinner();
-
-  // registers the projection EPSG:2154
-  registerProjection({
-    name: &#39;EPSG:2154&#39;,
-    bbox: [51.56, -9.86, 41.15, 10.38],
-    proj4:
-      &#39;+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs&#39;,
-  });
 
   // create a job, get a promise that resolves when the job is finished
   const blob = await print(spec.value);
