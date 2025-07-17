@@ -1,0 +1,18 @@
+{
+  "layers": [
+    {
+      "type": "XYZ",
+      "url": "/arcgis-tiles/{z}/{x}/{y}.png"
+    }
+  ],
+  "size": [256, 256],
+  "center": [0, 89],
+  "dpi": 50,
+  "scale": 20000000,
+  "scaleBar": {
+    "position": "bottom-left",
+    "units": "metric"
+  },
+  "projection": "EPSG:3413",
+  "northArrow": "top-right"
+}

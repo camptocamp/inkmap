@@ -7,16 +7,16 @@ import { generateGetFeatureUrl } from '../../../src/printer/utils.js';
 import ImageWMSSourceMock, {
   triggerLoadEnd,
   triggerLoadError,
-} from '../../../__mocks__/ol/source/ImageWMS.js';
+} from '../../../__mocks__/ol/source/ImageWMS.js.js';
 import TileWMSSourceMock, {
   triggerLoadError as triggerTileWMSError,
-} from '../../../__mocks__/ol/source/TileWMS.js';
+} from '../../../__mocks__/ol/source/TileWMS.js.js';
 import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
 } from '../../../__mocks__/ol/source/XYZ.js';
-import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js';
+import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js.js';
 import { applyStyle } from 'ol-mapbox-style';
-import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileLayer from 'ol/layer/VectorTile.js';
 
 /** @type {import('ol/Map').FrameState} */
 const frameState = {

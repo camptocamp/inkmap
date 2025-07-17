@@ -1,34 +1,9 @@
-import { applyTransform } from 'ol/extent';
-import { get as getProjection, getTransform } from 'ol/proj';
-import { register } from 'ol/proj/proj4';
+import { applyTransform } from 'ol/extent.js';
+import { get as getProjection, getTransform } from 'ol/proj.js';
+import { register } from 'ol/proj/proj4.js';
 import proj4 from 'proj4';
 
-export async function search(query) {
-  const response = await fetch('https://epsg.io/?format=json&q=' + query);
-  const json = await response.json();
-
-  const results = json['results'];
-  if (results && results.length > 0) {
-    for (let i = 0, ii = results.length; i < ii; i++) {
-      const result = results[i];
-      if (result) {
-        const code = result['code'];
-        const proj4def = result['proj4'];
-        const bbox = result['bbox'];
-        if (
-          code &&
-          code.length > 0 &&
-          proj4def &&
-          proj4def.length > 0 &&
-          bbox &&
-          bbox.length == 4
-        ) {
-          return { name: 'EPSG:' + code, proj4def, bbox };
-        }
-      }
-    }
-  }
-}
+register(proj4);
 
 /**
  * @param {string} name Projection name written as `prefix:code`.

@@ -289,11 +289,13 @@
       <div class="mt-5" id="example-06">
         <h2>Using projections</h2>
         <p>
-          <strong>inkmap</strong> supports a large amount of projections for
-          rendering the map. Projections can be defined and registered using
-          <code>registerProjection</code>. If the map projection is not
-          registered, <strong>inkmap</strong> will look it up on
-          <a href="https://epsg.io/">epsg.io</a>.
+          <strong>inkmap</strong> supports rendering maps in many different
+          projections. Projections can be defined using the
+          <code>projectionDefinitions</code> field of a spec. If a projection is
+          not defined in the spec but still needed for rendering,
+          <strong>inkmap</strong> will look it up on
+          <a href="https://epsg.io/">epsg.io</a>. This only works for
+          projections with an EPSG code!
         </p>
         <p>
           Under the hood, <strong>inkmap</strong> uses
@@ -320,7 +322,7 @@
               <print-spec
                 class="col-8"
                 expanded="false"
-                select="North pole, arctic projection (WMS)"
+                select="Custom local projection (WMS)"
               ></print-spec>
               <custom-button class="col-3"> Generate! </custom-button>
             </div>

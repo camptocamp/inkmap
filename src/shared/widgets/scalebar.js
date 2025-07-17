@@ -1,4 +1,4 @@
-import { fromLonLat, getPointResolution, METERS_PER_UNIT } from 'ol/proj';
+import { fromLonLat, getPointResolution, METERS_PER_UNIT } from 'ol/proj.js';
 import { applyWidgetPositionTransform } from './position.js';
 import {
   pixelToRealWorld,

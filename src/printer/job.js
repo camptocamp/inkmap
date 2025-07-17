@@ -1,4 +1,4 @@
-import { createCanvasContext2D } from 'ol/dom';
+import { createCanvasContext2D } from 'ol/dom.js';
 import { combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 

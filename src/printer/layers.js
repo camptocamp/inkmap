@@ -1,20 +1,18 @@
-import TileLayer from 'ol/layer/Tile';
-import WMTS from 'ol/source/WMTS';
-import XYZ from 'ol/source/XYZ';
-import BingMaps from 'ol/source/BingMaps';
-import { quadKey } from 'ol/source/BingMaps';
-import ImageWMS from 'ol/source/ImageWMS';
-import TileWMS from 'ol/source/TileWMS';
-import MVT from 'ol/format/MVT';
-
-import WFS from 'ol/format/WFS';
-import GeoJSON from 'ol/format/GeoJSON';
-import VectorSource from 'ol/source/Vector';
-import ImageLayer from 'ol/layer/Image';
-import VectorLayer from 'ol/layer/Vector';
-import ImageArcGISRest from 'ol/source/ImageArcGISRest';
-import { bbox } from 'ol/loadingstrategy';
-import { createCanvasContext2D } from 'ol/dom';
+import TileLayer from 'ol/layer/Tile.js';
+import WMTS from 'ol/source/WMTS.js';
+import XYZ from 'ol/source/XYZ.js';
+import BingMaps, { quadKey } from 'ol/source/BingMaps.js';
+import ImageWMS from 'ol/source/ImageWMS.js';
+import TileWMS from 'ol/source/TileWMS.js';
+import MVT from 'ol/format/MVT.js';
+import WFS from 'ol/format/WFS.js';
+import GeoJSON from 'ol/format/GeoJSON.js';
+import VectorSource from 'ol/source/Vector.js';
+import ImageLayer from 'ol/layer/Image.js';
+import VectorLayer from 'ol/layer/Vector.js';
+import ImageArcGISRest from 'ol/source/ImageArcGISRest.js';
+import { bbox } from 'ol/loadingstrategy.js';
+import { createCanvasContext2D } from 'ol/dom.js';
 import { BehaviorSubject, from, interval, merge, Subject } from 'rxjs';
 import {
   filter,
@@ -27,16 +25,16 @@ import {
   tap,
   throttleTime,
 } from 'rxjs/operators';
-import WMTSTileGrid from 'ol/tilegrid/WMTS';
-import { extentFromProjection } from 'ol/tilegrid';
+import WMTSTileGrid from 'ol/tilegrid/WMTS.js';
+import { extentFromProjection } from 'ol/tilegrid.js';
 import {
   generateGetFeatureUrl,
   makeLayerFrameState,
   useContainer,
 } from './utils.js';
 import OpenLayersParser from 'geostyler-openlayers-parser';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import VectorTileSource from 'ol/source/VectorTile';
+import VectorTileLayer from 'ol/layer/VectorTile.js';
+import VectorTileSource from 'ol/source/VectorTile.js';
 import { applyStyle } from 'ol-mapbox-style';
 
 const blankSrc =
@@ -380,7 +378,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
         url: layerSpec.url,
         params: getWMSParams(layerSpec),
         transition: 0,
-        projection: layerSpec.projection ? layerSpec.projection : undefined,
+        ...(layerSpec.projection ? { projection: layerSpec.projection } : {}),
       }),
       rootFrameState,
       layerSpec.opacity,
@@ -392,7 +390,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     url: layerSpec.url,
     params: getWMSParams(layerSpec),
     ratio: 1,
-    projection: layerSpec.projection ? layerSpec.projection : undefined,
+    ...(layerSpec.projection ? { projection: layerSpec.projection } : {}),
   });
   return createImageLayer(jobId, source, rootFrameState, layerSpec.opacity);
 }
