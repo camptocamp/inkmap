@@ -1,16 +1,13 @@
 import { isWorker } from '../worker/utils.js';
 import { from, Observable } from 'rxjs';
 import { fromLonLat, get as getProjection } from 'ol/proj';
-import {
-  registerWithExtent,
-  search as searchProjection,
-} from '../shared/projections.js';
 import { getForViewAndSize } from 'ol/extent';
 import TileQueue, {
   getTilePriority as tilePriorityFunction,
 } from 'ol/TileQueue';
 import { CM_PER_INCH } from '../shared/constants.js';
 import { scaleToResolution } from '../shared/units.js';
+import { fromEPSGCode } from 'ol/proj/proj4';
 
 /**
  * Transforms a canvas to a Blob through an observable
@@ -40,11 +37,8 @@ export function canvasToBlob(canvas) {
 export async function getJobFrameState(spec, sizeInPixel) {
   let projection = getProjection(spec.projection);
 
-  if (!projection && spec.projection.startsWith('EPSG:')) {
-    const splitted = spec.projection.split(':');
-    const { name, proj4def, bbox } = await searchProjection(splitted[1]);
-    registerWithExtent(name, proj4def, bbox);
-    projection = getProjection(spec.projection);
+  if (!projection && spec.projection.toUpperCase().startsWith('EPSG:')) {
+    projection = await fromEPSGCode(spec.projection.toUpperCase());
   }
 
   const resolution = scaleToResolution(spec.projection, spec.scale, spec.dpi);
