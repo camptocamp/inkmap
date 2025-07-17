@@ -1,0 +1,24 @@
+{
+  "layers": [
+    {
+      "type": "WMS",
+      "url": "/wms1-tile.png",
+      "layer": "TOPO-OSM-WMS",
+      "tiled": true,
+      "projection": "EPSG:3857"
+    }
+  ],
+  "size": [256, 256],
+  "center": [
+    0,
+    89
+  ],
+  "dpi": 50,
+  "scale": 20000000,
+  "scaleBar": {
+    "position": "bottom-left",
+    "units": "metric"
+  },
+  "projection": "EPSG:3413",
+  "northArrow": "top-right"
+}
