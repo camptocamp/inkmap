@@ -381,7 +381,7 @@ const IgnOrthoWmtsSpec = {
   layers: [
     {
       type: 'WMTS',
-      url: 'https://wxs.ign.fr/ortho/geoportail/wmts?',
+      url: 'https://data.geopf.fr/wmts?',
       layer: 'ORTHOIMAGERY.ORTHOPHOTOS',
       matrixSet: 'PM',
       projection: 'EPSG:3857',
@@ -629,7 +629,7 @@ const CustomProjection = {
   layers: [
     {
       type: 'WMS',
-      url: 'https://wxs.ign.fr/jhyvi0fgmnuxvfv0zjzorvdn/geoportail/r/wms',
+      url: 'https://data.geopf.fr/wms-r/wms',
       layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
       tiled: true,
       attribution: '© IGN',
@@ -742,7 +742,6 @@ const PresetSpecs = {
   'Europe in OpenStreetMap (WMS, tiled)': OsmWmsSpec,
   'France in OpenStreetMap and GeoJSON': OsmAndGeoJSONSpec,
   'France in IGN orthophotos (WMTS)': IgnOrthoWmtsSpec,
-  'France in BingMaps road (BingMaps)': BingMapsJSONSpec,
   'Volcanoes Terrain model (WMS)': AuvergneTerrainSpec,
   'Mars Perseverance Rover Landing Site': MarsRoverLandingSpec,
   'Bayonne, 1935 (WMTS)': BayonneWmtsSpec,
@@ -750,8 +749,8 @@ const PresetSpecs = {
   'Water areas geometries (WFS)': WfsSpec,
   'Europe as vector tiles (Mapbox Style)': MapboxVectorStyleSpec,
   'Custom local projection (WMS)': CustomProjection,
-  'Spec with invalid sources': ErrorSpec,
   'Spec with legends': LegendSpec,
+  'Spec with invalid sources': ErrorSpec,
 };
 
 export default PresetSpecs;
