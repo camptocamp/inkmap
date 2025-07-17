@@ -3,7 +3,7 @@ import { createJob } from '../../../src/printer/job.js';
 import * as LayersMock from '../../../src/printer/layers.js';
 import { messageToMain } from '../../../src/printer/exchange.js';
 import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants.js';
-import * as olDomMock from 'ol/dom';
+import * as olDomMock from 'ol/dom.js';
 
 jest.mock('../../../src/printer/layers');
 jest.mock('../../../src/printer/exchange');
@@ -11,7 +11,7 @@ jest.mock('../../../src/printer/utils', () => ({
   ...jest.requireActual('../../../src/printer/utils'),
   canvasToBlob: jest.fn(() => mockCanvasToBlob()),
 }));
-jest.mock('ol/dom');
+jest.mock('ol/dom.js');
 
 const spec = {
   layers: [

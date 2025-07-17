@@ -1,13 +1,13 @@
 import { isWorker } from '../worker/utils.js';
 import { from, Observable } from 'rxjs';
-import { fromLonLat, get as getProjection } from 'ol/proj';
-import { getForViewAndSize } from 'ol/extent';
+import { fromLonLat, get as getProjection } from 'ol/proj.js';
+import { getForViewAndSize } from 'ol/extent.js';
 import TileQueue, {
   getTilePriority as tilePriorityFunction,
-} from 'ol/TileQueue';
+} from 'ol/TileQueue.js';
 import { CM_PER_INCH } from '../shared/constants.js';
 import { scaleToResolution } from '../shared/units.js';
-import { fromEPSGCode } from 'ol/proj/proj4';
+import { fromEPSGCode } from 'ol/proj/proj4.js';
 
 /**
  * Transforms a canvas to a Blob through an observable

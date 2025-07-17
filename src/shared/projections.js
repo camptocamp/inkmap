@@ -1,6 +1,6 @@
-import { applyTransform } from 'ol/extent';
-import { get as getProjection, getTransform } from 'ol/proj';
-import { register } from 'ol/proj/proj4';
+import { applyTransform } from 'ol/extent.js';
+import { get as getProjection, getTransform } from 'ol/proj.js';
+import { register } from 'ol/proj/proj4.js';
 import proj4 from 'proj4';
 
 register(proj4);

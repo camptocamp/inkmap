@@ -1,5 +1,5 @@
 import { CM_PER_INCH } from './constants.js';
-import { get as getProjection } from 'ol/proj';
+import { get as getProjection } from 'ol/proj.js';
 
 /**
  * @param {import("../main/index.js").RealWorldUnit} unit
