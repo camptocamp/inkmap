@@ -1,0 +1,11 @@
+<html lang="en"><head><title>inkmap demo page</title><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet"/><script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script></head><style>body {
+      font-family: 'PT Sans', sans-serif;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Montserrat', sans-serif;
+    }</style><body><div class="container" style="width: 960px"><h1 class="mt-5"><strong>inkmap</strong><br/><span class="mt-2" style="font-size: 20px">a library for generating high-quality, printable maps.</span></h1><div class="mt-5 example-01"><p>Give <strong>inkmap</strong> a JSON spec and it will use it to generate a PNG image in the background.</p><div class="row align-items-center"><print-spec class="col-8" editable="true"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div><div class="mt-5 example-02"><h2>Showing progress</h2><p><strong>inkmap</strong> also enables finer monitoring by making the jobs status observable.</p><div class="row align-items-center"><print-spec class="col-8" editable="false"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div></div><script src="app.js"></script></body></html>
