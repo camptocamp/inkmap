@@ -1,7 +1,6 @@
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 import '../printer/index.js';
 import { MESSAGE_JOB_CANCEL } from '../shared/constants.js';
-import { registerWithExtent } from '../shared/projections.js';
 import { messageToPrinter } from './exchange.js';
 import {
   createNewJob,
@@ -10,6 +9,7 @@ import {
 } from './jobs.js';
 import getLegends from '../shared/widgets/legends.js';
 import { lastValueFrom } from 'rxjs';
+
 export { downloadBlob } from './utils.js';
 
 /**
@@ -257,14 +257,6 @@ export function getJobStatus(jobId) {
  */
 export function cancelJob(jobId) {
   messageToPrinter(MESSAGE_JOB_CANCEL, { jobId });
-}
-
-/**
- * Register a new projection from a projection definition.
- * @param {ProjectionDefinition} definition
- */
-export function registerProjection(definition) {
-  registerWithExtent(definition.name, definition.proj4, definition.bbox);
 }
 
 export { computeAttributionsText as getAttributionsText } from '../shared/widgets/attributions.js';
