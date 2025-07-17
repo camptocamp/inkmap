@@ -380,7 +380,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
         url: layerSpec.url,
         params: getWMSParams(layerSpec),
         transition: 0,
-        projection: layerSpec.projection ? layerSpec.projection : undefined,
+        ...(layerSpec.projection ? { projection: layerSpec.projection } : {}),
       }),
       rootFrameState,
       layerSpec.opacity,
@@ -392,7 +392,7 @@ function createLayerWMS(jobId, layerSpec, rootFrameState) {
     url: layerSpec.url,
     params: getWMSParams(layerSpec),
     ratio: 1,
-    projection: layerSpec.projection ? layerSpec.projection : undefined,
+    ...(layerSpec.projection ? { projection: layerSpec.projection } : {}),
   });
   return createImageLayer(jobId, source, rootFrameState, layerSpec.opacity);
 }
