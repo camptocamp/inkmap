@@ -23,7 +23,7 @@
     "build:demo": "webpack --config demo/webpack.config.js --mode production",
     "build:lib": "rm -rf dist && webpack --config ./webpack.config.js --mode production",
     "prepublishOnly": "npm run lint && npm run typecheck && npm run format:check && npm run test:unit && npm run test:rendering && npm run build:lib",
-    "docs:build": "typedoc --options docs/typedoc.config.js"
+    "build:docs": "typedoc --options docs/typedoc.config.js"
   },
   "type": "module",
   "repository": {
