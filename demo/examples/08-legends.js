@@ -1,5 +1,9 @@
-import { downloadBlob, getJobStatus, queuePrint } from '@camptocamp/inkmap';
-import { createLegends } from '../../src/main/index.js';
+import {
+  createLegends,
+  downloadBlob,
+  getJobStatus,
+  queuePrint,
+} from '@camptocamp/inkmap';
 
 const root = document.getElementById('example-08');
 const mapBtn = /** @type {CustomButton} */ root.querySelector(

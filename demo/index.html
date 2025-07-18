@@ -50,18 +50,21 @@
       <h1 class="mt-5">
         <strong>inkmap</strong><br />
         <span class="mt-2" style="font-size: 20px"
-          >a library for generating high-quality, printable maps.</span
+          >a library for generating high-quality, printable maps.
+          <a href="./docs">Go to the API documentation</a></span
         >
       </h1>
 
       <div class="mt-5" id="example-01">
         <p>
-          Give <strong>inkmap</strong> a JSON spec and it will use it to
-          generate a PNG image in the background.
+          Give <strong>inkmap</strong> a
+          <a href="./docs/interfaces/PrintSpec.html">JSON spec</a> and it will
+          use it to generate a PNG image in the background.
         </p>
         <p>
-          Use the <code>print</code> API to begin printing a spec. This function
-          returns a
+          Use the
+          <a href="docs/functions/print.html"><code>print()</code></a> API to
+          begin printing a spec. This function returns a
           <a
             href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"
             >Promise</a
@@ -109,15 +112,19 @@
           job status observable.
         </p>
         <p>
-          Use the <code>enqueuePrint</code> API to start a print job
-          asynchronously. This function returns a
+          Use the
+          <a href="docs/functions/queuePrint.html"><code>queuePrint()</code></a>
+          API to start a print job asynchronously. This function returns a
           <a
             href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"
             >Promise</a
           >
           which resolves to a job id. You can then feed the job id to
-          <code>getJobStatus</code> which will return an observable that you can
-          <code>subscribe</code> to, emitting updates on the given print job
+          <a href="docs/functions/getJobStatus.html"
+            ><code>getJobStatus()</code></a
+          >
+          which will return an observable that you can
+          <code>subscribe()</code> to, emitting updates on the given print job
           status.
         </p>
         <ul class="nav nav-tabs">
@@ -157,8 +164,11 @@
         <h2>Canceling a job</h2>
         <p><strong>inkmap</strong> also enables job cancellation.</p>
         <p>
-          Use <code>cancelJob</code> after having started a job with
-          <code>enqueuePrint</code>.
+          Use
+          <a href="docs/functions/cancelJob.html"><code>cancelJob()</code></a>
+          after having started a job with
+          <a href="docs/functions/queuePrint.html"><code>queuePrint()</code></a
+          >.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -202,13 +212,17 @@
       <div class="mt-5" id="example-04">
         <h2>Monitoring multiple jobs</h2>
         <p>
-          Multiple jobs can be monitored at once through a long lived
+          Multiple jobs can be monitored at once through a long-lived
           observable.
         </p>
         <p>
-          Use <code>getJobsStatus</code> to receive a long-lived observable that
-          you can <code>subscribe</code> to and which will regularly give you
-          status updates on all running jobs.
+          Use
+          <a href="docs/functions/getJobsStatus.html"
+            ><code>getJobsStatus()</code></a
+          >
+          to receive a long-lived observable that you can
+          <code>subscribe()</code> to and which will regularly give you status
+          updates on all running jobs.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -291,9 +305,11 @@
         <p>
           <strong>inkmap</strong> supports rendering maps in many different
           projections. Projections can be defined using the
-          <code>projectionDefinitions</code> field of a spec. If a projection is
-          not defined in the spec but still needed for rendering,
-          <strong>inkmap</strong> will look it up on
+          <a href="docs/interfaces/PrintSpec.html#projectiondefinitions"
+            ><code>projectionDefinitions</code></a
+          >
+          field of a spec. If a projection is not defined in the spec but still
+          needed for rendering, <strong>inkmap</strong> will look it up on
           <a href="https://epsg.io/">epsg.io</a>. This only works for
           projections with an EPSG code!
         </p>
@@ -380,10 +396,14 @@
       <div class="mt-5" id="example-08">
         <h2>Printing legends</h2>
         <p>
-          This examples shows how to print legends for vector and rasterlayers
+          This examples shows how to print legends for vector and raster layers
           by providing the configuration option <code>legend</code> on a layer
           with a value of <code>true</code>. Currently this supports WMS, WMTS,
-          GeoJSON and WFS layers.
+          GeoJSON and WFS layers. Use the
+          <a href="docs/functions/createLegends.html"
+            ><code>createLegends()</code></a
+          >
+          function to generate the print spec legends.
         </p>
         <p>
           The print will generate a separate image containing all the legends at

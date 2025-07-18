@@ -85,7 +85,7 @@ export default {
 
 Important note: all API functions are named exports from the `inkmap` package.
 
-See the [API documentation](https://camptocamp.github.io/inkmap/main/api/) website.
+See the [API documentation](https://camptocamp.github.io/inkmap/main/docs/) website.
 
 ## Architecture
 
