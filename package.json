@@ -22,7 +22,8 @@
     "demo": "webpack-dev-server --config demo/webpack.config.js",
     "build:demo": "webpack --config demo/webpack.config.js --mode production",
     "build:lib": "rm -rf dist && webpack --config ./webpack.config.js --mode production",
-    "prepublishOnly": "npm run lint && npm run typecheck && npm run format:check && npm run test:unit && npm run test:rendering && npm run build:lib"
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run format:check && npm run test:unit && npm run test:rendering && npm run build:lib",
+    "docs:build": "typedoc --options docs/typedoc.config.js"
   },
   "type": "module",
   "repository": {
@@ -71,6 +72,7 @@
     "pixelmatch": "~7.1.0",
     "prettier": "~3.6.2",
     "puppeteer": "~24.12.0",
+    "typedoc": "^0.28.7",
     "typescript": "~5.8.3",
     "webpack": "~5.99.9",
     "webpack-cli": "~6.0.1",

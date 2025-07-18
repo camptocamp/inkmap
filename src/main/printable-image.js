@@ -6,7 +6,9 @@ export class PrintableImage {
    * @param {number} dpi
    */
   constructor(image, dpi) {
+    /** @private */
     this.image_ = image;
+    /** @private */
     this.dpi_ = dpi;
   }
 
