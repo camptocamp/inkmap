@@ -10,6 +10,7 @@ import {
 import getLegends from '../shared/widgets/legends.js';
 import { lastValueFrom } from 'rxjs';
 
+export { PrintableImage } from './printable-image.js';
 export { downloadBlob } from './utils.js';
 
 /**

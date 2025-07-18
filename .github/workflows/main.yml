@@ -1,4 +1,4 @@
-name: Build
+name: Quality Assurance
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
-  lint-test-build:
+  lint-format-typecheck:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,7 +19,7 @@ jobs:
       - name: Install Node & NPM
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install
@@ -34,33 +34,23 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Node & NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
       - name: Unit tests
         run: npm run test:unit
 
       - name: Rendering tests
         run: npm run test:rendering
-
-      - name: Build demo
-        run: npm run build:demo
-
-      - run: echo "::set-env name=BRANCH_NAME::${GITHUB_HEAD_REF:-main}"
-
-      # Check for write permission
-      - name: Check user permission
-        id: check-write-access
-        uses: scherermichael-oss/action-has-permission@master
-        with:
-          required-permission: write
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Only if user has write permission
-      - name: Deploy
-        if: steps.check-write-access.outputs.has-permission
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./demo/dist
-          destination_dir: ${{env.BRANCH_NAME}}
-          keep_files: true
-          exclude_assets: '*.js.map'
