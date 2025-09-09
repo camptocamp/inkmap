@@ -22,6 +22,7 @@ class Image extends OffscreenCanvas {
 
   // setting `src` will trigger a loading of the image and a trigger of a `load` event eventually
   set src(url) {
+    this.src_ = url;
     fetch(url)
       .then((response) => response.blob())
       .then((blob) => createImageBitmap(blob))

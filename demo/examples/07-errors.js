@@ -23,10 +23,16 @@ btn.addEventListener('click', async () => {
       btn.hideSpinner();
 
       // display urls with errors
-      if (status.sourceLoadErrors.length > 0) {
-        let errorMessage = 'The following layers encountered errors:<br>';
-        status.sourceLoadErrors.forEach((element) => {
-          errorMessage = `${errorMessage} - ${element.url}<br>`;
+      if (status.errors.length > 0) {
+        let errorMessage =
+          'The following errors were encountered during the print job:<br>';
+        status.errors.forEach((printError) => {
+          if (printError.layerIndex !== undefined) {
+            const layer = spec.value.layers[printError.layerIndex];
+            errorMessage += `- ${printError.message} (layer: ${JSON.stringify(layer)}<br>`;
+          } else {
+            errorMessage += `- ${printError.message}<br>`;
+          }
         });
         errors.innerHTML = errorMessage;
       } else {
