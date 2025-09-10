@@ -174,13 +174,19 @@ export { downloadBlob } from './utils.js';
 /** @typedef {'metric'|'degrees'|'imperial'|'nautical'|'us'} ScaleUnits */
 
 /**
+ * @typedef {Object} PrintError
+ * @property {string} message Error message.
+ * @property {number} [layerIndex] Which layer this error relates to (if any)
+ */
+
+/**
  * @typedef {Object} PrintStatus
  * @property {number} id Job id.
  * @property {PrintSpec} spec Job initial spec.
  * @property {number} progress Job progress, from 0 to 1.
  * @property {'pending' | 'ongoing' | 'finished' | 'canceled'} status Job status.
- * @property {Blob} [imageBlob] Finished image blob.
- * @property {SourceLoadError[]} [sourceLoadErrors] Array of `SourceLoadError` objects.
+ * @property {Blob|null} imageBlob Finished image blob; `null` if not finished or canceled
+ * @property {PrintError[]} errors Errors encountered so far during the job, if any; empty if no error.
  */
 
 /**

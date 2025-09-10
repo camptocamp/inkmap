@@ -17,4 +17,7 @@ export default class LayerMock {
   getSource() {
     return this.source;
   }
+  setStyle() {
+    // do nothing
+  }
 }

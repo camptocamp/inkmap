@@ -1,5 +1,6 @@
 import { CM_PER_INCH } from './constants.js';
 import { get as getProjection } from 'ol/proj.js';
+import { PrintError } from './print-error.js';
 
 /**
  * @param {import("../main/index.js").RealWorldUnit} unit
@@ -19,7 +20,7 @@ function fromPxRatio(unit, dpi) {
     case 'px':
       return 1;
     default:
-      throw new Error(`Invalid real world unit: ${unit}`);
+      throw new PrintError(`Invalid real world unit: ${unit}`);
   }
 }
 

@@ -36,6 +36,7 @@ import OpenLayersParser from 'geostyler-openlayers-parser';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
 import VectorTileSource from 'ol/source/VectorTile.js';
 import { applyStyle } from 'ol-mapbox-style';
+import { PrintError } from '../shared/print-error.js';
 
 const blankSrc =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -47,13 +48,13 @@ export const cancel$ = new Subject();
  * @typedef {Array} LayerPrintStatus
  * @property {number} 0 Progress, from 0 to 1, or -1 when canceled.
  * @property {HTMLCanvasElement|OffscreenCanvas|null} 1 Canvas on which the layer is printed, or null if progress < 1.
- * @property {string} 2 URL which caused an error.
  */
 
 /**
  * Returns an observable emitting the printing status for this layer
  * The observable will emit a final value, with the finished canvas
  * if not canceled, and complete.
+ * @param {number} jobId
  * @param {import('../main/index.js').Layer} layerSpec
  * @param {import('ol/Map').FrameState} rootFrameState
  * @return {import('rxjs').Observable<LayerPrintStatus>}
@@ -96,7 +97,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
   context.canvas.style = {};
   let frameState;
   let renderer;
-  let tileLoadErrorUrl;
+  const errors$ = new Subject();
 
   layer =
     layer ??
@@ -104,7 +105,8 @@ function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
       source,
     });
   source.on('tileloaderror', function (e) {
-    tileLoadErrorUrl = e.target.getUrls()[0];
+    const tileUrl = /** @type {any} */ (e.tile)?.src_;
+    errors$.next(new PrintError(`Failed to load tile at ${tileUrl}`));
   });
 
   frameState = makeLayerFrameState(rootFrameState, layer, opacity);
@@ -118,13 +120,16 @@ function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
     /** @type {any} */ (frameState.tileQueue).queuedElements_,
   ).length;
 
-  const updatedProgress$ = update$.pipe(
+  const updatedProgress$ = merge(update$, errors$).pipe(
     startWith(true),
     takeWhile(() => {
       frameState.tileQueue.reprioritize();
       frameState.tileQueue.loadMoreTiles(12, 4);
       return !!frameState.tileQueue.getTilesLoading();
     }, true),
+    tap((v) => {
+      if (v instanceof Error) throw v; // throw error if it was emitted by errors$
+    }),
     map(() => {
       let queuedTilesCount = Object.keys(
         frameState.tileQueue['queuedElements_'],
@@ -139,9 +144,9 @@ function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
 
       if (progress === 1) {
         renderer.renderFrame(frameState, context.canvas);
-        return [1, context.canvas, tileLoadErrorUrl];
+        return [1, context.canvas];
       } else {
-        return [progress, null, tileLoadErrorUrl];
+        return [progress, null];
       }
     }),
     throttleTime(500, undefined, { leading: true, trailing: true }),
@@ -149,7 +154,7 @@ function createTiledLayer(jobId, source, rootFrameState, opacity, layer) {
 
   const canceledProgress$ = cancel$.pipe(
     filter((canceledJobId) => canceledJobId === jobId),
-    map(() => [-1, null, undefined]),
+    map(() => [-1, null]),
   );
 
   return merge(updatedProgress$, canceledProgress$).pipe(
@@ -206,57 +211,50 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
   // when true, the layer is ready to be drawn
   let styleReady = false;
   if (style) {
-    new OpenLayersParser()
-      .writeStyle(style)
-      .then(({ output: olStyle }) => {
-        layer.setStyle(olStyle);
-        styleReady = true;
-      })
-      .catch((error) => console.log(error));
+    new OpenLayersParser().writeStyle(style).then(({ output: olStyle }) => {
+      layer.setStyle(olStyle);
+      styleReady = true;
+    });
   } else {
     styleReady = true;
   }
 
   const updateSub = update$
     .pipe(
+      // waiting for style to be converted
       skipWhile(() => !styleReady),
-      tap(() => {
-        // try to render the layer on each update
-        renderer.prepareFrame({ ...frameState, time: Date.now() });
-        renderer.renderFrame(
-          { ...frameState, time: Date.now() },
-          context.canvas,
-        );
-      }),
-      map(() => {
-        const sourceLoaded = source.getState() === 'ready';
-        const layerRendered = renderer.ready;
-        if (sourceLoaded && layerRendered) {
-          progress$.next([1, context.canvas]);
-          progress$.complete();
-          updateSub.unsubscribe();
-          cancelSub.unsubscribe();
-        } else if (sourceLoaded) {
-          progress$.next([0.75, null]);
-        } else {
-          progress$.next([0.5, null]);
-        }
-      }),
     )
-    .subscribe();
+    .subscribe(() => {
+      // try to render the layer on each update
+      renderer.prepareFrame({ ...frameState, time: Date.now() });
+      renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+
+      // update status according to whether the data is loaded and layer is rendered
+      const sourceLoaded = source.getState() === 'ready';
+      const layerRendered = renderer.ready;
+      if (sourceLoaded && layerRendered) {
+        progress$.next([1, context.canvas]);
+        progress$.complete();
+        updateSub.unsubscribe();
+        cancelSub.unsubscribe();
+      } else if (sourceLoaded) {
+        progress$.next([0.75, null]);
+      } else {
+        progress$.next([0.5, null]);
+      }
+    });
 
   const cancelSub = cancel$
     .pipe(
       filter((canceledJobId) => canceledJobId === jobId),
       take(1),
-      tap(() => {
-        progress$.next([-1, null]);
-        progress$.complete();
-        updateSub.unsubscribe();
-        cancelSub.unsubscribe();
-      }),
     )
-    .subscribe();
+    .subscribe(() => {
+      progress$.next([-1, null]);
+      progress$.complete();
+      updateSub.unsubscribe();
+      cancelSub.unsubscribe();
+    });
 
   return progress$;
 }
@@ -278,8 +276,8 @@ function createImageLayer(jobId, source, rootFrameState, opacity) {
   let layer;
   let renderer;
 
-  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
-  const progress$ = new BehaviorSubject([0, null, undefined]);
+  /** @type {BehaviorSubject<LayerPrintStatus|PrintError>} */
+  const progress$ = new BehaviorSubject([0, null]);
   layer = new ImageLayer({
     source,
   });
@@ -289,14 +287,13 @@ function createImageLayer(jobId, source, rootFrameState, opacity) {
     .pipe(
       filter((canceledJobId) => canceledJobId === jobId),
       take(1),
-      tap(() => {
-        progress$.next([-1, null, undefined]);
-        progress$.complete();
-        isCancelled = true;
-        cancelSub.unsubscribe();
-      }),
     )
-    .subscribe();
+    .subscribe(() => {
+      progress$.next([-1, null]);
+      progress$.complete();
+      isCancelled = true;
+      cancelSub.unsubscribe();
+    });
 
   if (
     'setImageLoadFunction' in source &&
@@ -327,21 +324,31 @@ function createImageLayer(jobId, source, rootFrameState, opacity) {
   renderer.useContainer = useContainer.bind(renderer, context);
 
   source.once('imageloaderror', function (e) {
-    const imageLoadErrorUrl = e.target.getUrl();
-    progress$.next([1, context.canvas, imageLoadErrorUrl]);
+    const imageSrc =
+      /** @type {any} */ (e.image?.getImage())?.src ?? '(unknown url)';
+    progress$.next(new PrintError(`Failed to load image at ${imageSrc}`));
     progress$.complete();
-    cancelSub.unsubscribe();
   });
   source.once('imageloadend', () => {
     renderer.prepareFrame({ ...frameState, time: Date.now() });
     renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
-    progress$.next([1, context.canvas, undefined]);
+    progress$.next([1, context.canvas]);
     progress$.complete();
     cancelSub.unsubscribe();
   });
   renderer.prepareFrame({ ...frameState, time: Date.now() });
 
-  return progress$;
+  return /** @type {BehaviorSubject<LayerPrintStatus>} */ (
+    progress$.pipe(
+      tap((value) => {
+        if (value instanceof Error) {
+          progress$.next([1, context.canvas]);
+          cancelSub.unsubscribe();
+          throw value;
+        }
+      }),
+    )
+  );
 }
 
 /**
@@ -475,8 +482,10 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
       );
       fetch(requestUrl)
         .then((response) => {
-          if (response.status >= 400) {
-            throw new Error();
+          if (!response.ok) {
+            throw new PrintError(
+              `Failed to fetch data: ${response.status} ${response.statusText}`,
+            );
           }
           return response.text();
         })
@@ -521,7 +530,9 @@ async function createBingMapsSource(layerSpec) {
   )
     .then((response) => {
       if (!response.ok) {
-        throw new Error('ERROR HTTP, status ' + response.status);
+        throw new PrintError(
+          `Failed to fetch metadata: ${response.status} ${response.statusText}`,
+        );
       }
       return response.json();
     })
@@ -536,10 +547,6 @@ async function createBingMapsSource(layerSpec) {
       }
       url = url + '&coord={z}/{x}/{y}';
       source.setUrl(url);
-    })
-    .catch((error) => {
-      console.error('ERROR : ', error);
-      return error;
     });
 
   source.setTileLoadFunction(function (tile, src) {
@@ -604,8 +611,18 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
       function (tile, url) {
         tile.setLoader(async (extent, resolution, projection) => {
           const data = await fetch(url)
-            .then((response) => response.arrayBuffer())
-            .catch(() => tile.setState('error'));
+            .then((response) => {
+              if (!response.ok) {
+                throw new PrintError(
+                  `Failed to fetch tile at ${url}: ${response.status} ${response.statusText}`,
+                );
+              }
+              return response.arrayBuffer();
+            })
+            .catch((e) => {
+              tile.setState('error');
+              throw e;
+            });
           const format = tile.getFormat();
           const features = format.readFeatures(data, {
             extent: extent,
@@ -639,7 +656,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
     styleReadyPromise = fetch(layerSpec.styleUrl)
       .then((response) => {
         if (!response.ok) {
-          throw new Error(
+          throw new PrintError(
             `Failed to fetch style: ${response.status} ${response.statusText}`,
           );
         }
@@ -679,8 +696,7 @@ function createLayerVectorTile(jobId, layerSpec, rootFrameState) {
       .writeStyle(layerSpec.style)
       .then(({ output: olStyle }) => {
         layer.setStyle(olStyle);
-      })
-      .catch((error) => console.log(error));
+      });
   } else {
     styleReadyPromise = Promise.resolve();
   }

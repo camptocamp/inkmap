@@ -355,8 +355,11 @@
         <h2>Error handling</h2>
         <p>
           When errors are encountered while loading data for one or several
-          layers, <strong>inkmap</strong> includes a list of error objects with
-          urls in the status updates.
+          layers, <strong>inkmap</strong> includes these in the
+          <code>errors</code> property of the print status updates. Each error
+          is an object with a <code>message</code> property as well as a
+          <code>layerIndex</code> which tells you for which layer this error
+          originated.
         </p>
         <ul class="nav nav-tabs">
           <li class="nav-item">

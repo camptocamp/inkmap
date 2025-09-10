@@ -1,9 +1,10 @@
-import { BehaviorSubject, of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { createJob } from '../../../src/printer/job.js';
 import * as LayersMock from '../../../src/printer/layers.js';
 import { messageToMain } from '../../../src/printer/exchange.js';
 import { MESSAGE_JOB_STATUS } from '../../../src/shared/constants.js';
 import * as olDomMock from 'ol/dom.js';
+import { shareReplay, startWith, tap } from 'rxjs/operators';
 
 jest.mock('../../../src/printer/layers');
 jest.mock('../../../src/printer/exchange');
@@ -36,13 +37,21 @@ const spec = {
   scale: 40000000,
   projection: 'EPSG:3857',
 };
-const errorurl = 'https://my.url/z/y/x.png';
 let layerSubjects;
 
 LayersMock.createLayer = jest.fn(() => {
-  const layer$ = new BehaviorSubject([0, null, undefined]);
+  const layer$ = new Subject();
   layerSubjects.push(layer$);
-  return layer$;
+  // this will throw an error if it appears in the stream
+  return layer$.pipe(
+    startWith([0, null]),
+    tap((v) => {
+      if (v instanceof Error) {
+        throw v;
+      }
+    }),
+    shareReplay(1),
+  );
 });
 
 const mockCanvasToBlob = () => of({ blob: true });
@@ -81,14 +90,14 @@ describe('job creation', () => {
           progress: 0,
           spec,
           status: 'ongoing',
-          sourceLoadErrors: [],
+          errors: [],
         },
       });
     });
     it('broadcast advancement status', () => {
-      layerSubjects[0].next([0.1, null, undefined]);
-      layerSubjects[1].next([0.9, null, undefined]);
-      layerSubjects[2].next([0.2, null, undefined]);
+      layerSubjects[0].next([0.1, null]);
+      layerSubjects[1].next([0.9, null]);
+      layerSubjects[2].next([0.2, null]);
       expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
         status: {
           id: expect.any(Number),
@@ -96,12 +105,13 @@ describe('job creation', () => {
           progress: 0.4,
           spec,
           status: 'ongoing',
-          sourceLoadErrors: [],
+          errors: [],
         },
       });
     });
-    it('prints all layers to a final canvas and passes errorurls to status when finished', () => {
-      layerSubjects[0].next([1, { style: {} }, errorurl]);
+    it('prints all layers to a final canvas and passes errors to status when finished', () => {
+      layerSubjects[0].next(new Error('blargz'));
+      layerSubjects[0].next([1, { style: {} }]);
       layerSubjects[1].next([1, { style: {} }]);
       layerSubjects[2].next([1, { style: {} }]);
       expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
@@ -111,9 +121,10 @@ describe('job creation', () => {
           progress: 1,
           spec,
           status: 'finished',
-          sourceLoadErrors: [
+          errors: [
             {
-              url: errorurl,
+              message: 'blargz',
+              layerIndex: 0,
             },
           ],
         },
@@ -132,7 +143,7 @@ describe('job creation', () => {
 
     it('does not broadcast a print success if all layers except one are complete', () => {
       layerSubjects.forEach((subject, index) =>
-        subject.next(index > 0 ? [1, { style: {} }] : [0.999, null, undefined]),
+        subject.next(index > 0 ? [1, { style: {} }] : [0.999, null]),
       );
       expect(messageToMain).toHaveBeenLastCalledWith(MESSAGE_JOB_STATUS, {
         status: {
@@ -141,7 +152,7 @@ describe('job creation', () => {
           progress: 0.999,
           spec: expect.any(Object),
           status: 'ongoing',
-          sourceLoadErrors: [],
+          errors: [],
         },
       });
     });

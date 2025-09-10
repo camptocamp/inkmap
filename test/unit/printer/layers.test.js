@@ -17,6 +17,10 @@ import XYZSourceMock, {
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js.js';
 import { applyStyle } from 'ol-mapbox-style';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
+import { PrintError } from '../../../src/shared/print-error.js';
+import ImageTile from 'ol/ImageTile.js';
+import ImageWrapper from 'ol/Image.js';
+import { catchError } from 'rxjs';
 
 /** @type {import('ol/Map').FrameState} */
 const frameState = {
@@ -66,58 +70,79 @@ describe('layer creation', () => {
     let layer$;
     let received;
     let completed;
+    let error;
     const xyzSourceMock = new XYZSourceMock(['testurl']);
     const tileErrorEventMock = new SourceEventMock(xyzSourceMock);
 
     beforeEach(async () => {
       completed = false;
-      layer$ = await createLayer(jobId, spec, frameState);
-      layer$.subscribe(
-        (status) => (received = status),
-        null,
-        () => (completed = true),
-      );
+      error = null;
+      layer$ = createLayer(jobId, spec, frameState);
+      layer$
+        .pipe(
+          catchError((e, source) => {
+            error = e; // catch error but leave stream running
+            return source;
+          }),
+        )
+        .subscribe(
+          (status) => (received = status),
+          null,
+          () => (completed = true),
+        );
     });
 
     it('initially emit a status with progress 0', () => {
-      expect(received).toEqual([0, null, undefined]);
+      expect(received).toEqual([0, null]);
     });
 
     it('status updates are sent regularly', () => {
       setQueuedCount(12, 12);
-      expect(received).toEqual([0.4, null, undefined]);
+      expect(received).toEqual([0.4, null]);
 
       setQueuedCount(2, 2);
-      expect(received).toEqual([0.9, null, undefined]);
+      expect(received).toEqual([0.9, null]);
     });
 
     it('when no queued elements left but tiles are remaining, do not complete', () => {
       setQueuedCount(0, 2);
-      expect(received).toEqual([0.999, null, undefined]);
+      expect(received).toEqual([0.999, null]);
     });
 
     it('when observable completes, canvas is received', () => {
       setQueuedCount(0, 0);
-      expect(received).toEqual([1, expect.anything(), undefined]);
+      expect(received).toEqual([1, expect.anything()]);
       expect(completed).toBeTruthy();
     });
 
     it('when error occurs during tile loading, error url is received', () => {
-      triggerXYZError(tileErrorEventMock);
+      triggerXYZError({
+        target: tileErrorEventMock,
+        tile: new ImageTile([0, 0, 0], 1, 'http://my.tile/png'),
+      });
       setQueuedCount(2, 2);
-      expect(received).toEqual([0.9, null, 'testurl']);
+      expect(error).toEqual(
+        new PrintError('Failed to load tile at http://my.tile/png'),
+      );
+      expect(received).toEqual([0.9, null]);
     });
 
     it('when observable completes with error, canvas and error url are received', () => {
-      triggerXYZError(tileErrorEventMock);
+      triggerXYZError({
+        target: tileErrorEventMock,
+        tile: new ImageTile([0, 0, 0], 1, 'http://my.tile/png'),
+      });
       setQueuedCount(0, 0);
-      expect(received).toEqual([1, expect.anything(), 'testurl']);
+      expect(error).toEqual(
+        new PrintError('Failed to load tile at http://my.tile/png'),
+      );
+      expect(received).toEqual([1, expect.anything()]);
       expect(completed).toBeTruthy();
     });
 
     it('when canceled, canvas and error are not defined, then complete', () => {
       cancel$.next(1);
-      expect(received).toEqual([-1, null, undefined]);
+      expect(received).toEqual([-1, null]);
       expect(completed).toBeTruthy();
     });
   });
@@ -210,36 +235,54 @@ describe('layer creation', () => {
       let layer$;
       let received;
       let completed;
+      let error;
       const imageWMSSourceMock = new ImageWMSSourceMock('testurl');
       const errorEventMock = new SourceEventMock(imageWMSSourceMock);
 
       beforeEach(async () => {
         completed = false;
-        layer$ = await createLayer(jobId, spec, frameState);
-        layer$.subscribe(
-          (status) => (received = status),
-          null,
-          () => (completed = true),
-        );
+        error = null;
+        layer$ = createLayer(jobId, spec, frameState);
+        layer$
+          .pipe(
+            catchError((e, source) => {
+              error = e; // catch error but leave stream running
+              return source;
+            }),
+          )
+          .subscribe(
+            (status) => (received = status),
+            null,
+            () => (completed = true),
+          );
       });
 
       it('initially emit a status with progress 0', () => {
-        expect(received).toEqual([0, null, undefined]);
+        expect(received).toEqual([0, null]);
       });
 
       it('when observable completes, canvas is received', () => {
         triggerLoadEnd();
         jest.runOnlyPendingTimers();
 
-        expect(received).toEqual([1, expect.anything(), undefined]);
+        expect(received).toEqual([1, expect.anything()]);
         expect(completed).toBeTruthy();
       });
 
       it('when observable completes with error, canvas and error url are received', () => {
-        triggerLoadError(errorEventMock);
+        const image = new ImageWrapper();
+        const imageImg = new Image();
+        imageImg.src = 'http://my.server/image.png';
+        image.setImage(imageImg);
+        triggerLoadError({
+          target: errorEventMock,
+          image,
+        });
         jest.runOnlyPendingTimers();
-
-        expect(received).toEqual([1, expect.anything(), 'testurl']);
+        expect(error).toEqual(
+          new PrintError('Failed to load image at http://my.server/image.png'),
+        );
+        expect(received).toEqual([1, expect.anything()]);
         expect(completed).toBeTruthy();
       });
     });
@@ -258,58 +301,79 @@ describe('layer creation', () => {
       let layer$;
       let received;
       let completed;
+      let error;
       const tileWMSSourceMock = new TileWMSSourceMock(['testurl']);
       const tileErrorEventMock = new SourceEventMock(tileWMSSourceMock);
 
       beforeEach(async () => {
         completed = false;
-        layer$ = await createLayer(jobId, spec, frameState);
-        layer$.subscribe(
-          (status) => (received = status),
-          null,
-          () => (completed = true),
-        );
+        error = null;
+        layer$ = createLayer(jobId, spec, frameState);
+        layer$
+          .pipe(
+            catchError((e, source) => {
+              error = e; // catch error but leave stream running
+              return source;
+            }),
+          )
+          .subscribe(
+            (status) => (received = status),
+            null,
+            () => (completed = true),
+          );
       });
 
       it('initially emit a status with progress 0', () => {
-        expect(received).toEqual([0, null, undefined]);
+        expect(received).toEqual([0, null]);
       });
 
       it('status updates are sent regularly', () => {
         setQueuedCount(12, 12);
-        expect(received).toEqual([0.4, null, undefined]);
+        expect(received).toEqual([0.4, null]);
 
         setQueuedCount(2, 2);
-        expect(received).toEqual([0.9, null, undefined]);
+        expect(received).toEqual([0.9, null]);
       });
 
       it('when no queued elements left but tiles are remaining, do not complete', () => {
         setQueuedCount(0, 2);
-        expect(received).toEqual([0.999, null, undefined]);
+        expect(received).toEqual([0.999, null]);
       });
 
       it('when observable completes, canvas is received', () => {
         setQueuedCount(0, 0);
-        expect(received).toEqual([1, expect.anything(), undefined]);
+        expect(received).toEqual([1, expect.anything()]);
         expect(completed).toBeTruthy();
       });
 
       it('when error occurs during tile loading, error url is received', () => {
-        triggerTileWMSError(tileErrorEventMock);
+        triggerTileWMSError({
+          target: tileErrorEventMock,
+          tile: new ImageTile([0, 0, 0], 1, 'http://my.wms/png'),
+        });
         setQueuedCount(2, 2);
-        expect(received).toEqual([0.9, null, 'testurl']);
+        expect(error).toEqual(
+          new PrintError('Failed to load tile at http://my.wms/png'),
+        );
+        expect(received).toEqual([0.9, null]);
       });
 
       it('when observable completes with error, canvas and error url are received', () => {
-        triggerTileWMSError(tileErrorEventMock);
+        triggerTileWMSError({
+          target: tileErrorEventMock,
+          tile: new ImageTile([0, 0, 0], 1, 'http://my.wms/png'),
+        });
         setQueuedCount(0, 0);
-        expect(received).toEqual([1, expect.anything(), 'testurl']);
+        expect(error).toEqual(
+          new PrintError('Failed to load tile at http://my.wms/png'),
+        );
+        expect(received).toEqual([1, expect.anything()]);
         expect(completed).toBeTruthy();
       });
 
       it('when canceled, canvas and error are not defined, then complete', () => {
         cancel$.next(1);
-        expect(received).toEqual([-1, null, undefined]);
+        expect(received).toEqual([-1, null]);
         expect(completed).toBeTruthy();
       });
     });
@@ -328,15 +392,24 @@ describe('layer creation', () => {
     let layer$;
     let received;
     let completed;
+    let error;
 
     beforeEach(async () => {
       completed = false;
-      layer$ = await createLayer(jobId, spec, frameState);
-      layer$.subscribe(
-        (status) => (received = status),
-        null,
-        () => (completed = true),
-      );
+      error = null;
+      layer$ = createLayer(jobId, spec, frameState);
+      layer$
+        .pipe(
+          catchError((e, source) => {
+            error = e; // catch error but leave stream running
+            return source;
+          }),
+        )
+        .subscribe(
+          (status) => (received = status),
+          null,
+          () => (completed = true),
+        );
     });
 
     it('initially emit a status with progress 0', () => {
@@ -400,7 +473,7 @@ describe('layer creation', () => {
 
     beforeEach(async () => {
       completed = false;
-      layer$ = await createLayer(jobId, spec, { ...frameState });
+      layer$ = createLayer(jobId, spec, { ...frameState });
       layer$.subscribe(
         (status) => (received = status),
         console.error,
@@ -447,7 +520,7 @@ describe('layer creation', () => {
 
     beforeEach(async () => {
       completed = false;
-      layer$ = await createLayer(jobId, spec, { ...frameState });
+      layer$ = createLayer(jobId, spec, { ...frameState });
       layer$.subscribe(
         (status) => (received = status),
         console.error,
@@ -499,7 +572,7 @@ describe('layer creation', () => {
 
       beforeEach(async () => {
         completed = false;
-        layer$ = await createLayer(jobId, spec, { ...frameState });
+        layer$ = createLayer(jobId, spec, { ...frameState });
         layer$.subscribe(
           (status) => (received = status),
           console.error,
@@ -538,7 +611,7 @@ describe('layer creation', () => {
       });
 
       beforeEach(async () => {
-        await createLayer(jobId, spec, { ...frameState }).subscribe();
+        createLayer(jobId, spec, { ...frameState }).subscribe();
       });
 
       it('does call applyStyle() with corrected URLs (not relative)', () => {

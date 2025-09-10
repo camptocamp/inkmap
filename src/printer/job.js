@@ -1,5 +1,5 @@
 import { createCanvasContext2D } from 'ol/dom.js';
-import { combineLatest, of } from 'rxjs';
+import { catchError, combineLatest, of } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 
 import { MESSAGE_JOB_STATUS } from '../shared/constants.js';
@@ -14,6 +14,7 @@ import {
 import { printAttributions } from '../shared/widgets/attributions.js';
 import { printNorthArrow } from '../shared/widgets/north-arrow.js';
 import { printScaleBar } from '../shared/widgets/scalebar.js';
+import { PrintError } from '../shared/print-error.js';
 
 let counter = 0;
 
@@ -28,6 +29,18 @@ export async function createJob(spec) {
   const sizeInPixel = calculateSizeInPixel(spec);
   const frameState = await getJobFrameState(spec, sizeInPixel);
 
+  /** @type {import('../main/index.js').PrintError[]} */
+  const jobErrors = [];
+
+  function logError(error, layerIndex) {
+    /** @type {import('../main/index.js').PrintError} */
+    const printError = { message: error.message };
+    if (layerIndex !== undefined) {
+      printError.layerIndex = layerIndex;
+    }
+    jobErrors.push(printError);
+  }
+
   /**
    * @type {import('../main/index.js').PrintStatus}
    */
@@ -36,36 +49,35 @@ export async function createJob(spec) {
     spec,
     status: 'pending',
     progress: 0,
-    sourceLoadErrors: [],
+    imageBlob: null,
+    errors: jobErrors,
   };
 
   const context = createCanvasContext2D(sizeInPixel[0], sizeInPixel[1]);
 
-  const layerStates$ = spec.layers.length
-    ? combineLatest(
-        spec.layers.map((layer) => {
-          return createLayer(job.id, layer, frameState);
-        }),
-      )
+  const layerObservables = spec.layers.map((layer, layerIndex) =>
+    createLayer(job.id, layer, frameState).pipe(
+      catchError((error, source) => {
+        logError(error, layerIndex);
+        return source;
+      }),
+    ),
+  );
+
+  const layerStates$ = layerObservables.length
+    ? combineLatest(layerObservables)
     : of([]);
   layerStates$
     .pipe(
       switchMap((layerStates) => {
         const allReady = layerStates.every(([progress]) => progress === 1);
         const oneCanceled = layerStates.some(([progress]) => progress === -1);
-        let sourceLoadErrors = [];
 
         if (allReady) {
           for (let i = 0; i < layerStates.length; i++) {
             const canvasImage = layerStates[i][1];
-            const errorUrl = layerStates[i][2];
             if (canvasImage.width !== 0 && canvasImage.height !== 0) {
               context.drawImage(canvasImage, 0, 0);
-              if (errorUrl) {
-                sourceLoadErrors.push({
-                  url: errorUrl,
-                });
-              }
             }
           }
           if (spec.northArrow) {
@@ -80,11 +92,9 @@ export async function createJob(spec) {
           if (spec.attributions) {
             printAttributions(context, spec);
           }
-          return canvasToBlob(context.canvas).pipe(
-            map((blob) => [1, blob, sourceLoadErrors]),
-          );
+          return canvasToBlob(context.canvas).pipe(map((blob) => [1, blob]));
         } else if (oneCanceled) {
-          return of([-1, null, sourceLoadErrors]);
+          return of([-1, null]);
         } else {
           const rawProgress =
             layerStates.reduce((prev, [progress]) => progress + prev, 0) /
@@ -92,11 +102,11 @@ export async function createJob(spec) {
           // only keep 4 digits precision for readability
           const progress = Math.min(0.999, parseFloat(rawProgress.toFixed(4)));
 
-          return of([progress, null, sourceLoadErrors]);
+          return of([progress, null]);
         }
       }),
       map(
-        ([progress, imageBlob, sourceLoadErrors]) =>
+        ([progress, imageBlob]) =>
           /** @type {import('../main/index.js').PrintStatus} */ ({
             ...job,
             progress,
@@ -107,9 +117,12 @@ export async function createJob(spec) {
                 : progress === -1
                   ? 'canceled'
                   : 'ongoing',
-            sourceLoadErrors,
           }),
       ),
+      catchError((error, source) => {
+        logError(error);
+        return source;
+      }),
       takeWhile(
         (jobStatus) => jobStatus.progress < 1 && jobStatus.progress !== -1,
         true,
@@ -126,6 +139,10 @@ function registerProjections(definitions) {
   }
 }
 
+/**
+ * Cancel a job given its id
+ * @param {number} jobId
+ */
 export function cancelJob(jobId) {
   cancel$.next(jobId);
 }
