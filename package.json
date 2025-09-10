@@ -1,6 +1,6 @@
 {
   "name": "@camptocamp/inkmap",
-  "version": "2.0.0",
+  "version": "2.0.1-dev",
   "description": "A library for generating printable, high quality maps in the browser.",
   "main": "src/main/index.js",
   "files": [
