@@ -251,7 +251,7 @@ btn.addEventListener(&#39;click&#39;, async () =&gt; {
 
   downloadBlob(blob, &#39;inkmap.png&#39;);
 });
-</code></pre></div></div></div><div class="mt-5" id="example-07"><h2>Error handling</h2><p>When errors are encountered while loading data for one or several layers, <strong>inkmap</strong> includes a list of error objects with urls in the status updates.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-07-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-07-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-07-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false" select="Spec with invalid sources"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div><div class="tab-pane example-07-source"><pre class="rounded small"><code class="js">import { downloadBlob, getJobStatus, queuePrint } from &#39;@camptocamp/inkmap&#39;;
+</code></pre></div></div></div><div class="mt-5" id="example-07"><h2>Error handling</h2><p>When errors are encountered while loading data for one or several layers, <strong>inkmap</strong> includes these in the <code>errors</code> property of the print status updates. Each error is an object with a <code>message</code> property as well as a <code>layerIndex</code> which tells you for which layer this error originated.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-07-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-07-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-07-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false" select="Spec with invalid sources"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div><div class="tab-pane example-07-source"><pre class="rounded small"><code class="js">import { downloadBlob, getJobStatus, queuePrint } from &#39;@camptocamp/inkmap&#39;;
 
 const root = document.getElementById(&#39;example-07&#39;);
 const btn = /** @type {CustomButton} */ root.querySelector(&#39;custom-button&#39;);
@@ -276,10 +276,16 @@ btn.addEventListener(&#39;click&#39;, async () =&gt; {
       btn.hideSpinner();
 
       // display urls with errors
-      if (status.sourceLoadErrors.length &gt; 0) {
-        let errorMessage = &#39;The following layers encountered errors:&lt;br&gt;&#39;;
-        status.sourceLoadErrors.forEach((element) =&gt; {
-          errorMessage = `${errorMessage} - ${element.url}&lt;br&gt;`;
+      if (status.errors.length &gt; 0) {
+        let errorMessage =
+          &#39;The following errors were encountered during the print job:&lt;br&gt;&#39;;
+        status.errors.forEach((printError) =&gt; {
+          if (printError.layerIndex !== undefined) {
+            const layer = spec.value.layers[printError.layerIndex];
+            errorMessage += `- ${printError.message} (layer: ${JSON.stringify(layer)}&lt;br&gt;`;
+          } else {
+            errorMessage += `- ${printError.message}&lt;br&gt;`;
+          }
         });
         errors.innerHTML = errorMessage;
       } else {
