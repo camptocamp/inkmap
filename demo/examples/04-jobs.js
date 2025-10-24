@@ -1,8 +1,9 @@
 import {
-  getJobsStatus,
-  queuePrint,
+  cancelJob,
   downloadBlob,
+  getJobsStatus,
   getJobStatus,
+  queuePrint,
 } from '@camptocamp/inkmap';
 
 const root = document.getElementById('example-04');
@@ -30,3 +31,6 @@ btn.addEventListener('click', async () => {
     }
   });
 });
+
+// cancel a job when a "cancel" button is clicked
+bars.addEventListener('cancelJob', (event) => cancelJob(event.detail.jobId));
