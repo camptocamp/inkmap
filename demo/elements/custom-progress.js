@@ -50,7 +50,7 @@ class CustomProgress extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-  <div class="progress mt-1 mb-2" style="height: 5px; visible">
+  <div class="progress mt-1 mb-1" style="height: 5px; visible">
     <div
       class="progress-bar"
       style="width: 50%"
