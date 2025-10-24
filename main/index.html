@@ -59,7 +59,7 @@ btn.addEventListener(&#39;click&#39;, async () =&gt; {
     }
   });
 });
-</code></pre></div></div></div><div class="mt-5" id="example-03"><h2>Canceling a job</h2><p><strong>inkmap</strong> also enables job cancellation.</p><p>Use <a href="docs/functions/cancelJob.html"><code>cancelJob()</code></a> after having started a job with <a href="docs/functions/queuePrint.html"><code>queuePrint()</code></a>.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-03-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-03-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-03-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false"></print-spec><div class="col-3"><custom-button>Generate!</custom-button><custom-progress></custom-progress><button role="button" class="cancel-btn btn btn-danger btn-block mt-2">Cancel</button></div></div></div><div class="tab-pane example-03-source"><pre class="rounded small"><code class="js">import {
+</code></pre></div></div></div><div class="mt-5" id="example-03"><h2>Canceling a job</h2><p><strong>inkmap</strong> also enables job cancellation.</p><p>Use <a href="docs/functions/cancelJob.html"><code>cancelJob()</code></a> after having started a job with <a href="docs/functions/queuePrint.html"><code>queuePrint()</code></a>.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-03-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-03-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-03-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false"></print-spec><div class="col-3"><custom-button>Generate!</custom-button><custom-progress></custom-progress><button role="button" class="cancel-btn btn btn-danger btn-block">Cancel</button></div></div></div><div class="tab-pane example-03-source"><pre class="rounded small"><code class="js">import {
   cancelJob,
   downloadBlob,
   getJobStatus,
@@ -109,10 +109,11 @@ btnCancel.addEventListener(&#39;click&#39;, async () =&gt; {
   cancelJob(jobId);
 });
 </code></pre></div></div></div><div class="mt-5" id="example-04"><h2>Monitoring multiple jobs</h2><p>Multiple jobs can be monitored at once through a long-lived observable.</p><p>Use <a href="docs/functions/getJobsStatus.html"><code>getJobsStatus()</code></a> to receive a long-lived observable that you can <code>subscribe()</code> to and which will regularly give you status updates on all running jobs.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-04-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-04-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-04-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false"></print-spec><div class="col-3"><custom-button>Add to the queue</custom-button><progress-bars></progress-bars></div></div></div><div class="tab-pane example-04-source"><pre class="rounded small"><code class="js">import {
-  getJobsStatus,
-  queuePrint,
+  cancelJob,
   downloadBlob,
+  getJobsStatus,
   getJobStatus,
+  queuePrint,
 } from &#39;@camptocamp/inkmap&#39;;
 
 const root = document.getElementById(&#39;example-04&#39;);
@@ -140,6 +141,9 @@ btn.addEventListener(&#39;click&#39;, async () =&gt; {
     }
   });
 });
+
+// cancel a job when a &quot;cancel&quot; button is clicked
+bars.addEventListener(&#39;cancelJob&#39;, (event) =&gt; cancelJob(event.detail.jobId));
 </code></pre></div></div></div><div class="mt-5" id="example-05"><h2>Printing to PDF</h2><p><strong>inkmap</strong> jobs give back a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob">Blob</a> which can be inserted into a PDF. This is for example supported by <a href="http://raw.githack.com/MrRio/jsPDF/master/docs/module-addImage.html#~addImage">jsPDF</a>, as showcased here.</p><ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" data-toggle="tab" href=".example-05-result">Result</a></li><li class="nav-item"><a class="nav-link" data-toggle="tab" href=".example-05-source">Source</a></li></ul><div class="tab-content mt-2"><div class="tab-pane example-05-result show active"><div class="row align-items-start"><print-spec class="col-8" expanded="false"></print-spec><custom-button class="col-3">Generate!</custom-button></div></div><div class="tab-pane example-05-source"><pre class="rounded small"><code class="js">import { print, getAttributionsText, getNorthArrow } from &#39;@camptocamp/inkmap&#39;;
 import { jsPDF } from &#39;jspdf&#39;;
 import { getScaleBar } from &#39;../../src/main/index.js&#39;;
