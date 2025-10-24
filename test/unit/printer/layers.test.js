@@ -13,7 +13,8 @@ import TileWMSSourceMock, {
 } from '../../../__mocks__/ol/source/TileWMS.js.js';
 import XYZSourceMock, {
   triggerLoadError as triggerXYZError,
-} from '../../../__mocks__/ol/source/XYZ.js';
+} from '../../../__mocks__/ol/source/XYZ.js.js';
+import { triggerLoadError as triggerWFSError } from '../../../__mocks__/ol/source/Vector.js.js';
 import { setQueuedCount } from '../../../__mocks__/ol/TileQueue.js.js';
 import { applyStyle } from 'ol-mapbox-style';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
@@ -58,6 +59,12 @@ export class SourceEventMock {
 }
 
 jest.useFakeTimers();
+
+const originalFetch = window.fetch;
+
+afterEach(() => {
+  window.fetch = originalFetch;
+});
 
 describe('layer creation', () => {
   describe('XYZ layer creation', () => {
@@ -394,40 +401,71 @@ describe('layer creation', () => {
     let completed;
     let error;
 
-    beforeEach(async () => {
-      completed = false;
-      error = null;
-      layer$ = createLayer(jobId, spec, frameState);
-      layer$
-        .pipe(
-          catchError((e, source) => {
-            error = e; // catch error but leave stream running
-            return source;
-          }),
-        )
-        .subscribe(
-          (status) => (received = status),
-          null,
-          () => (completed = true),
+    describe('nominal case', () => {
+      beforeEach(async () => {
+        completed = false;
+        error = null;
+        layer$ = createLayer(jobId, spec, frameState);
+        layer$
+          .pipe(
+            catchError((e, source) => {
+              error = e; // catch error but leave stream running
+              return source;
+            }),
+          )
+          .subscribe(
+            (status) => (received = status),
+            null,
+            () => (completed = true),
+          );
+      });
+
+      it('initially emit a status with progress 0', () => {
+        expect(received).toEqual([0, null]);
+      });
+
+      it('generates GetFeature URL according to spec', () => {
+        const url = generateGetFeatureUrl(
+          spec.url,
+          spec.version,
+          spec.layer,
+          spec.format,
+          frameState.viewState.projection,
+          frameState.extent,
         );
+        expect(url).toEqual(
+          'https://my.url/wfs?SERVICE=WFS&version=1.1.0&request=GetFeature&typename=my%3Alayername&srsName=EPSG%3A3857&bbox=-696165.0132013096%2C5090855.383524774%2C3367832.7922398755%2C7122854.286245367%2CEPSG%3A3857&outputFormat=application%2Fjson',
+        );
+      });
     });
 
-    it('initially emit a status with progress 0', () => {
-      expect(received).toEqual([0, null]);
-    });
+    describe('error during data loading', () => {
+      beforeEach(async () => {
+        completed = false;
+        error = null;
+        layer$ = createLayer(jobId, spec, frameState);
+        layer$
+          .pipe(
+            catchError((e, source) => {
+              error = e; // catch error but leave stream running
+              return source;
+            }),
+          )
+          .subscribe(
+            (status) => (received = status),
+            null,
+            () => (completed = true),
+          );
+      });
 
-    it('generates GetFeature URL according to spec', () => {
-      const url = generateGetFeatureUrl(
-        spec.url,
-        spec.version,
-        spec.layer,
-        spec.format,
-        frameState.viewState.projection,
-        frameState.extent,
-      );
-      expect(url).toEqual(
-        'https://my.url/wfs?SERVICE=WFS&version=1.1.0&request=GetFeature&typename=my%3Alayername&srsName=EPSG%3A3857&bbox=-696165.0132013096%2C5090855.383524774%2C3367832.7922398755%2C7122854.286245367%2CEPSG%3A3857&outputFormat=application%2Fjson',
-      );
+      it('when error occurs during data loading, an error is received', async () => {
+        triggerWFSError({ error: 'Something went wrong' });
+        await jest.advanceTimersByTimeAsync(2000);
+        expect(error).toEqual(
+          new PrintError('Failed to load vector data: Something went wrong'),
+        );
+        expect(received).toEqual([1, expect.anything()]);
+      });
     });
   });
 

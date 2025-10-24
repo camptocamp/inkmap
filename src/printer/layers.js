@@ -37,6 +37,7 @@ import VectorTileLayer from 'ol/layer/VectorTile.js';
 import VectorTileSource from 'ol/source/VectorTile.js';
 import { applyStyle } from 'ol-mapbox-style';
 import { PrintError } from '../shared/print-error.js';
+import BaseEvent from 'ol/events/Event.js';
 
 const blankSrc =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -205,8 +206,20 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
   // @ts-ignore
   renderer.useContainer = useContainer.bind(renderer, context);
 
-  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus>} */
+  /** @type {import('rxjs').BehaviorSubject<LayerPrintStatus|PrintError>} */
   const progress$ = new BehaviorSubject([0, null]);
+
+  /** @type {import('rxjs').Subject<Error>} */
+  const errors$ = new Subject();
+
+  // 'vectorloaderror' is a custom event, not part of OL
+  source.on(/** @type {any} */ ('vectorloaderror'), function (e) {
+    errors$.next(
+      new PrintError(
+        `Failed to load vector data: ${/** @type {any} */ (e).error.toString()}`,
+      ),
+    );
+  });
 
   // when true, the layer is ready to be drawn
   let styleReady = false;
@@ -219,29 +232,43 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
     styleReady = true;
   }
 
-  const updateSub = update$
+  const updateSub = merge(update$, errors$)
     .pipe(
       // waiting for style to be converted
       skipWhile(() => !styleReady),
+      tap((v) => {
+        // close the progress$ stream & set it as errored
+        if (v instanceof Error) {
+          progress$.next(v);
+          progress$.next([1, context.canvas]);
+          updateSub.unsubscribe();
+          cancelSub.unsubscribe();
+        }
+      }),
     )
-    .subscribe(() => {
-      // try to render the layer on each update
-      renderer.prepareFrame({ ...frameState, time: Date.now() });
-      renderer.renderFrame({ ...frameState, time: Date.now() }, context.canvas);
+    .subscribe({
+      next: () => {
+        // try to render the layer on each update
+        renderer.prepareFrame({ ...frameState, time: Date.now() });
+        renderer.renderFrame(
+          { ...frameState, time: Date.now() },
+          context.canvas,
+        );
 
-      // update status according to whether the data is loaded and layer is rendered
-      const sourceLoaded = source.getState() === 'ready';
-      const layerRendered = renderer.ready;
-      if (sourceLoaded && layerRendered) {
-        progress$.next([1, context.canvas]);
-        progress$.complete();
-        updateSub.unsubscribe();
-        cancelSub.unsubscribe();
-      } else if (sourceLoaded) {
-        progress$.next([0.75, null]);
-      } else {
-        progress$.next([0.5, null]);
-      }
+        // update status according to whether the data is loaded and layer is rendered
+        const sourceLoaded = source.getState() === 'ready';
+        const layerRendered = renderer.ready;
+        if (sourceLoaded && layerRendered) {
+          progress$.next([1, context.canvas]);
+          progress$.complete();
+          updateSub.unsubscribe();
+          cancelSub.unsubscribe();
+        } else if (sourceLoaded) {
+          progress$.next([0.75, null]);
+        } else {
+          progress$.next([0.5, null]);
+        }
+      },
     });
 
   const cancelSub = cancel$
@@ -256,7 +283,16 @@ function createVectorLayer(jobId, source, style, rootFrameState, opacity) {
       cancelSub.unsubscribe();
     });
 
-  return progress$;
+  return /** @type {BehaviorSubject<LayerPrintStatus>} */ (
+    progress$.pipe(
+      tap((value) => {
+        if (value instanceof Error) {
+          progress$.next([1, context.canvas]);
+          throw value;
+        }
+      }),
+    )
+  );
 }
 
 /**
@@ -492,6 +528,12 @@ function createLayerWFS(jobId, layerSpec, rootFrameState) {
         .then((responseText) => {
           vectorSource.addFeatures(format.readFeatures(responseText));
           vectorSource.setState('ready');
+        })
+        .catch((e) => {
+          vectorSource.setState('error');
+          const event = /** @type {any} */ (new BaseEvent('vectorloaderror'));
+          event.error = e;
+          vectorSource.dispatchEvent(event);
         });
       vectorSource.setState('loading');
     },
